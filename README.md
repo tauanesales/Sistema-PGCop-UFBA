@@ -23,3 +23,7 @@ Tauane Sales
 ## Languages
 
 JavaScript
+
+## 
+Gestâo de Projeto
+**https://trello.com/templates/project-management/gestão-de-projetos-fn73Cyyt**
