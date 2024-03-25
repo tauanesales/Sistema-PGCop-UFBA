@@ -24,7 +24,8 @@ Tauane Sales
 Python - FastAPI
 
 ## Gestão de Projeto
-**https://trello.com/templates/project-management/gestão-de-projetos-fn73Cyyt**
+** https://taysales6.atlassian.net/jira/software/projects/KAN/boards/1?atlOrigin=eyJpIjoiNTY5MGQyZmVhOTMwNDJiYjhkMmJjY2NjNjhmYWYwYmIiLCJwIjoiaiJ9
+**
 
 ## Usage
 
