@@ -1,5 +1,5 @@
 ﻿# Back-End: Sistema de Monitoramento de Alunos do PGCOMP-UFBA
-Projeto da disciplina: MATE85 - Tópicos em Sistemas de Informacao e Web I
+Projeto da disciplina: MATE85 - Tópicos em Sistemas de Informação e Web I
  
 ## Tabela de Conteúdos:
 - [Sobre o Projeto](#sobre-o-projeto)
