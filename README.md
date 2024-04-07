@@ -33,15 +33,41 @@ A imagem abaixo mostra a arquitetura do lado back-end da aplicação.
 
 ## Getting Started:
 
-**Instale as bibliotecas necessárias para rodar o projeto**
+1. **Clone o repositório do projeto**
 ```bash
-pip install -r requirements.txt 
+git clone git@github.com:tauanesales\BACK-MATE85-Topicos-em-sistemas-de-informacao-e-web-i.git
 ```
 
-**Inicialize o servidor API com o comando**
+2. **Acesse a pasta do projeto**
 ```bash
-uvicorn src.api.app:get_app
+cd BACK-MATE85-Topicos-em-sistemas-de-informacao-e-web-i
 ```
+
+3. **Instale as bibliotecas necessárias para rodar o projeto**
+```bash
+make install
+```
+
+4. **Crie um arquivo `.env` na raiz do projeto e adicione as variáveis de ambiente do `.env.sample`.**
+
+5. **Inicialize o servidor com o comando**
+```bash
+make run
+```
+
+### Para o desenvolvedor
+
+- **Para adicionar novas dependências ao projeto, rode o comando**
+```bash
+poetry add <nome_da_dependencia>
+```
+
+- **Sempre que adicionar novas dependencias, rode o comando abaixo**
+```bash
+make export-requirements
+```
+
+- **O deploy da aplicação é feito automaticamente pelo Vercel, após o merge na branch `main`.**
 
 ### Links:
 - [Aplicação em Produção](https://back-mate-85-topicos-em-sistemas-de-informacao-e-web-i.vercel.app/)
