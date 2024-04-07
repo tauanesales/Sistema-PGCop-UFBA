@@ -4,6 +4,14 @@ Application's and its environment's configuration.
 
 import os
 
+class DBConfig:
+    """Database configuration.""" 
+    DB_DRIVERNAME = os.getenv("DB_DRIVERNAME", ...)
+    DB_USERNAME = os.getenv("DB_USERNAME", ...)
+    DB_PASSWORD = os.getenv("DB_PASSWORD", ...)
+    DB_HOST = os.getenv("DB_HOST", ...)
+    DB_PORT = os.getenv("DB_PORT", ...)
+    DB_DATABASE = os.getenv("DB_DATABASE", ...)
 
 class Config:
     """Base configuration."""
@@ -20,11 +28,4 @@ class Config:
 
     APPLICATION_ROOT = os.getenv("APPLICATION_ROOT", "")
 
-
-class TestConfig(Config):
-    """Test configuration."""
-
-    ENVIRONMENT = "test"
-    TESTING = True
-    DEBUG = False
-    PRESERVE_CONTEXT_ON_EXCEPTION = False
+    DB_CONFIG: DBConfig = DBConfig()
