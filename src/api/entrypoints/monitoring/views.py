@@ -10,4 +10,4 @@ def health_check() -> dict:
 
     It returns 200 if the project is healthy.
     """
-    return {'status': 'alive'}
+    return {"status": "alive"}

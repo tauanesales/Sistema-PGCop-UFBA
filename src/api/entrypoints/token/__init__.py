@@ -1,5 +1,5 @@
 """API for checking project status."""
 
-from src.api.entrypoints.monitoring.views import router
+from src.api.entrypoints.token.views import router
 
 __all__ = ["router"]

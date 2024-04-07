@@ -6,10 +6,16 @@ from src.api.entrypoints.usuario.schema import UsuarioCreate
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+
 class ServiceUsuario:
     @staticmethod
     def criar_usuario(db: Session, usuario: UsuarioCreate):
-        db_usuario = Usuario(Nome=usuario.Nome, Email=usuario.Email, Senha=pwd_context.hash(usuario.Senha), Role=usuario.Role)
+        db_usuario = Usuario(
+            Nome=usuario.Nome,
+            Email=usuario.Email,
+            Senha=pwd_context.hash(usuario.Senha),
+            Role=usuario.Role,
+        )
         db.add(db_usuario)
         db.commit()
         db.refresh(db_usuario)
