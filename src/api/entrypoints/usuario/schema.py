@@ -1,12 +1,22 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, constr, validator
+from typing import Literal
+
 
 class UsuarioBase(BaseModel):
-    Nome: str
+    Nome: constr(min_length=2, max_length=100)
     Email: EmailStr
-    Role: str
+    Role: Literal["professor", "orientador", "coordenador"]
+
 
 class UsuarioCreate(UsuarioBase):
-    Senha: str
+    Senha: constr(min_length=7)
+
+    @validator("Senha")
+    def validar_senha(cls, senha):
+        if " " in senha:
+            raise ValueError("A senha não pode conter espaços")
+        return senha
+
 
 class UsuarioInDB(UsuarioBase):
     UserID: int

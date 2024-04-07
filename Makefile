@@ -12,4 +12,4 @@ install:
 	poetry install --no-root
 
 export-requirements:
-	poetry export -f requirements.txt --output requirements.txt --without-hashes
+	poetry export -f requirements.txt --output requirements.txt --without-hashes --without dev

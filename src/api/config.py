@@ -4,14 +4,25 @@ Application's and its environment's configuration.
 
 import os
 
+
+class AuthConfig:
+    SECRET_KEY = os.getenv("SECRET_KEY", ...)
+    ALGORITHM = os.getenv("ALGORITHM", ...)
+    ACCESS_TOKEN_EXPIRE_MINUTES: float = float(
+        os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", ...)
+    )
+
+
 class DBConfig:
-    """Database configuration.""" 
+    """Database configuration."""
+
     DB_DRIVERNAME = os.getenv("DB_DRIVERNAME", ...)
     DB_USERNAME = os.getenv("DB_USERNAME", ...)
     DB_PASSWORD = os.getenv("DB_PASSWORD", ...)
     DB_HOST = os.getenv("DB_HOST", ...)
     DB_PORT = os.getenv("DB_PORT", ...)
     DB_DATABASE = os.getenv("DB_DATABASE", ...)
+
 
 class Config:
     """Base configuration."""
@@ -29,3 +40,4 @@ class Config:
     APPLICATION_ROOT = os.getenv("APPLICATION_ROOT", "")
 
     DB_CONFIG: DBConfig = DBConfig()
+    AUTH: AuthConfig = AuthConfig()
