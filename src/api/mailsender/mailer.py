@@ -25,7 +25,7 @@ class Mailer:
         """
         deadline = datetime.now() + timedelta(days=30)  # Expires in 1 month
             
-        query = select(Tarefa).where(Tarefa.prazo == deadline.date())  # TODO: Tem que obter o email do aluno na query.
+        query = select(Tarefa).where(Tarefa.Prazo == deadline.date())  # TODO: Tem que obter o email do aluno na query.
         result = session.execute(query)
 
         return result.scalars().all()
