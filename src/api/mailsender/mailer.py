@@ -2,6 +2,7 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
 from src.api.config import Config
+from src.api.database.session import session
 
 import asyncio
 import logging
