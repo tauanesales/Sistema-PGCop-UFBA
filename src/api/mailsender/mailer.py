@@ -1,7 +1,3 @@
-"""
-Worker para enviar emails aos usuários da aplicação.
-"""
-
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
