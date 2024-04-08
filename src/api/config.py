@@ -24,6 +24,13 @@ class DBConfig:
     DB_DATABASE = os.getenv("DB_DATABASE", ...)
 
 
+class SendGridConfig:
+    """Send Grid configuration."""
+
+    API_KEY = os.getenv("SENDGRID_API_KEY", ...)
+    EMAIL = os.getenv("SENDGRID_EMAIL", ...)
+
+
 class Config:
     """Base configuration."""
 
@@ -40,4 +47,5 @@ class Config:
     APPLICATION_ROOT = os.getenv("APPLICATION_ROOT", "")
 
     DB_CONFIG: DBConfig = DBConfig()
+    SENDGRID_CONFIG: SendGridConfig = SendGridConfig()
     AUTH: AuthConfig = AuthConfig()
