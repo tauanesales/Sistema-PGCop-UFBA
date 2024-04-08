@@ -16,6 +16,10 @@ import logging
 
 
 class Mailer:
+    """
+    Classe responsável por notificar por email os usuários.
+    """
+    
     def __init__(self):
         self.sg_client = SendGridAPIClient(Config.SENDGRID_CONFIG.API_KEY)
 
