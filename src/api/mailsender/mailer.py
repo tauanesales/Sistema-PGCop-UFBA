@@ -19,7 +19,7 @@ class Mailer:
     def __init__(self):
         self.sg_client = SendGridAPIClient(Config.SENDGRID_CONFIG.API_KEY)
 
-    def __get_tasks_near_to_deadline():
+    def __get_tasks_near_to_deadline(self):
         """
         Retorna as tarefas pendentes, próximas ao prazo de entrega.
         """
@@ -30,7 +30,7 @@ class Mailer:
 
         return result.scalars().all()
     
-    def __send_message(dest: str, subject: str, content: str):
+    def __send_message(self, dest: str, subject: str, content: str):
         """
         Envia uma mensagem para o usuário.
         """
