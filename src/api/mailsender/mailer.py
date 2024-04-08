@@ -1,8 +1,15 @@
+from datetime import datetime
+
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
+from sqlalchemy import select
+
 from src.api.config import Config
+from src.api.database.models.tarefa import Tarefa
 from src.api.database.session import session
+
+from typing import Callable, Optional
 
 import asyncio
 import logging
@@ -11,6 +18,17 @@ import logging
 class Mailer:
     def __init__(self):
         self.sg_client = SendGridAPIClient(Config.SENDGRID_CONFIG.API_KEY)
+
+    def __get_tasks_near_to_deadline():
+        """
+        Retorna as tarefas pendentes, próximas ao prazo de entrega.
+        """
+        deadline = datetime.now() + timedelta(days=30)  # Expires in 1 month
+            
+        query = select(Tarefa).where(Tarefa.prazo == deadline.date())  # TODO: Tem que obter o email do aluno na query.
+        result = session.execute(query)
+
+        return result.scalars().all()
     
     def __send_message(dest: str, subject: str, content: str):
         """
@@ -35,9 +53,12 @@ class Mailer:
         pass  # TODO: Implementar isso.
 
 
-async def start_mailer():
+async def start_mailer(stop_function: Optional[Callable] = None):
+    """
+    Inicializa o worker.
+    """
     mailer = Mailer()
 
-    while True:
+    while stop_function is None or not stop_function():
         mailer.check()
         await asyncio.sleep(60 * 60)
