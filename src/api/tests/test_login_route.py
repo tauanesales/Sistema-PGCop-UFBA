@@ -57,7 +57,7 @@ def test_login():
     assert response.status_code >= 400
 
 
-@pytest.skip()  # TODO: How am I supposed to use this route?
+@pytest.mark.skip()  # TODO: How am I supposed to use this route?
 def test_check_token():
     """
     Test route for checking user access.
