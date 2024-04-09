@@ -34,4 +34,5 @@ A imagem abaixo mostra a arquitetura do lado back-end da aplicação.
 ### Links:
 - [Aplicação em Produção](https://back-mate-85-topicos-em-sistemas-de-informacao-e-web-i.vercel.app/)
 - [Gestão do Projeto (Jira)](https://taysales6.atlassian.net/jira/software/projects/KAN/boards/1?atlOrigin=eyJpIjoiNTY5MGQyZmVhOTMwNDJiYjhkMmJjY2NjNjhmYWYwYmIiLCJwIjoiaiJ9)
+- [Getting Started](./getting-started.pdf)
 - [Repositório do Front-End do Projeto](https://github.com/tauanesales/FRONT-MATE85-Topicos-em-sistemas-de-informacao-e-web-i)
