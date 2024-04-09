@@ -1,11 +1,5 @@
-from application import app
-from fastapi.testclient import TestClient
+from core.application import client
 
-
-client = TestClient(app)
-
-
-# TODO: Use mocked database.
 
 def test_create_user():
     invalid_form = {"Nome": "Roberto", "Email": "roberto@ufba.br", "Role": "professor"}  # Missing password
