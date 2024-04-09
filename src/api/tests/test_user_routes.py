@@ -64,6 +64,24 @@ def test_get_user():
         assert result.get(key, "") == value
 
 
+def test_get_user_by_email():
+    """
+    Test route for getting the user from the database by his email.
+    """
+    url = f"/usuarios/email/{email}"
+
+    expected = {"Nome": name, "Email": email, "Role": role}
+    
+    response = client.get(url)
+
+    assert 200 <= response.status_code <= 299
+
+    result = response.json()
+
+    for key, value in expected.items():
+        assert result.get(key, "") == value
+
+
 def test_update_user():
     """
     Test route for updating the user's information on the database.
