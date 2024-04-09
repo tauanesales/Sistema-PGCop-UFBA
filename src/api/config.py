@@ -2,7 +2,10 @@
 Application's and its environment's configuration.
 """
 
+import dotenv
 import os
+
+dotenv.load_dotenv()
 
 
 class AuthConfig:
