@@ -3,6 +3,7 @@ from core.application import client
 name = "Jean Loui Bernard"
 email = "jeanjesus@ufba.br"
 role = "professor"
+new_role = "coordenador"
 password = "patao002"
 user_id = 1
 
@@ -54,11 +55,47 @@ def test_get_user():
     expected = {"Nome": name, "Email": email, "Role": role}
     
     response = client.get(url)
-    
+
     assert 200 <= response.status_code <= 299
 
     result = response.json()
 
     for key, value in expected.items():
         assert result.get(key, "") == value
+
+
+def test_update_user():
+    """
+    Test route for updating the user's information on the database.
+    """
+    url = f"/usuarios/{user_id}"
+
+    new_data = {"Nome": name, "Email": email.split("@")[0] + "@ufmg.br", "Role": new_role}
     
+    # Update user's information.
+    response = client.put(url, json = new_data)
+    assert 200 <= response.status_code <= 299
+
+    # Get the user's information and check the changes.
+    response = client.get(url)
+    assert 200 <= response.status_code <= 299
+
+    result = response.json()
+
+    for key, value in new_data.items():
+        assert result.get(key, "") == value
+    
+
+def test_delete_user():
+    """
+    Test route for deleting the user from the database.
+    """
+    url = f"/usuarios/{user_id}"
+
+    # Update user's information.
+    response = client.delete(url)
+    assert 200 <= response.status_code <= 299
+
+    # Try to get the deleted user.
+    response = client.get(url)
+    assert response.status_code >= 400
