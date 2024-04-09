@@ -1,16 +1,17 @@
 from core.application import client
 
+name = "Jean Loui Bernard"
+email = "jeanjesus@ufba.br"
+role = "professor"
+password = "patao002"
+user_id = 1
+
 
 def test_create_user():
     """
     Test route for creating a new user.
     """
     url = "/usuarios/"
-
-    name = "Roberto"
-    email = "roberto@ufba.br"
-    role = "professor"
-    password = "patao002"
 
     # Test sending invalid forms.
     invalid_form_cases = [
@@ -42,3 +43,22 @@ def test_create_user():
     valid_form_case["Senha"] = "AnotherPassword"
     valid_form_case["Role"] = "orientador"
     assert client.post(url, json=valid_form_case).status_code >= 400
+
+
+def test_get_user():
+    """
+    Test route for getting the user from the database.
+    """
+    url = f"/usuarios/{user_id}"
+
+    expected = {"Nome": name, "Email": email, "Role": role}
+    
+    response = client.get(url)
+    
+    assert 200 <= response.status_code <= 299
+
+    result = response.json()
+
+    for key, value in expected.items():
+        assert result.get(key, "") == value
+    
