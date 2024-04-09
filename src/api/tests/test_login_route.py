@@ -1,11 +1,17 @@
 from core.application import client
 from core.base_user import email, name, password, role, new_role, user_id
 
+import pytest
+
+
+token = None
+
 
 def test_login():
     """
     Test route for log in to an account.
     """
+    global token
 
     # Create a new user.
     user_data = {"Nome": name, "Email": email, "Role": role, "Senha": password}
@@ -19,9 +25,11 @@ def test_login():
     }
 
     response = client.post("token/", data=login_data, headers={"content-type": "application/x-www-form-urlencoded"})
-    
+
     assert 200 <= response.status_code <= 299
-    assert "token" in "".join(response.json().keys())
+
+    token = response.json()
+    assert "access_token" in token
 
     # Try to invade the account.
     test_cases = [
@@ -48,3 +56,14 @@ def test_login():
     response = client.post("token/", data=login_data, headers={"content-type": "application/x-www-form-urlencoded"})
     assert response.status_code >= 400
 
+
+@pytest.skip()  # TODO: How am I supposed to use this route?
+def test_check_token():
+    """
+    Test route for checking user access.
+    """
+
+    headers = {"Authorization": f"{token['token_type'].capitalize()} {token['access_token']}"}
+
+    response = client.post("usuarios/me", headers=headers)
+    assert 200 <= response.status_code <= 299
