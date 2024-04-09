@@ -18,7 +18,7 @@ def test_login():
         "grant_type": "password"
     }
 
-    response = client.post("token/", json=login_data, headers={"Content-Type": "x-www-form-urlencoded"})
-    assert 200 <= response.status_code <= 299  # TODO: Returning error 422
+    response = client.post("token/", data=login_data, headers={"content-type": "application/x-www-form-urlencoded"})
+    assert 200 <= response.status_code <= 299
 
 
