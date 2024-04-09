@@ -19,7 +19,9 @@ def test_login():
     }
 
     response = client.post("token/", data=login_data, headers={"content-type": "application/x-www-form-urlencoded"})
+    
     assert 200 <= response.status_code <= 299
+    assert "token" in "".join(response.json().keys())
 
     # Try to invade the account.
     test_cases = [
