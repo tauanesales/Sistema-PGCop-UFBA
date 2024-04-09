@@ -1,11 +1,5 @@
 from core.application import client
-
-name = "Jean Loui Bernard"
-email = "jeanjesus@ufba.br"
-role = "professor"
-new_role = "coordenador"
-password = "patao002"
-user_id = 1
+from core.base_user import email, name, password, role, new_role, user_id
 
 
 def test_create_user():
