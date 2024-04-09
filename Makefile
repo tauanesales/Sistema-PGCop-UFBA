@@ -6,6 +6,9 @@ endif
 run:
 	poetry run python -m src.api
 
+test:
+	poetry run pytest ./src/api/tests -v -s
+
 install:
 	pip install poetry
 	poetry lock
