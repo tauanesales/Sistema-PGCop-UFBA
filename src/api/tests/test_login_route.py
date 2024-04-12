@@ -1,8 +1,6 @@
 from core.application import client
 from core.base_user import email, name, password, role, new_role, user_id
 
-import pytest
-
 
 token = None
 
