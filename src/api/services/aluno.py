@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from src.api.database.models.aluno import Aluno
-from src.api.entrypoints.aluno.schema import AlunoBase
+from src.api.entrypoints.alunos.schema import AlunoBase
 
 
 class ServiceAluno:

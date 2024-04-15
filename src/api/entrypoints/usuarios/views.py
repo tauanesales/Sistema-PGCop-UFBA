@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 
 from src.api.database.session import get_db
-from src.api.entrypoints.usuario.schema import UsuarioBase, UsuarioCreate, UsuarioInDB
+from src.api.entrypoints.usuarios.schema import UsuarioBase, UsuarioCreate, UsuarioInDB
 from src.api.services.usuario import ServiceUsuario
 
 

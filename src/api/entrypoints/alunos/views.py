@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 
 from src.api.database.session import get_db
-from src.api.entrypoints.aluno.schema import AlunoBase, AlunoInDB
+from src.api.entrypoints.alunos.schema import AlunoBase, AlunoInDB
 from src.api.services.aluno import ServiceAluno
 
 router = APIRouter()
