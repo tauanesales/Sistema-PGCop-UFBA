@@ -11,7 +11,7 @@ class ServiceAluno:
 
         # CPF must not be registered.
         try: 
-            ServiceAluno.obter_aluno_por_cpf(db, cpf=aluno.Cpf):
+            ServiceAluno.obter_aluno_por_cpf(db, cpf=aluno.Cpf)
             raise CPFAlreadyRegisteredException()
         except StudentNotFoundException:
             pass
@@ -47,8 +47,8 @@ class ServiceAluno:
         if db_aluno:
             db.delete(db_aluno)
             db.commit()
-
-        raise StudentNotFoundException()
+        else:
+            raise StudentNotFoundException()
 
     @staticmethod
     def atualizar_aluno(db: Session, aluno_id: int, update_data: dict):

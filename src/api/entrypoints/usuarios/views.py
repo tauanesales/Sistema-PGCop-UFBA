@@ -15,11 +15,6 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 @router.post("/", response_model=UsuarioInDB, status_code=status.HTTP_201_CREATED)
 def criar_usuario(usuario: UsuarioCreate, db: Session = Depends(get_db)):
-    db_usuario = ServiceUsuario.obter_usuario_por_email(db, email=usuario.Email)
-
-    if db_usuario:
-        raise EmailAlreadyRegisteredException()
-
     return ServiceUsuario.criar_usuario(db=db, usuario=usuario)
 
 
@@ -30,41 +25,20 @@ async def read_users_me(token: str = Depends(oauth2_scheme)):
 
 @router.get("/{usuario_id}", response_model=UsuarioInDB)
 def ler_usuario(usuario_id: int, db: Session = Depends(get_db)):
-    db_usuario = ServiceUsuario.obter_usuario(db, usuario_id=usuario_id)
-
-    if db_usuario is None:
-        raise UserNotFoundException()
-
-    return db_usuario
+    return ServiceUsuario.obter_usuario(db, usuario_id=usuario_id)
 
 
 @router.delete("/{usuario_id}", status_code=status.HTTP_204_NO_CONTENT)
 def deletar_usuario(usuario_id: int, db: Session = Depends(get_db)):
-    success = ServiceUsuario.deletar_usuario(db, usuario_id)
-
-    if not success:
-        raise UserNotFoundException()
-
+    ServiceUsuario.deletar_usuario(db, usuario_id)
     return {"ok": True}
 
 
 @router.put("/{usuario_id}", response_model=UsuarioInDB)
-def atualizar_usuario(
-    usuario_id: int, usuario: UsuarioBase, db: Session = Depends(get_db)
-):
-    db_usuario = ServiceUsuario.atualizar_usuario(db, usuario_id, usuario.dict())
-
-    if db_usuario is None:
-        raise UserNotFoundException()
-
-    return db_usuario
+def atualizar_usuario(usuario_id: int, usuario: UsuarioBase, db: Session = Depends(get_db)):
+    return ServiceUsuario.atualizar_usuario(db, usuario_id, usuario.dict())
 
 
 @router.get("/email/{email}", response_model=UsuarioInDB)
-def ler_usuario_por_email(email: str, db: Session = Depends(get_db)):
-    db_usuario = ServiceUsuario.obter_usuario_por_email(db, email=email)
-
-    if db_usuario is None:
-        raise UserNotFoundException()
-
-    return db_usuario
+def obter_usuario_por_email(email: str, db: Session = Depends(get_db)):
+    return ServiceUsuario.obter_usuario_por_email(db, email=email)
