@@ -28,17 +28,19 @@ class ServiceUsuario:
     @staticmethod
     def deletar_usuario(db: Session, usuario_id: int):
         db_usuario = db.query(Usuario).filter(Usuario.UserID == usuario_id).one_or_none()
+
         if db_usuario:
             db.delete(db_usuario)
             db.commit()
             return True
+            
         return False
 
     @staticmethod
     def atualizar_usuario(db: Session, usuario_id: int, update_data: dict):
         db.query(Usuario).filter(Usuario.UserID == usuario_id).update(update_data)
         db.commit()
-        return db.query(Usuario).filter(Usuario.UserID == usuario_id).one_or_none()
+        return db.query(Usuario).filter(Usuario.UserID == usuario_id).one()
 
     @staticmethod
     def obter_usuario_por_email(db: Session, email: str):

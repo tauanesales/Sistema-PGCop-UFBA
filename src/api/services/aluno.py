@@ -28,17 +28,19 @@ class ServiceAluno:
     @staticmethod
     def deletar_aluno(db: Session, aluno_id: int):
         db_aluno = db.query(Aluno).filter(Aluno.UserID == aluno_id).one_or_none()
+
         if db_aluno:
             db.delete(db_aluno)
             db.commit()
             return True
+
         return False
 
     @staticmethod
     def atualizar_aluno(db: Session, aluno_id: int, update_data: dict):
         db.query(Aluno).filter(Aluno.UserID == aluno_id).update(update_data)
         db.commit()
-        return db.query(Aluno).filter(Aluno.UserID == aluno_id).one_or_none()
+        return db.query(Aluno).filter(Aluno.UserID == aluno_id).one()
 
     @staticmethod
     def obter_aluno_por_email(db: Session, email: str):
