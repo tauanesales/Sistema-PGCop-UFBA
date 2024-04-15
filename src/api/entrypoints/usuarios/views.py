@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 
 from src.api.database.session import get_db
+from src.api.entrypoints.usuarios.errors import UserNotFoundException
 from src.api.entrypoints.usuarios.schema import UsuarioBase, UsuarioCreate, UsuarioInDB
 from src.api.services.usuario import ServiceUsuario
 
@@ -15,8 +16,10 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 @router.post("/", response_model=UsuarioInDB, status_code=status.HTTP_201_CREATED)
 def criar_usuario(usuario: UsuarioCreate, db: Session = Depends(get_db)):
     db_usuario = ServiceUsuario.obter_usuario_por_email(db, email=usuario.Email)
+
     if db_usuario:
         raise HTTPException(status_code=400, detail="Email já cadastrado")
+
     return ServiceUsuario.criar_usuario(db=db, usuario=usuario)
 
 
@@ -28,16 +31,20 @@ async def read_users_me(token: str = Depends(oauth2_scheme)):
 @router.get("/{usuario_id}", response_model=UsuarioInDB)
 def ler_usuario(usuario_id: int, db: Session = Depends(get_db)):
     db_usuario = ServiceUsuario.obter_usuario(db, usuario_id=usuario_id)
+
     if db_usuario is None:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+        raise UserNotFoundException()
+
     return db_usuario
 
 
 @router.delete("/{usuario_id}", status_code=status.HTTP_204_NO_CONTENT)
 def deletar_usuario(usuario_id: int, db: Session = Depends(get_db)):
-    sucesso = ServiceUsuario.deletar_usuario(db, usuario_id)
-    if not sucesso:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    success = ServiceUsuario.deletar_usuario(db, usuario_id)
+
+    if not success:
+        raise UserNotFoundException()
+
     return {"ok": True}
 
 
@@ -46,14 +53,18 @@ def atualizar_usuario(
     usuario_id: int, usuario: UsuarioBase, db: Session = Depends(get_db)
 ):
     db_usuario = ServiceUsuario.atualizar_usuario(db, usuario_id, usuario.dict())
+
     if db_usuario is None:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+        raise UserNotFoundException()
+
     return db_usuario
 
 
 @router.get("/email/{email}", response_model=UsuarioInDB)
 def ler_usuario_por_email(email: str, db: Session = Depends(get_db)):
     db_usuario = ServiceUsuario.obter_usuario_por_email(db, email=email)
+
     if db_usuario is None:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+        raise UserNotFoundException()
+
     return db_usuario
