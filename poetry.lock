@@ -798,6 +798,17 @@ typing-extensions = ">=4.6.1"
 email = ["email-validator (>=2.0.0)"]
 
 [[package]]
+name = "pydantic-br"
+version = "1.0.0"
+description = "Pydantic library extension with Brazilian fields"
+optional = false
+python-versions = ">=3.8,<4.0"
+files = [
+    {file = "pydantic_br-1.0.0-py3-none-any.whl", hash = "sha256:f18b0d74f8c1e16348a4082ad30231c6f4d059f17eb1447c49ebf32557d0871a"},
+    {file = "pydantic_br-1.0.0.tar.gz", hash = "sha256:3f13d07fef5500aa50b8be485d9eb2d5ce0e55e7176db3af5c19d9f4c069f1ff"},
+]
+
+[[package]]
 name = "pydantic-core"
 version = "2.16.3"
 description = ""
@@ -1551,4 +1562,4 @@ dev = ["black (>=19.3b0)", "pytest (>=4.6.2)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.9"
-content-hash = "8f1ec10dc27e68f4f8ede4233ac505e8222e4b1a1d6494fb298198f24e0b1cb3"
+content-hash = "e21ca49a0bc7aba6aa4ef0754ed6364bafaf2b4b7032da5124b73f3cda3bf8ba"
