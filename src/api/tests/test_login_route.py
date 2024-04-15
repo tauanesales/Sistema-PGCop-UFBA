@@ -1,8 +1,6 @@
 from core.application import client
 from core.base_user import email, name, password, role, new_role, user_id
 
-import pytest
-
 
 token = None
 
@@ -57,7 +55,6 @@ def test_login():
     assert response.status_code >= 400
 
 
-@pytest.mark.skip()  # TODO: How am I supposed to use this route?
 def test_check_token():
     """
     Test route for checking user access.
@@ -65,5 +62,5 @@ def test_check_token():
 
     headers = {"Authorization": f"{token['token_type'].capitalize()} {token['access_token']}"}
 
-    response = client.post("usuarios/me", headers=headers)
+    response = client.get("usuarios/me", headers=headers)
     assert 200 <= response.status_code <= 299
