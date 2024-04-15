@@ -23,11 +23,11 @@ class ServiceAluno:
 
     @staticmethod
     def obter_aluno(db: Session, aluno_id: int):
-        return db.query(Aluno).filter(Aluno.UserID == aluno_id).first()
+        return db.query(Aluno).filter(Aluno.UserID == aluno_id).one_or_none()
 
     @staticmethod
     def deletar_aluno(db: Session, aluno_id: int):
-        db_aluno = db.query(Aluno).filter(Aluno.UserID == aluno_id).first()
+        db_aluno = db.query(Aluno).filter(Aluno.UserID == aluno_id).one_or_none()
         if db_aluno:
             db.delete(db_aluno)
             db.commit()
@@ -38,12 +38,12 @@ class ServiceAluno:
     def atualizar_aluno(db: Session, aluno_id: int, update_data: dict):
         db.query(Aluno).filter(Aluno.UserID == aluno_id).update(update_data)
         db.commit()
-        return db.query(Aluno).filter(Aluno.UserID == aluno_id).first()
+        return db.query(Aluno).filter(Aluno.UserID == aluno_id).one_or_none()
 
     @staticmethod
     def obter_aluno_por_email(db: Session, email: str):
-        return db.query(Aluno).filter(Aluno.Email == email).first()
+        return db.query(Aluno).filter(Aluno.Email == email).one_or_none()
 
     @staticmethod
     def obter_aluno_por_cpf(db: Session, cpf: str):
-        return db.query(Aluno).filter(Aluno.Cpf == cpf).first()
+        return db.query(Aluno).filter(Aluno.Cpf == cpf).one_or_none()

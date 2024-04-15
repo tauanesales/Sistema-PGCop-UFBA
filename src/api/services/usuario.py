@@ -23,11 +23,11 @@ class ServiceUsuario:
 
     @staticmethod
     def obter_usuario(db: Session, usuario_id: int):
-        return db.query(Usuario).filter(Usuario.UserID == usuario_id).first()
+        return db.query(Usuario).filter(Usuario.UserID == usuario_id).one_or_none()
 
     @staticmethod
     def deletar_usuario(db: Session, usuario_id: int):
-        db_usuario = db.query(Usuario).filter(Usuario.UserID == usuario_id).first()
+        db_usuario = db.query(Usuario).filter(Usuario.UserID == usuario_id).one_or_none()
         if db_usuario:
             db.delete(db_usuario)
             db.commit()
@@ -38,8 +38,8 @@ class ServiceUsuario:
     def atualizar_usuario(db: Session, usuario_id: int, update_data: dict):
         db.query(Usuario).filter(Usuario.UserID == usuario_id).update(update_data)
         db.commit()
-        return db.query(Usuario).filter(Usuario.UserID == usuario_id).first()
+        return db.query(Usuario).filter(Usuario.UserID == usuario_id).one_or_none()
 
     @staticmethod
     def obter_usuario_por_email(db: Session, email: str):
-        return db.query(Usuario).filter(Usuario.Email == email).first()
+        return db.query(Usuario).filter(Usuario.Email == email).one_or_none()
