@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 
 from src.api.database.session import get_db
-from src.api.entrypoints.alunos.errors import StudentNotFoundException
+from src.api.entrypoints.alunos.errors import CPFAlreadyRegisteredException, StudentNotFoundException
 from src.api.entrypoints.alunos.schema import AlunoBase, AlunoInDB
 from src.api.services.aluno import ServiceAluno
 
@@ -14,7 +14,7 @@ router = APIRouter()
 def criar_aluno(aluno: AlunoBase, db: Session = Depends(get_db)):
     db_aluno = ServiceAluno.obter_aluno_por_cpf(db, cpf=aluno.Cpf)
     if db_aluno:
-        raise HTTPException(status_code=400, detail="CPF já cadastrado")
+        raise CPFAlreadyRegisteredException()
     return ServiceAluno.criar_aluno(db, aluno)
 
 @router.get("/alunos/{aluno_id}", response_model=AlunoInDB)

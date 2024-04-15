@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 
 from src.api.database.session import get_db
-from src.api.entrypoints.usuarios.errors import UserNotFoundException
+from src.api.entrypoints.usuarios.errors import EmailAlreadyRegisteredException, UserNotFoundException
 from src.api.entrypoints.usuarios.schema import UsuarioBase, UsuarioCreate, UsuarioInDB
 from src.api.services.usuario import ServiceUsuario
 
@@ -18,7 +18,7 @@ def criar_usuario(usuario: UsuarioCreate, db: Session = Depends(get_db)):
     db_usuario = ServiceUsuario.obter_usuario_por_email(db, email=usuario.Email)
 
     if db_usuario:
-        raise HTTPException(status_code=400, detail="Email já cadastrado")
+        raise EmailAlreadyRegisteredException()
 
     return ServiceUsuario.criar_usuario(db=db, usuario=usuario)
 
