@@ -9,7 +9,7 @@ class AlunoBase(BaseModel):
     Telefone: constr(strip_whitespace=True, min_length=10, max_length=11)
     Matricula: constr(min_length=6, max_length=6) #Não sei se números de matricula podem conter mais que 6 dígitos
     ProfessorID = constr(min_length=8, max_length=8)
-    Role: Literal["mestrado", "doutorando"]
+    Role: Literal["mestrado", "doutorado"]
 
 class AlunoInDB(AlunoBase):
     AlunoID: int
