@@ -7,7 +7,7 @@ run:
 	poetry run python -m src.api
 
 test:
-	poetry run pytest ./src/api/tests -v -s
+	poetry run pytest ./src/api/tests -vv -s
 
 install:
 	pip install poetry

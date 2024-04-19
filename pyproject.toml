@@ -22,6 +22,8 @@ python-multipart = "^0.0.9"
 sendgrid = "^6.11.0"
 python-dotenv = "^1.0.1"
 pytest = "^8.1.1"
+pydantic-br = "^1.0.0"
+mysqlclient = {version = "^2.2.4", platform = "win32"}
 
 
 [tool.poetry.group.dev.dependencies]
