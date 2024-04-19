@@ -6,7 +6,7 @@ class Tarefa(Base):
     __tablename__ = "TAREFAS"
     TarefaID = Column(Integer, primary_key=True, index=True)
     Descricao = Column(String, nullable=False)
-    Prazo = Column(Date, nullable=False)
-    Status = Column(Enum("pendente", "completa", "atrasada"), nullable=False)
-    AlunoID = Column(Integer, nullable=False, index=True)
-    ProfessorID = Column(Integer, nullable=False, index=True)
+    Prazo = Column(Date, nullable=True)
+    Status = Column(Enum("pendente", "completa", "atrasada"), nullable=True)
+    AlunoID = Column(Integer, nullable=True, index=True)
+    ProfessorID = Column(Integer, nullable=True, index=True)
