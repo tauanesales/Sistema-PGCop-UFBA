@@ -3,8 +3,8 @@ from typing import Literal
 
 
 class TarefaBase(BaseModel):
-    Descricao: constr
-    Status: constr
+    Descricao: constr(min_length=2, max_length=100)
+    ProfessorID: int
     
     
 class TarefaInDB(TarefaBase):

@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
 
@@ -7,6 +8,7 @@ from src.api.entrypoints.tarefas.schema import TarefaBase, TarefaInDB
 from src.api.services.tarefa import ServiceTarefa
 
 router = APIRouter()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 #@router.post("/alunos", response_model=AlunoInDB, status_code=status.HTTP_201_CREATED)
