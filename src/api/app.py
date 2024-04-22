@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from src.api.entrypoints.router import api_router
-from src.api.mailsender import mailer
+from src.api.mailsender.workers import start_mailer_workers
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -39,7 +39,7 @@ def get_app() -> FastAPI:
 
     @_app.on_event("startup")
     async def app_startup():
-        asyncio.create_task(mailer.start_mailer())
+        asyncio.create_task(start_mailer_workers())
 
     FastAPICache.init(InMemoryBackend(), prefix="fastapi-cache")
     return _app
