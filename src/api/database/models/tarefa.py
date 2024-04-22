@@ -1,12 +1,14 @@
-from sqlalchemy import Column, Date, Enum, Integer, String
-from src.api.database.session import Base
 
+from sqlalchemy import Column, Date, Integer, String
+from src.api.database.session import Base
 
 class Tarefa(Base):
     __tablename__ = "TAREFAS"
-    TarefaID = Column(Integer, primary_key=True, index=True)
+    ID = Column(Integer, primary_key=True, index=False)
     Descricao = Column(String, nullable=False)
-    Prazo = Column(Date, nullable=False)
-    Status = Column(Enum("pendente", "completa", "atrasada"), nullable=False)
-    AlunoID = Column(Integer, nullable=False, index=True)
-    ProfessorID = Column(Integer, nullable=False, index=True)
+    Data_Prazo = Column(Date, nullable=True)
+    Completada = Column(Integer,nullable=True)
+    Aluno_ID = Column(Integer, nullable=False)
+    Data_Conclusao = Column(Date, nullable=True)
+    Last_Notifield = Column(Date, nullable=True)
+    
