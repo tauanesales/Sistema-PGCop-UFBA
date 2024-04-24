@@ -1,3 +1,11 @@
+import os
+import sys
+
+
+current_dir = os.path.join(os.getcwd())
+sys.path.append(current_dir)
+
+
 def pytest_collection_modifyitems(items):
     """
     Modifies test items in place to ensure test modules run in a given order.
