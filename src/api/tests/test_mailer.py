@@ -5,12 +5,14 @@ import email
 import random
 import time
 
+import pytest
 
 receiver_imap_server = "your.server.com"  # TODO: Change it
 receiver_username = "youremailaddress@provider.com"
 receiver_password = "yourpassword"
     
 
+@pytest.mark.skip()
 def test_send_email():
     """
     Check if mailer is able for sending emails.
@@ -24,7 +26,7 @@ def test_send_email():
     target_content = f"This is a message sent from an unit testing.\n<h3>Code:<h3> {code}"
 
     mailer.send_message(
-        dest_email=receiver_username,  # TODO: Change it
+        dest_email=receiver_username,
         subject=target_subject,
         message=target_content
     )
