@@ -36,8 +36,11 @@ if ($Args[0] -eq "install") {
 
     } elseif ($Args[0] -eq "export-requirements") {
         poetry export -f requirements.txt --output requirements.txt --without-hashes --without dev
-    } else {
-        Write-Output "Erro!"
+
+    } elseif ($Args[0] -eq "add-dependency") {
+        poetry add $Args[1]
+
     }
+    
     deactivate
 }

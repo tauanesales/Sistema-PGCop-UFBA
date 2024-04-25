@@ -4,7 +4,7 @@ ifneq ("$(wildcard .env)","")
 endif
 
 ifeq ($(OS),Windows_NT)
-	INSTALL_SCRIPT=powershell .\make-windows.ps1
+	INSTALL_SCRIPT=powershell -ExecutionPolicy bypass .\make-windows.ps1
 else
 	INSTALL_SCRIPT=bash make-linux.sh
 endif
@@ -17,6 +17,9 @@ test:
 
 install:
 	${INSTALL_SCRIPT} install
+
+add-dependency:
+	${INSTALL_SCRIPT} add-dependency ${DEPNAME}
 
 export-requirements:
 	${INSTALL_SCRIPT} export-requirements

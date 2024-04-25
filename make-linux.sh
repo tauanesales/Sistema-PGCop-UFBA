@@ -34,6 +34,9 @@ else
         
     elif [ "$1" == "export-requirements" ]; then
         poetry export -f requirements.txt --output requirements.txt --without-hashes --without dev
+    
+    elif [ "$1" == "add-dependency" ]; then
+        poetry add "$2"
 
     fi
 fi
