@@ -19,7 +19,7 @@ def criar_usuario(usuario: UsuarioCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/me")
-async def read_users_me(current_user: schemas.UsuarioInDB = Depends(auth.get_current_user), db: Session = Depends(get_db)):
+async def read_users_me(current_user: UsuarioInDB = Depends(get_current_user), db: Session = Depends(get_db)):
     return current_user
 
 #async def read_users_me(token: str = Depends(oauth2_scheme)):
