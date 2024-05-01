@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import Callable, Optional
 from src.api.mailsender.mailer import Mailer
 
-import asyncio
 
 
 class MailerWorker(ABC, Mailer):
