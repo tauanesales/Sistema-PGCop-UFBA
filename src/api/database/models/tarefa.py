@@ -9,5 +9,7 @@ class Tarefa(Base):
     descricao = Column(String, nullable=False)
     completada = Column(Integer, nullable=True)
     data_prazo = Column(Date, nullable=False)
+    data_conclusao = Column(Date, nullable=False)
+    last_notified = Column(Date, nullable=False)
     aluno_id = Column(ForeignKey("aluno.id"), nullable=True, index=True)
     
