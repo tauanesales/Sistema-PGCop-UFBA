@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Date, Enum, Integer, String
+from sqlalchemy import Column, Date, Enum, ForeignKey, Integer, String
 from src.api.database.session import Base
 
 
@@ -10,7 +10,7 @@ class Aluno(Base):
     email_ufba = Column(String, unique=True, index=True, nullable=False)
     matricula = Column(String, nullable=False, unique=True, index=True)
     lattes = Column(String, nullable=True, index=False)
-    orientador_id = Column(Integer, nullable=True, index=True)
+    orientador_id = Column(ForeignKey("professor.id"), nullable=True, index=True)
     curso = Column(Enum("M", "D"), nullable=False)
     data_ingresso = Column(Date, nullable=True)
     data_qualificacao = Column(Date, nullable=False)
