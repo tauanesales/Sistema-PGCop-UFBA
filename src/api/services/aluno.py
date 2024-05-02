@@ -11,19 +11,18 @@ class ServiceAluno:
 
         # CPF must not be registered.
         try: 
-            ServiceAluno.obter_aluno_por_cpf(db, cpf=aluno.Cpf)
+            ServiceAluno.obter_aluno_por_cpf(db, cpf=aluno.cpf)
             raise CPFAlreadyRegisteredException()
         except StudentNotFoundException:
             pass
 
         db_aluno = Aluno(
-            Nome=aluno.Nome,
-            Cpf=aluno.Cpf,
-            Email=aluno.Email,
-            Telefone=aluno.Telefone,
-            Matricula=aluno.Matricula,
-            ProfessorID=aluno.ProfessorID,
-            Role=aluno.Role,
+            nome=aluno.nome,
+            cpf=aluno.cpf,
+            email_ufba=aluno.email_ufba,
+            matricula=aluno.matricula,
+            orientador_id=aluno.orientador_id,
+            curso=aluno.curso,
         )
         db.add(db_aluno)
         db.commit()
