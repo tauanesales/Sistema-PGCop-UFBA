@@ -1,13 +1,15 @@
 import datetime
-from pydantic import BaseModel,constr
-from typing import Literal
+from pydantic import BaseModel, constr
+
 
 class TarefaBase(BaseModel):
-    Aluno_ID: int
-    Descricao: constr(max_length=100)
-    Data_Prazo: datetime.date
-    Completada: int
+    aluno_id: int
+    nome: constr(max_length=100)
+    descricao: constr(max_length=100)
+    data_prazo: datetime.date
+    completada: int
        
+
 class TarefaInDB(TarefaBase):
     ID: int
 

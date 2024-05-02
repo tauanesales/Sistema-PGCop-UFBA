@@ -11,10 +11,11 @@ class ServiceTarefa:
     def criar_tarefa(db: Session, tarefa: TarefaBase):
 
         db_tarefa = Tarefa(
-            Aluno_ID=tarefa.Aluno_ID,
-            Descricao=tarefa.Descricao,
-            Data_Prazo=tarefa.Data_Prazo,
-            Completada=tarefa.Completada                       
+            aluno_id=tarefa.aluno_id,
+            nome=tarefa.nome,
+            descricao=tarefa.descricao,
+            data_prazo=tarefa.data_prazo,
+            completada=tarefa.completada                       
         )
         db.add(db_tarefa)
         db.commit()
