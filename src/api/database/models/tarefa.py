@@ -2,7 +2,7 @@ from sqlalchemy import Column, Date, Integer, String
 from src.api.database.session import Base
 
 class Tarefa(Base):
-    tablename = "tarefas"
+    __tablename__ = "tarefas"
     id = Column(Integer, primary_key=True, index=False)
     nome = Column(String, nullable=False)
     descricao = Column(String, nullable=False)

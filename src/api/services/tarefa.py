@@ -11,10 +11,13 @@ class ServiceTarefa:
     def criar_tarefa(db: Session, tarefa: TarefaBase):
 
         db_tarefa = Tarefa(
-            Aluno_ID=tarefa.Aluno_ID,
-            Descricao=tarefa.Descricao,
-            Data_Prazo=tarefa.Data_Prazo,
-            Completada=tarefa.Completada                       
+            aluno_id=tarefa.aluno_id,
+            nome=tarefa.nome,
+            last_notified=tarefa.last_notified,
+            data_conclusao=tarefa.data_conclusao,
+            descricao=tarefa.descricao,
+            data_prazo=tarefa.data_prazo,
+            completada=tarefa.completada                       
         )
         db.add(db_tarefa)
         db.commit()
@@ -24,10 +27,10 @@ class ServiceTarefa:
     
     @staticmethod
     def atualizar_tarefa(db: Session, tarefa_id: int, update_data: dict):
-        db.query(Tarefa).filter(Tarefa.ID == tarefa_id).update(update_data)
+        db.query(Tarefa).filter(Tarefa.id == tarefa_id).update(update_data)
         db.commit()
 
-        db_tarefa = db.query(Tarefa).filter(Tarefa.ID == tarefa_id).one()
+        db_tarefa = db.query(Tarefa).filter(Tarefa.id == tarefa_id).one()
         
         if db_tarefa is None:
            raise ExcecaoTarefaNaoEncontrada()
@@ -36,7 +39,7 @@ class ServiceTarefa:
     
     @staticmethod
     def deletar_tarefa(db: Session, tarefa_id: int):
-        db_tarefa = db.query(Tarefa).filter(Tarefa.ID == tarefa_id).one_or_none()
+        db_tarefa = db.query(Tarefa).filter(Tarefa.id == tarefa_id).one_or_none()
 
         if db_tarefa:
             db.delete(db_tarefa)
@@ -46,7 +49,7 @@ class ServiceTarefa:
     
     @staticmethod
     def obter_tarefa(db: Session, id: int):
-        db_tarefa = db.query(Tarefa).filter(Tarefa.ID == id).one_or_none()
+        db_tarefa = db.query(Tarefa).filter(Tarefa.id == id).one_or_none()
 
         if db_tarefa is None:
             raise ExcecaoTarefaNaoEncontrada()
@@ -54,10 +57,10 @@ class ServiceTarefa:
         return db_tarefa
     
     @staticmethod
-    def obter_tarefas_aluno(db: Session, aluno_id: int):
-        db_tarefas = db.query(Tarefa).filter(Tarefa.Aluno_ID == aluno_id).all()
+    def obter_tarefas_por_aluno(db: Session, aluno_id: int):
+        db_aluno = db.query(Tarefa).filter(Tarefa.aluno_id == aluno_id).all()
 
-        if db_tarefas is None:
+        if db_aluno is None:
             raise ExcecaoTarefaNaoEncontrada()
 
-        return db_tarefas
+        return db_aluno
