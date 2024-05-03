@@ -1,18 +1,34 @@
-from pydantic import BaseModel, EmailStr, constr
-from typing import Literal
+from pydantic import BaseModel, EmailStr, constr, validator
+from datetime import date
+from typing import ClassVar, Literal, Optional
 from pydantic_br import CPF
+from src.api.database.models.aluno import Aluno
 
 class AlunoBase(BaseModel):
-    Nome: constr(min_length=2, max_length=100)
-    Cpf: CPF
-    Email: EmailStr
-    Telefone: constr(strip_whitespace=True, min_length=10, max_length=11)
-    Matricula: constr(min_length=6, max_length=6) #Não sei se números de matricula podem conter mais que 6 dígitos
-    ProfessorID = constr(min_length=8, max_length=8)
-    Role: Literal["mestrando", "doutorando"]
+    nome: constr(min_length=2, max_length=100)
+    cpf: CPF
+    email: EmailStr
+    telefone: constr(strip_whitespace=True, min_length=10, max_length=11)
+    matricula: constr(min_length=6, max_length=12) 
+    orientador_id: Optional[int] = None
+    curso: Literal["M", "D"]
+    lattes: Optional[constr(min_length=2, max_length=100)]
+    data_ingresso: date
+    data_qualificacao: Optional[date] 
+    data_defesa: Optional[date]
+
+class AlunoCreate(AlunoBase):
+    senha: constr(min_length=7)
+
+    @validator("senha")
+    def validar_senha(cls, senha):
+        if " " in senha:
+            raise ValueError("A senha não pode conter espaços")
+        return senha
+
 
 class AlunoInDB(AlunoBase):
-    AlunoID: int
+    id: int
 
     class Config:
         from_attributes = True
