@@ -16,7 +16,7 @@ def criar_tarefa(tarefa: TarefaBase, db: Session = Depends(get_db)):
 
 @router.put("/{tarefa_id}", response_model=TarefaInDB)
 def atualizar_tarefa(tarefa_id: int, tarefa: TarefaBase, db: Session = Depends(get_db)):
-    return ServiceTarefa.atualizar_tarefa(db, tarefa_id, tarefa.dict())
+    return ServiceTarefa.atualizar_tarefa(db, tarefa_id, tarefa)
 
 @router.delete("/{tarefa_id}", status_code=status.HTTP_204_NO_CONTENT)
 def deletar_tarefa(tarefa_id: int, db: Session = Depends(get_db)):

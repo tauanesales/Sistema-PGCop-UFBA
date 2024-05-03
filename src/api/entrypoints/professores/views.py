@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 
 from src.api.database.session import get_db
-from src.api.entrypoints.professores.errors import EmailAlreadyRegisteredException, UserNotFoundException
+from src.api.entrypoints.professores.errors import EmailAlreadyRegisteredException, ProfessorNotFoundException
 from src.api.entrypoints.professores.schema import ProfessorBase, ProfessorCreate, ProfessorInDB
 from src.api.services.professor import ServiceProfessor
 
@@ -36,7 +36,7 @@ def deletar_professor(professor_id: int, db: Session = Depends(get_db)):
 
 @router.put("/{professor_id}", response_model=ProfessorInDB)
 def atualizar_professor(professor_id: int, professor: ProfessorBase, db: Session = Depends(get_db)):
-    return ServiceProfessor.atualizar_professor(db, professor_id, professor.dict())
+    return ServiceProfessor.atualizar_professor(db, professor_id, professor)
 
 
 @router.get("/email/{email}", response_model=ProfessorInDB)
