@@ -20,6 +20,7 @@ Repositório com o back-end da aplicação do sistema de monitoramento de alunos
 - Jean Loui Bernard
 - Mário Augusto
 - Pedro Harzer
+- Rafael Costa
 - Tauane Sales 
 
 ### Linguagem e Tecnologias:
