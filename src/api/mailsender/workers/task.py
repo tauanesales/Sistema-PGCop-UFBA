@@ -27,6 +27,6 @@ class TaskMailerWorker(MailerWorker):
         return result.scalars().all()
     
     async def start(stop_function: Optional[Callable] = None):
-        while stop_function is None or not stop_function():
+        while stop_function is None or not stop_function:
             # TODO: Implement
             await asyncio.sleep(60 * 60)
