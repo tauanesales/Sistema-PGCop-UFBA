@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Optional
+from typing import Literal, Optional
 from pydantic import BaseModel, EmailStr, constr, validator, Field
 from pydantic_br import CPF
 

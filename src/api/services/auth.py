@@ -1,15 +1,10 @@
 from datetime import datetime, timedelta
 from typing import Optional
-from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 
 from src.api.config import Config
-from src.api.services.professor import ServiceProfessor
-from src.api.services.aluno import ServiceAluno
-from src.api.database.session import get_db
-from sqlalchemy.orm import Session
 
 # Instanciando o OAuth2PasswordBearer
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -53,17 +48,3 @@ class ServiceAuth:
         except JWTError:
             raise credentials_exception
         return username
-
-async def obter_usuario_atual(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> dict:
-    """Obtém o usuário atual com base no token fornecido."""
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Credenciais inválidas",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    email = ServiceAuth.verificar_token(token, credentials_exception)
-    usuario = ServiceProfessor.obter_professor_por_email(db, email=email) or ServiceAluno.obter_aluno_por_email(db, email=email)
-    if usuario:
-        return usuario
-    else:
-        raise credentials_exception

@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
-from src.api.services.auth import verify_token, oauth2_scheme
+from src.api.services.auth import ServiceAuth, oauth2_scheme
 from src.api.database.session import get_db
 from src.api.database.models.professor import Professor
 from src.api.database.models.aluno import Aluno
@@ -13,7 +13,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 class ServiceProfessor:
 
     def get_current_professor(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> ProfessorInDB:
-        email = verify_token(token)
+        email = ServiceAuth.verificar_token(token)
         professor = db.query(Professor).filter(Professor.email == email).first()
         if not professor:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Professor não encontrado")
