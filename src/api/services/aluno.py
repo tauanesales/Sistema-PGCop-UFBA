@@ -1,3 +1,4 @@
+from src.api.entrypoints.alunos.schema import AlunoCreate
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
@@ -23,17 +24,21 @@ class ServiceAluno:
         return aluno
 
     @staticmethod
-    def validar_aluno(db: Session, aluno):
+    def validar_aluno(db: Session, aluno: AlunoCreate):
         if db.query(Aluno).filter_by(cpf=aluno.cpf).first() or db.query(Aluno).filter_by(email=aluno.email).first():
             raise EmailAlreadyRegisteredException()
         if aluno.orientador_id and not db.query(Professor).filter_by(id=aluno.orientador_id).first():
             raise ExcecaoIdOrientadorNaoEncontrado()
 
     @staticmethod
-    def criar_aluno(db: Session, aluno) -> Aluno:
+    def criar_aluno(db: Session, aluno: AlunoCreate) -> Aluno:
         ServiceAluno.validar_aluno(db, aluno)
         senha_hash = pwd_context.hash(aluno.senha)
-        novo_aluno = Aluno(**aluno.dict(), senha_hash=senha_hash)
+
+        aluno_dict = aluno.model_dump()
+        del aluno_dict['senha']
+
+        novo_aluno = Aluno(**aluno_dict, senha_hash=senha_hash)
         db.add(novo_aluno)
         db.commit()
         db.refresh(novo_aluno)

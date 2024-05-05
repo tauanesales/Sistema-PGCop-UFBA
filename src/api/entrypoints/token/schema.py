@@ -8,7 +8,7 @@ class TokenType(Enum):
 
 class Token(BaseModel):
     access_token: str
-    token_type: Literal[TokenType.ACCESS, TokenType.REFRESH]
+    token_type: str
 
 class TokenData(BaseModel):
     username: Optional[str] = None

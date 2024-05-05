@@ -18,14 +18,11 @@ class UserType(Enum):
 
 def authenticate_user(db: Session, email: str, password: str):
     user = ServiceProfessor.obter_por_email(db, email)
-    print('B'*100)
     if user and ServiceAuth.verificar_senha(password, user.senha_hash):
         return user, UserType.PROFESSOR
-    print('C'*100)
     user = ServiceAluno.obter_por_email(db, email)
     if user and ServiceAuth.verificar_senha(password, user.senha_hash):
         return user, UserType.ALUNO
-    print('D'*100)
 
     return None, None
 
@@ -33,7 +30,6 @@ def authenticate_user(db: Session, email: str, password: str):
 async def login_para_acessar_token(
     form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
 ):
-    print('A'*100)
     usuario, tipo_usuario = authenticate_user(db, form_data.username, form_data.password)
     if not usuario:
         raise HTTPException(
@@ -41,7 +37,6 @@ async def login_para_acessar_token(
             detail="Credenciais incorretas",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
     access_token_expires = timedelta(minutes=Config.AUTH.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = ServiceAuth.criar_access_token(
         data={"sub": usuario.email, "type": tipo_usuario.value},

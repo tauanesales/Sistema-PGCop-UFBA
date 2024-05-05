@@ -4,6 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 
+from src.api.exceptions.credentials_exception import CredentialsException
 from src.api.config import Config
 
 # Instanciando o OAuth2PasswordBearer
@@ -38,13 +39,13 @@ class ServiceAuth:
         return encoded_jwt
 
     @staticmethod
-    def verificar_token(token: str, credentials_exception) -> str:
+    def verificar_token(token: str) -> str:
         """Verifica um token JWT e extrai o identificador do usuário."""
         try:
             payload = jwt.decode(token, Config.AUTH.SECRET_KEY, algorithms=[Config.AUTH.ALGORITHM])
             username: str = payload.get("sub")
             if username is None:
-                raise credentials_exception
+                raise CredentialsException
         except JWTError:
-            raise credentials_exception
+            raise CredentialsException
         return username
