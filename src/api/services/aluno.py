@@ -70,3 +70,10 @@ class ServiceAluno:
         if not alunos:
             raise StudentNotFoundException()
         return alunos
+
+    @staticmethod
+    def obter_por_email(db: Session, email: str) -> Aluno:
+        db_aluno = db.query(Aluno).filter(Aluno.email == email).one_or_none()
+        if db_aluno is None:
+            raise StudentNotFoundException()
+        return db_aluno

@@ -17,10 +17,14 @@ class UserType(Enum):
     ALUNO = "aluno"
 
 def authenticate_user(db: Session, email: str, password: str):
-    for service, user_type in [(ServiceProfessor, UserType.PROFESSOR), (ServiceAluno, UserType.ALUNO)]:
-        user = service.obter_por_email(db, email)
-        if user and ServiceAuth.verificar_senha(password, user.senha_hash):
-            return user, user_type
+    user = ServiceProfessor.obter_por_email(db, email)
+    if user and ServiceAuth.verificar_senha(password, user.senha_hash):
+        return user, UserType.PROFESSOR
+
+    user = ServiceAluno.obter_por_email(db, email)
+    if user and ServiceAuth.verificar_senha(password, user.senha_hash):
+        return user, UserType.ALUNO
+
     return None, None
 
 @router.post("/", response_model=Token)
@@ -41,54 +45,3 @@ async def login_para_acessar_token(
         expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

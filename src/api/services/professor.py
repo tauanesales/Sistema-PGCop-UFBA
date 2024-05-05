@@ -66,7 +66,7 @@ class ServiceProfessor:
         return db_professor
 
     @staticmethod
-    def obter_professor_por_email(db: Session, email: str) -> Professor:
+    def obter_por_email(db: Session, email: str) -> Professor:
         db_professor = db.query(Professor).filter(Professor.email == email).one_or_none()
         if db_professor is None:
             raise ProfessorNotFoundException()

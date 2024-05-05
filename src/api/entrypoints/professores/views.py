@@ -20,7 +20,7 @@ def criar_professor(professor: ProfessorCreate, db: Session = Depends(get_db)):
 @router.get("/me", response_model=ProfessorInDB)
 async def read_professor_me(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     email = ServiceAuth.verificar_token(token)
-    professor = ServiceProfessor.obter_professor_por_email(db, email=email)
+    professor = ServiceProfessor.obter_por_email(db, email=email)
     if not professor:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Professor não encontrado")
     return professor
@@ -40,4 +40,4 @@ def atualizar_professor(professor_id: int, professor: ProfessorBase, db: Session
 
 @router.get("/email/{email}", response_model=ProfessorInDB)
 def obter_professor_por_email(email: str, db: Session = Depends(get_db)):
-    return ServiceProfessor.obter_professor_por_email(db, email=email)
+    return ServiceProfessor.obter_por_email(db, email=email)

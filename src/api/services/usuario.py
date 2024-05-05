@@ -23,7 +23,7 @@ class ServiceUsuario:
             headers={"WWW-Authenticate": "Bearer"},
         )
         email = ServiceAuth.verificar_token(token, credentials_exception)
-        usuario = ServiceProfessor.obter_professor_por_email(db, email=email) or ServiceAluno.obter_aluno_por_email(db, email=email)
+        usuario = ServiceProfessor.obter_por_email(db, email=email) or ServiceAluno.obter_por_email(db, email=email)
         if usuario:
             return usuario
         else:
