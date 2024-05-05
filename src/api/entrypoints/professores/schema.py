@@ -25,20 +25,4 @@ class ProfessorInDB(ProfessorBase):
     senha_hash: Optional[str] = None  # Ajuste opcional do hash da senha
 
     class Config:
-        orm_mode = True  # Utiliza o ORM mode para compatibilidade com o SQLAlchemy
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        from_attributes = True  # Utiliza o ORM mode para compatibilidade com o SQLAlchemy

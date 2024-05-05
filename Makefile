@@ -3,23 +3,24 @@ ifneq ("$(wildcard .env)","")
 	export
 endif
 
-ifeq ($(OS),Windows_NT)
-	INSTALL_SCRIPT=powershell -ExecutionPolicy bypass .\make-windows.ps1
-else
-	INSTALL_SCRIPT=bash make-linux.sh
-endif
 
 run:
-	${INSTALL_SCRIPT} run
+	poetry run python -m src.api
 
 test:
-	${INSTALL_SCRIPT} test
+	ENVIRONMENT=test poetry run pytest --cov
 
 install:
-	${INSTALL_SCRIPT} install
+	pip install poetry
+	poetry install --no-root
+	poetry lock
+	poetry run pre-commit install
 
-add-dependency:
-	${INSTALL_SCRIPT} add-dependency ${DEPNAME}
+pre-commit:
+	poetry run pre-commit run --config ./.pre-commit-config.yaml
 
-export-requirements:
-	${INSTALL_SCRIPT} export-requirements
+patch:
+	poetry version patch
+
+minor:
+	poetry version minor
