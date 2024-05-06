@@ -14,7 +14,7 @@ router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 @router.get("/me", response_model=UsuarioInDB)
-async def read_aluno_me(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+async def get_current_user_from_token(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     try:
         return UsuarioInDB(tipo="aluno", dados=ServiceAluno.get_current_aluno(token, db))
     except StudentNotFoundException:
