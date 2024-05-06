@@ -18,7 +18,7 @@ class ServiceProfessor:
         email = ServiceAuth.verificar_token(token)
         professor = db.query(Professor).filter(Professor.email == email).first()
         if not professor:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Professor não encontrado")
+            raise ProfessorNotFoundException()
         return professor
 
     @staticmethod

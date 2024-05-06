@@ -1,13 +1,11 @@
 from typing import List
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
-from src.api.entrypoints.alunos.errors import StudentNotFoundException
 from src.api.database.session import get_db
 from src.api.entrypoints.alunos.schema import AlunoBase, AlunoCreate, AlunoInDB
 from src.api.services.aluno import ServiceAluno
-from src.api.services.auth import ServiceAuth
 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")

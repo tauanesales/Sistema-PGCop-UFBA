@@ -1,5 +1,5 @@
 from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from src.api.entrypoints.alunos.errors import StudentNotFoundException
 from src.api.entrypoints.professores.errors import ProfessorNotFoundException
