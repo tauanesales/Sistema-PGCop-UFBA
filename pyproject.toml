@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fastapi-backend"
-version = "0.7.0"
+version = "0.7.1"
 description = "A FastAPI backend."
 authors = ["Tauane Sales <tauanesales@ufba.br>"]
 readme = "README.md"
