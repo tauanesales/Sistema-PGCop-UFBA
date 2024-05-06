@@ -1,6 +1,9 @@
 from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from src.api.entrypoints.alunos.errors import StudentNotFoundException
+from src.api.entrypoints.professores.errors import ProfessorNotFoundException
+from src.api.exceptions.credentials_exception import CredentialsException
 from src.api.config import Config
 from src.api.database.session import get_db
 from src.api.services.auth import ServiceAuth
@@ -17,26 +20,27 @@ class UserType(Enum):
     ALUNO = "aluno"
 
 def authenticate_user(db: Session, email: str, password: str):
-    user = ServiceProfessor.obter_por_email(db, email)
-    if user and ServiceAuth.verificar_senha(password, user.senha_hash):
-        return user, UserType.PROFESSOR
-    user = ServiceAluno.obter_por_email(db, email)
-    if user and ServiceAuth.verificar_senha(password, user.senha_hash):
-        return user, UserType.ALUNO
+    try:
+        user = ServiceProfessor.obter_por_email(db, email)
+        if ServiceAuth.verificar_senha(password, user.senha_hash):
+            return user, UserType.PROFESSOR
+    except ProfessorNotFoundException:
+        pass
 
-    return None, None
+    try:
+        user = ServiceAluno.obter_por_email(db, email)
+        if user and ServiceAuth.verificar_senha(password, user.senha_hash):
+            return user, UserType.ALUNO
+    except StudentNotFoundException:
+        pass
+
+    raise CredentialsException()
 
 @router.post("/", response_model=Token)
 async def login_para_acessar_token(
     form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
 ):
-    usuario, tipo_usuario = authenticate_user(db, form_data.username, form_data.password)
-    if not usuario:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Credenciais incorretas",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    usuario, tipo_usuario = authenticate_user(db, form_data.username, form_data.password)        
     access_token_expires = timedelta(minutes=Config.AUTH.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = ServiceAuth.criar_access_token(
         data={"sub": usuario.email, "type": tipo_usuario.value},

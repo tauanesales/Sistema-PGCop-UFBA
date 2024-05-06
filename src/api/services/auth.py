@@ -45,7 +45,7 @@ class ServiceAuth:
             payload = jwt.decode(token, Config.AUTH.SECRET_KEY, algorithms=[Config.AUTH.ALGORITHM])
             username: str = payload.get("sub")
             if username is None:
-                raise CredentialsException
+                raise CredentialsException()
         except JWTError:
-            raise CredentialsException
+            raise CredentialsException()
         return username

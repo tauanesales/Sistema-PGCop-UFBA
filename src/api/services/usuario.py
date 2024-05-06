@@ -22,4 +22,4 @@ class ServiceUsuario:
         usuario = ServiceProfessor.obter_por_email(db, email=email) or ServiceAluno.obter_por_email(db, email=email)
         if usuario:
             return usuario
-        raise CredentialsException
+        raise CredentialsException()

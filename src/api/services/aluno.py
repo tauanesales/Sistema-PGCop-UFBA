@@ -1,3 +1,4 @@
+from src.api.database.models.tarefa import Tarefa
 from src.api.entrypoints.alunos.schema import AlunoCreate
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
@@ -6,6 +7,8 @@ from src.api.services.auth import ServiceAuth, oauth2_scheme
 from src.api.database.models.professor import Professor
 from src.api.database.models.aluno import Aluno
 from src.api.entrypoints.alunos.errors import (
+    CPFAlreadyRegisteredException,
+    MatriculaAlreadyRegisteredException,
     StudentNotFoundException,
     EmailAlreadyRegisteredException,
     ExcecaoIdOrientadorNaoEncontrado
@@ -20,15 +23,19 @@ class ServiceAluno:
         email = ServiceAuth.verificar_token(token)
         aluno = db.query(Aluno).filter(Aluno.email == email).first()
         if not aluno:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Aluno não encontrado")
+            raise StudentNotFoundException()
         return aluno
 
     @staticmethod
     def validar_aluno(db: Session, aluno: AlunoCreate):
-        if db.query(Aluno).filter_by(cpf=aluno.cpf).first() or db.query(Aluno).filter_by(email=aluno.email).first():
+        if db.query(Aluno).filter_by(cpf=aluno.cpf).first():
+            raise CPFAlreadyRegisteredException()
+        if db.query(Aluno).filter_by(email=aluno.email).first():
             raise EmailAlreadyRegisteredException()
         if aluno.orientador_id and not db.query(Professor).filter_by(id=aluno.orientador_id).first():
             raise ExcecaoIdOrientadorNaoEncontrado()
+        if db.query(Aluno).filter_by(matricula=aluno.matricula).first():
+            raise MatriculaAlreadyRegisteredException()
 
     @staticmethod
     def criar_aluno(db: Session, aluno: AlunoCreate) -> Aluno:
@@ -63,11 +70,17 @@ class ServiceAluno:
 
     @staticmethod
     def deletar_aluno(db: Session, aluno_id: int):
-        aluno = db.query(Aluno).filter_by(id=aluno_id).one_or_none()
+        tarefas = db.query(Tarefa).filter(Tarefa.aluno_id == aluno_id).all()
+        for tarefa in tarefas:
+            db.delete(tarefa)
+        db.flush()
+
+        aluno = db.query(Aluno).filter(Aluno.id == aluno_id).one_or_none()
         if not aluno:
             raise StudentNotFoundException()
         db.delete(aluno)
         db.commit()
+        
 
     @staticmethod
     def obter_alunos_por_orientador(db: Session, orientador_id: int):
@@ -81,4 +94,13 @@ class ServiceAluno:
         db_aluno = db.query(Aluno).filter(Aluno.email == email).one_or_none()
         if db_aluno is None:
             raise StudentNotFoundException()
+        return db_aluno
+
+    @staticmethod
+    def obter_aluno_por_cpf(db: Session, cpf: str):
+        db_aluno = db.query(Aluno).filter(Aluno.cpf == cpf).one_or_none()
+
+        if db_aluno is None:
+            raise StudentNotFoundException()
+
         return db_aluno

@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
+from src.api.entrypoints.alunos.errors import StudentNotFoundException
 from src.api.database.session import get_db
 from src.api.entrypoints.alunos.schema import AlunoBase, AlunoCreate, AlunoInDB
 from src.api.services.aluno import ServiceAluno
@@ -19,13 +20,7 @@ def criar_aluno(aluno: AlunoCreate, db: Session = Depends(get_db)):
 
 @router.get("/me", response_model=AlunoInDB)
 async def read_aluno_me(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-    aluno = ServiceAluno.get_current_aluno(token, db)
-    if aluno:
-        return aluno
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="Aluno não encontrado."
-    )
+    return ServiceAluno.get_current_aluno(token, db)
 
 
 @router.get("/{aluno_id}", response_model=AlunoInDB)
@@ -51,7 +46,7 @@ def get_aluno_cpf(aluno_cpf: str, db: Session = Depends(get_db)):
 
 @router.get("/email/{aluno_email}", response_model=AlunoInDB)
 def get_aluno_email(aluno_email: str, db: Session = Depends(get_db)):
-    return ServiceAluno.obter_aluno_por_email(db, aluno_email)
+    return ServiceAluno.obter_por_email(db, aluno_email)
 
 
 @router.get("/orientador/{orientador_id}", response_model=List[AlunoInDB])
