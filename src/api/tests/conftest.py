@@ -15,7 +15,8 @@ def pytest_collection_modifyitems(items):
         "test_student_routes", 
         "test_professor_routes", 
         "test_login_route",
-        "test_task_routes", 
+        "test_default_task_routes",
+        "test_student_task_routes", 
         "test_mailer"
     ]
 

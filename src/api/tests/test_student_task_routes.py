@@ -1,6 +1,6 @@
 from core.application import client
 
-from core.base_task import (
+from core.base_student_task import (
     alternative_description,
     alternative_name,
     completed,
@@ -98,7 +98,7 @@ def test_get_task():
 @pytest.mark.dependency(depends=["test_create_task"])
 def test_get_tasks_by_student_id():
     """
-    Test route for getting the task from the database by his CPF.
+    Test route for getting the tasks from the database by the ID of a student.
     """
     expected = [
         {"nome": name, "descricao": description, "aluno_id": student_id},
