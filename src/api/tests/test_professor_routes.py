@@ -56,6 +56,8 @@ def test_create_professor():
 
     # Test sending a incomplete form.
     for key in valid_form.keys():
+        if valid_form[key] is None: continue
+
         form = valid_form.copy()
         form.pop(key)
 
