@@ -12,9 +12,12 @@ def pytest_collection_modifyitems(items):
     """
     MODULE_ORDER = [
         "test_application", 
-        "test_user_routes", 
-        "test_login_route"
+        "test_student_routes", 
+        "test_professor_routes", 
+        "test_login_route",
+        "test_mailer"
     ]
+
     module_mapping = {item: item.module.__name__ for item in items}
 
     sorted_items = items.copy()
