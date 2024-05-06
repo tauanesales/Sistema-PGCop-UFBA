@@ -10,10 +10,11 @@ cpf = "123.456.789-09"
 course = "M"
 password = "patao002"
 
-lattes = "0123456789"
-admission_date = int(datetime.now().timestamp())
-qualification_date = int(datetime.now().timestamp())
-defense_date = int(datetime.now().timestamp())
+advisor_id = None
+lattes = "123456789"
+admission_date = str(datetime.now().date())
+qualification_date = str(datetime.now().date())
+defense_date = str(datetime.now().date())
 
 alternative_name = "Jean Extreme"
 alternative_email = "jeanloui@ufba.br"

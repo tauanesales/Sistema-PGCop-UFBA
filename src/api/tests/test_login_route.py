@@ -1,15 +1,13 @@
 from core.application import client
 
 from core.base_professor import (
-    alternative_email,
-    alternative_name,
-    alternative_role,
     email, 
     name, 
     password,
-    role,
-    user_id
+    role
 )
+
+import pytest
 
 
 valid_form = {
@@ -71,6 +69,7 @@ def test_login():
     assert response.status_code >= 400
 
 
+@pytest.mark.dependency(depends=["test_login"])
 def test_check_token():
     """
     Test route for checking user access.

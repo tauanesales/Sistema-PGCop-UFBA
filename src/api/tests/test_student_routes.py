@@ -2,6 +2,7 @@ from core.application import client
 
 from core.base_student import (
     admission_date, 
+    advisor_id,
     alternative_course,
     alternative_cpf, 
     alternative_email, 
@@ -19,6 +20,8 @@ from core.base_student import (
     user_id
 )
 
+import pytest
+
 
 valid_form = {
     "nome": name,
@@ -29,7 +32,10 @@ valid_form = {
     "senha": password,
     "telefone": phone,
     "lattes": lattes,
-    "data_ingresso": admission_date
+    "data_ingresso": admission_date,
+    "data_defesa": defense_date,
+    "data_qualificacao": qualification_date,
+    "orientador_id": advisor_id,
 }
 
 
@@ -102,6 +108,7 @@ def test_create_student():
     assert 200 <= client.post(url, json=form).status_code <= 299
 
 
+@pytest.mark.dependency(depends=["test_create_student"])
 def test_get_student():
     """
     Test route for getting the student from the database.
@@ -117,6 +124,7 @@ def test_get_student():
         assert result.get(key, "") == value
 
 
+@pytest.mark.dependency(depends=["test_create_student"])
 def test_get_student_by_cpf():
     """
     Test route for getting the student from the database by his CPF.
@@ -132,6 +140,7 @@ def test_get_student_by_cpf():
         assert result.get(key, "") == value
 
 
+@pytest.mark.dependency(depends=["test_create_student"])
 def test_get_student_by_email():
     """
     Test route for getting the student from the database by his email.
@@ -147,6 +156,7 @@ def test_get_student_by_email():
         assert result.get(key, "") == value
 
 
+@pytest.mark.dependency(depends=["test_create_student"])
 def test_update_student():
     """
     Test route for updating the student's information on the database.
@@ -173,6 +183,7 @@ def test_update_student():
         assert result.get(key, "") == value
     
 
+@pytest.mark.dependency(depends=["test_create_student"])
 def test_delete_student():
     """
     Test route for deleting the student from the database.

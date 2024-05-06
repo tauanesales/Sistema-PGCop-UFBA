@@ -11,6 +11,8 @@ from core.base_professor import (
     user_id
 )
 
+import pytest
+
 
 valid_form = {
     "nome": name,
@@ -76,6 +78,7 @@ def test_create_professor():
     assert 200 <= client.post(url, json=form).status_code <= 299
 
 
+@pytest.mark.dependency(depends=["test_create_professor"])
 def test_get_professor():
     """
     Test route for getting the professor from the database.
@@ -91,6 +94,7 @@ def test_get_professor():
         assert result.get(key, "") == value
 
 
+@pytest.mark.dependency(depends=["test_create_professor"])
 def test_get_professor_by_email():
     """
     Test route for getting the professor from the database by his email.
@@ -106,6 +110,7 @@ def test_get_professor_by_email():
         assert result.get(key, "") == value
 
 
+@pytest.mark.dependency(depends=["test_create_professor"])
 def test_update_professor():
     """
     Test route for updating the professor's information on the database.
