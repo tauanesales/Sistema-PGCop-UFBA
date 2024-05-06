@@ -20,6 +20,7 @@ valid_form = {
 token = None
 
 
+@pytest.mark.dependency()
 def test_login():
     """
     Test route for log in to an account.

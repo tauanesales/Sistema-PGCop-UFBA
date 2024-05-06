@@ -22,6 +22,7 @@ valid_form = {
 }
 
 
+@pytest.mark.dependency()
 def test_create_professor():
     """
     Test route for creating a new professor.

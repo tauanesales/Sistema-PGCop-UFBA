@@ -7,6 +7,8 @@ from core.base_student import (
     alternative_cpf, 
     alternative_email, 
     alternative_name,
+    alternative_phone,
+    alternative_registration,
     course, 
     cpf, 
     defense_date,
@@ -39,6 +41,7 @@ valid_form = {
 }
 
 
+@pytest.mark.dependency()
 def test_create_student():
     """
     Test route for creating a new student.
@@ -76,6 +79,8 @@ def test_create_student():
 
     # Test sending a incomplete form.
     for key in valid_form.keys():
+        if valid_form[key] is None: continue
+
         form = valid_form.copy()
         form.pop(key)
 
@@ -89,22 +94,37 @@ def test_create_student():
 
     # Test sending a different form but with an email that already exists on database.
     form = valid_form.copy()
+    form["telefone"] = alternative_phone  # Phone is a unique field at the database. 
     form["nome"] = "Another Guy"
     form["senha"] = "AnotherPassword"
     form["cpf"] = alternative_cpf
+    form["matricula"] = alternative_registration
     assert client.post(url, json=form).status_code >= 400
 
     # Test sending a different form but with a CPF that already exists on database.
     form = valid_form.copy()
+    form["telefone"] = alternative_phone  # Phone is a unique field at the database.
     form["nome"] = "Another Guy"
     form["senha"] = "AnotherPassword"
     form["email"] = alternative_email
+    form["matricula"] = alternative_registration
     assert client.post(url, json=form).status_code >= 400
 
-    # Test sending a form with the same data, except the identication.
+    # Test sending a different form but with a registration that already exists on database.
     form = valid_form.copy()
+    form["telefone"] = alternative_phone  # Phone is a unique field at the database.
+    form["nome"] = "Another Guy"
+    form["senha"] = "AnotherPassword"
     form["cpf"] = alternative_cpf
     form["email"] = alternative_email
+    assert client.post(url, json=form).status_code >= 400
+
+    # Test sending a form with the same data, but different identication.
+    form = valid_form.copy()
+    form["telefone"] = alternative_phone  # Phone is a unique field at the database.
+    form["cpf"] = alternative_cpf
+    form["email"] = alternative_email
+    form["matricula"] = alternative_registration
     assert 200 <= client.post(url, json=form).status_code <= 299
 
 
@@ -163,7 +183,7 @@ def test_update_student():
     """
     url = f"/alunos/{user_id}"
 
-    new_data = {"nome": alternative_name, "email": alternative_email.split("@")[0] + "foo" + "@ufmg.br", "course": alternative_course}
+    new_data = {"nome": alternative_name, "email": alternative_email.split("@")[0] + "foo" + "@ufmg.br", "curso": alternative_course}
     
     # Update user's information.
     form = valid_form.copy()
