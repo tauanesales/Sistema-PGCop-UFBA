@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 
@@ -25,6 +26,10 @@ async def read_professor_me(token: str = Depends(oauth2_scheme), db: Session = D
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Professor não encontrado")
     return professor
 
+@router.get("/todos", response_model=List[ProfessorInDB])
+def obter_todos_professores(db: Session = Depends(get_db)):
+    return ServiceProfessor.obter_professores(db)
+
 @router.get("/{professor_id}", response_model=ProfessorInDB)
 def ler_professor(professor_id: int, db: Session = Depends(get_db)):
     return ServiceProfessor.obter_professor(db, professor_id=professor_id)
@@ -41,3 +46,4 @@ def atualizar_professor(professor_id: int, professor: ProfessorBase, db: Session
 @router.get("/email/{email}", response_model=ProfessorInDB)
 def obter_professor_por_email(email: str, db: Session = Depends(get_db)):
     return ServiceProfessor.obter_por_email(db, email=email)
+
