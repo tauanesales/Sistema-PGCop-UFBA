@@ -39,9 +39,7 @@ def get_app() -> FastAPI:
 
     @_app.on_event("startup")
     async def app_startup():
-        # TODO: Turn it on, when it's ready.
-        # asyncio.create_task(start_mailer_workers())
-        pass
+        asyncio.create_task(start_mailer_workers())
 
     FastAPICache.init(InMemoryBackend(), prefix="fastapi-cache")
     return _app

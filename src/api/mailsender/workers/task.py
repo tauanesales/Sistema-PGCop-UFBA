@@ -23,31 +23,29 @@ class TaskMailerWorker(MailerWorker):
         deadline = datetime.now() + timedelta(days=30)  # Expires in 1 month
             
         query = (
-            select([
-                Aluno.c.id, 
-                Aluno.c.nome, 
-                Aluno.c.email, 
-                Tarefa.c.id.label("tarefa_id"), 
-                Tarefa.c.data_prazo, 
-                Tarefa.c.nome.label("titulo")
-            ])
+            select(
+                Aluno.id, 
+                Aluno.nome, 
+                Aluno.email, 
+                Tarefa.id.label("tarefa_id"), 
+                Tarefa.data_prazo, 
+                Tarefa.nome.label("titulo")
+            )
             .select_from(
                 join(Aluno, Tarefa, Aluno.id == Tarefa.aluno_id)
             )
             .where(Tarefa.data_prazo <= deadline.date())
             .where(Tarefa.last_notified.is_(None))
         )
-        result = session.execute(query)
-
-        return result.scalars().all()
+        return session().execute(query)
     
     async def start(self, stop_function: Optional[Callable] = None):
         while stop_function is None or not stop_function():
-            for task in self.__get_tasks_near_to_deadline():
+            for task in self.__get_tasks_near_to_deadline():                    
                 # TODO: Definir o corpo do email e o título
                 subject = f"[AVISO PGCOP] - Tarefa Pendente"
                 body = f"Olá {task.nome}! Estou passando aqui para notificá-lo que a tarefa {task.titulo} está ainda pendente."
-                
+
                 self.send_message(task.email, subject, body)
 
                 query = update(Tarefa).where(Tarefa.id == task.tarefa_id).values(last_notified=datetime.now())
