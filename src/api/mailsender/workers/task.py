@@ -41,14 +41,16 @@ class TaskMailerWorker(MailerWorker):
     
     async def start(self, stop_function: Optional[Callable] = None):
         while stop_function is None or not stop_function():
-            for task in self.__get_tasks_near_to_deadline():                    
-                # TODO: Definir o corpo do email e o título
+            for task in self.__get_tasks_near_to_deadline():
                 subject = f"[AVISO PGCOP] - Tarefa Pendente"
-                body = f"Olá {task.nome}! Estou passando aqui para notificá-lo que a tarefa {task.titulo} está ainda pendente."
+                body = self.load_html("task_near_to_deadline", task.nome, task.titulo)
 
                 self.send_message(task.email, subject, body)
 
-                query = update(Tarefa).where(Tarefa.id == task.tarefa_id).values(last_notified=datetime.now())
-                session.execute(query)
+                query = update(Tarefa).where(Tarefa.id == task.tarefa_id).values(last_notified=str(datetime.now().date()))
+                
+                current_session = session()
+                current_session.execute(query)
+                current_session.commit()
 
             await asyncio.sleep(60 * 60)
