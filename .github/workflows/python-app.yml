@@ -44,7 +44,6 @@ jobs:
         echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
         echo ALGORITHM=${{ secrets.ALGORITHM }} >> .env
         echo ACCESS_TOKEN_EXPIRE_MINUTES=${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }} >> .env
-        cat .env
     - name: Test Application
       run: |
         make test
