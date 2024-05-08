@@ -25,6 +25,25 @@ jobs:
     - name: Install Dependencies
       run: |
         make install
+    - name: Create env file
+      run: |
+        touch .env
+        echo RELOAD=true >> .env
+
+        echo DB_DRIVERNAME="mysql" >> .env
+        echo DB_USERNAME="root" >> .env
+        echo DB_PASSWORD="password" >> .env
+        echo DB_HOST="localhost" >> .env
+        echo DB_PORT=3306 >> .env
+        echo DB_DATABASE="database" >> .env
+
+        echo SENDGRID_API_KEY="key" >> .env
+        echo SENDGRID_EMAIL="email" >> .env
+
+        echo SECRET_KEY="key" >> .env
+        echo ALGORITHM="HS256" >> .env
+        echo ACCESS_TOKEN_EXPIRE_MINUTES=30 >> .env
+        cat .env
     - name: Test Application
       run: |
         make test
