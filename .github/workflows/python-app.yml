@@ -25,6 +25,7 @@ jobs:
     - name: Install Dependencies
       run: |
         make install
+        poetry add mysqlclient
     - name: Create env file
       run: |
         touch .env
