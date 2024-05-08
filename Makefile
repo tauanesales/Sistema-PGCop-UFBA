@@ -6,7 +6,7 @@ endif
 ifeq ($(OS),Windows_NT)
 	INSTALL_SCRIPT=powershell -ExecutionPolicy bypass .\make-windows.ps1
 else
-	ifdef GITHUB-ACTIONS
+	ifdef GITHUB_ACTIONS
 		INSTALL_SCRIPT=bash make-github-workflow.sh
 	else
 		INSTALL_SCRIPT=bash make-linux.sh

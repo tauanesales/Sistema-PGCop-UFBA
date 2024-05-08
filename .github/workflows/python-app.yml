@@ -24,7 +24,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install Dependencies
       run: |
-        export GITHUB-ACTIONS=true
+        export GITHUB_ACTIONS=true
         make install
         poetry add mysqlclient
     - name: Create env file
