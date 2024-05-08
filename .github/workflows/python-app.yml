@@ -26,7 +26,6 @@ jobs:
       run: |
         export GITHUB_ACTIONS=true
         make install
-        poetry add mysqlclient
     - name: Create env file
       run: |
         touch .env
