@@ -21,6 +21,7 @@ if [ "$1" == "install" ]; then
     pyenv install -s
     pip install poetry
     poetry lock
+    poetry remove mysqlclient
     poetry add mysqlclient
     poetry install --no-root
 
