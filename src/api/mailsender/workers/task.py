@@ -1,7 +1,8 @@
-from datetime import datetime
-from sqlalchemy import select
+from datetime import datetime, timedelta
+from sqlalchemy import select, join, update
 from typing import Callable, Optional
 
+from src.api.database.models.aluno import Aluno
 from src.api.database.models.tarefa import Tarefa
 from src.api.mailsender.workers import MailerWorker
 from src.api.database.session import session
@@ -21,12 +22,35 @@ class TaskMailerWorker(MailerWorker):
         """
         deadline = datetime.now() + timedelta(days=30)  # Expires in 1 month
             
-        query = select(Tarefa).where(Tarefa.Prazo == deadline.date())  # TODO: Tem que obter o email do aluno na query.
-        result = session.execute(query)
-
-        return result.scalars().all()
+        query = (
+            select(
+                Aluno.id, 
+                Aluno.nome, 
+                Aluno.email, 
+                Tarefa.id.label("tarefa_id"), 
+                Tarefa.data_prazo, 
+                Tarefa.nome.label("titulo")
+            )
+            .select_from(
+                join(Aluno, Tarefa, Aluno.id == Tarefa.aluno_id)
+            )
+            .where(Tarefa.data_prazo <= deadline.date())
+            .where(Tarefa.last_notified.is_(None))
+        )
+        return session().execute(query)
     
-    async def start(stop_function: Optional[Callable] = None):
-        while stop_function is None or not stop_function:
-            # TODO: Implement
+    async def start(self, stop_function: Optional[Callable] = None):
+        while stop_function is None or not stop_function():
+            for task in self.__get_tasks_near_to_deadline():
+                subject = f"[AVISO PGCOP] - Tarefa Pendente"
+                body = self.load_html("task_near_to_deadline", task.nome, task.titulo)
+
+                self.send_message(task.email, subject, body)
+
+                query = update(Tarefa).where(Tarefa.id == task.tarefa_id).values(last_notified=str(datetime.now().date()))
+                
+                current_session = session()
+                current_session.execute(query)
+                current_session.commit()
+
             await asyncio.sleep(60 * 60)

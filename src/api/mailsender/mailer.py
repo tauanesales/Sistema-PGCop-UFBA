@@ -28,4 +28,5 @@ class Mailer(object):
         try:
             self.__sg_client.send(message)
         except Exception as exception:
-            logging.error(f"MailerError: {exception.message}")
+            logging.error(f"MailerError: {exception}")
+            raise exception
