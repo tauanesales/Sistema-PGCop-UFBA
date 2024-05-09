@@ -28,7 +28,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install Dependencies
@@ -40,19 +40,19 @@ jobs:
         touch .env
         echo RELOAD=true >> .env
 
-        echo DB_DRIVERNAME=${{ secrets.DB_DRIVERNAME }} >> .env
-        echo DB_USERNAME=${{ secrets.DB_USERNAME }} >> .env
-        echo DB_PASSWORD=${{ secrets.DB_PASSWORD }} >> .env
-        echo DB_HOST=${{ secrets.DB_HOST }} >> .env
-        echo DB_PORT=${{ secrets.DB_PORT }} >> .env
-        echo DB_DATABASE=${{ secrets.DB_DATABASE }} >> .env
+        echo DB_DRIVERNAME="mysql+mysqlconnector" >> .env
+        echo DB_USERNAME="root" >> .env
+        echo DB_PASSWORD="password" >> .env
+        echo DB_HOST="127.0.0.1" >> .env
+        echo DB_PORT=3306 >> .env
+        echo DB_DATABASE="db" >> .env
 
-        echo SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }} >> .env
-        echo SENDGRID_EMAIL=${{ secrets.SENDGRID_EMAIL }} >> .env
+        echo SENDGRID_API_KEY="secret" >> .env
+        echo SENDGRID_EMAIL="email" >> .env
 
-        echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
-        echo ALGORITHM=${{ secrets.ALGORITHM }} >> .env
-        echo ACCESS_TOKEN_EXPIRE_MINUTES=${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }} >> .env
+        echo SECRET_KEY="s585e8c7b402e0ge87c5d5b3151d0195ed7a3b647de6227f3ac6e655c38683b3c" >> .env
+        echo ALGORITHM="HS256" >> .env
+        echo ACCESS_TOKEN_EXPIRE_MINUTES=30 >> .env
     - name: Test Application
       run: |
         make test
