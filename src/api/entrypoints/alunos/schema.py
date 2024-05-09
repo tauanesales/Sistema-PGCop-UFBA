@@ -3,6 +3,7 @@ from typing import Literal, Optional
 from pydantic import BaseModel, EmailStr, constr, validator, Field
 from pydantic_br import CPF
 
+
 class AlunoBase(BaseModel):
     nome: constr(min_length=2, max_length=100) = Field(..., description="Nome completo do aluno.")
     cpf: CPF = Field(..., description="CPF do aluno.")
@@ -18,6 +19,19 @@ class AlunoBase(BaseModel):
 
 class AlunoCreate(AlunoBase):
     senha: constr(min_length=7) = Field(..., description="Senha de acesso do aluno.")
+
+    @validator("nome", "telefone", "matricula", "lattes", pre=True)
+    def blank_string(cls, value):
+        if isinstance(value, str) and value.replace(" ", "").replace("\t", "").replace("\r", "") == "":
+            raise ValueError("O campo não pode estar em branco")
+        return value
+    
+    @validator("nome", pre=True)
+    def validar_nome(cls, nome):
+        for char in nome:
+            if char in "1234567890!@#$%&*()-=+\/|[]{}'\";:":
+                raise ValueError("O nome não pode conter números ou símbolos")
+        return nome
 
     @validator("senha")
     def validar_senha(cls, senha):
