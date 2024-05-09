@@ -1,10 +1,26 @@
 from core.application import client
-from core.base_user import email, name, password, role, new_role, user_id
 
+from core.base_professor import (
+    email, 
+    name, 
+    password,
+    role
+)
+
+import pytest
+
+
+valid_form = {
+    "nome": name,
+    "email": email,
+    "role": role,
+    "senha": password,
+}
 
 token = None
 
 
+@pytest.mark.dependency()
 def test_login():
     """
     Test route for log in to an account.
@@ -12,8 +28,7 @@ def test_login():
     global token
 
     # Create a new user.
-    user_data = {"Nome": name, "Email": email, "Role": role, "Senha": password}
-    assert 200 <= client.post("usuarios/", json=user_data).status_code <= 299
+    assert 200 <= client.post("professores/", json=valid_form).status_code <= 299
     
     # Log in to the account.
     login_data = {
@@ -55,6 +70,7 @@ def test_login():
     assert response.status_code >= 400
 
 
+@pytest.mark.dependency(depends=["test_login"])
 def test_check_token():
     """
     Test route for checking user access.
@@ -62,5 +78,5 @@ def test_check_token():
 
     headers = {"Authorization": f"{token['token_type'].capitalize()} {token['access_token']}"}
 
-    response = client.get("usuarios/me", headers=headers)
+    response = client.get("professores/me", headers=headers)
     assert 200 <= response.status_code <= 299

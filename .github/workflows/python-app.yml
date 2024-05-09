@@ -1,0 +1,58 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Python Application
+
+on:
+  push:
+    branches: [ "master", "develop" ]
+  pull_request:
+    branches: [ "master", "develop" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: testdb
+          MYSQL_ROOT_PASSWORD: password
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+    strategy:
+      matrix:
+        python-version: ['3.9.13']
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install Dependencies
+      run: |
+        export GITHUB_ACTIONS=true
+        make install
+    - name: Create env file
+      run: |
+        touch .env
+        echo RELOAD=true >> .env
+
+        echo DB_DRIVERNAME="mysql+mysqlconnector" >> .env
+        echo DB_USERNAME="root" >> .env
+        echo DB_PASSWORD="password" >> .env
+        echo DB_HOST="127.0.0.1" >> .env
+        echo DB_PORT=3306 >> .env
+        echo DB_DATABASE="testdb" >> .env
+
+        echo SENDGRID_API_KEY="secret" >> .env
+        echo SENDGRID_EMAIL="email" >> .env
+
+        echo SECRET_KEY="s585e8c7b402e0ge87c5d5b3151d0195ed7a3b647de6227f3ac6e655c38683b3c" >> .env
+        echo ALGORITHM="HS256" >> .env
+        echo ACCESS_TOKEN_EXPIRE_MINUTES=30 >> .env
+    - name: Test Application
+      run: |
+        make test
