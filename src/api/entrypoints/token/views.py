@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from src.api.entrypoints.alunos.errors import StudentNotFoundException
@@ -15,9 +15,11 @@ from enum import Enum
 
 router = APIRouter()
 
+
 class UserType(Enum):
     PROFESSOR = "professor"
     ALUNO = "aluno"
+
 
 def authenticate_user(db: Session, email: str, password: str):
     try:
@@ -36,14 +38,22 @@ def authenticate_user(db: Session, email: str, password: str):
 
     raise CredentialsException()
 
+
 @router.post("/", response_model=Token)
 async def login_para_acessar_token(
     form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
-):
-    usuario, tipo_usuario = authenticate_user(db, form_data.username, form_data.password)        
+) -> Token:
+    usuario, tipo_usuario = authenticate_user(
+        db, form_data.username, form_data.password
+    )
     access_token_expires = timedelta(minutes=Config.AUTH.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = ServiceAuth.criar_access_token(
         data={"sub": usuario.email, "type": tipo_usuario.value},
-        expires_delta=access_token_expires
+        expires_delta=access_token_expires,
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+
+    return Token(
+        access_token=access_token,
+        token_type="bearer",
+        expiration_date=datetime.now() + access_token_expires,
+    )
