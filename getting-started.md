@@ -45,7 +45,7 @@ Na pasta do projeto há um arquivo chamado `.env.sample`. Renomeie-o para `.env`
 
 #### Variáveis relacionadas ao SGBD
 A URL de um banco de dados costuma seguir o seguinte formato: `<dialect>+<driver>://<username>:<password>@<host>:<port>/<database>`. A partir disso, seguem as seguintes variáveis:
-- `DB_DRIVERNAME` - Nome do SGBD a ser utilizado. O valor dessa variável depende que qual SGBD você vai utilizar neste projeto. É o mesmo valor que teria `<dialect>+<driver>` na URL. Para mais detalhes, [clique aqui](https://docs.sqlalchemy.org/en/20/core/engines.html#backend-specific-urls).
+- `DB_DRIVERNAME` - Nome do SGBD a ser utilizado. O valor dessa variável depende de qual SGBD você vai utilizar neste projeto. É o mesmo valor que teria `<dialect>+<driver>` na URL. Para mais detalhes, [clique aqui](https://docs.sqlalchemy.org/en/20/core/engines.html#backend-specific-urls).
 - `DB_USERNAME` e `DB_PASSWORD` - Nome de usuário e senha, respectivamente, registrados no SGBD. São os mesmos valores que `<username>` e `<password>` teriam na URL, respectivamente.
 - `DB_HOST` e `DB_PORT` - Endereço e porta, respectivamente, onde o SGBD está hospedado. São os mesmos valores que `<host>` e `<port>` teriam na URL, respectivamente.
 - `DB_DATABASE` - Nome do banco de dados no SGBD a ser utilizado pelo projeto. É o mesmo valor que teria `<database>` na URL.
