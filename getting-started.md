@@ -44,18 +44,19 @@ make install
 Na pasta do projeto há um arquivo chamado `.env.sample`. Renomeie-o para `.env`, abra-o como arquivo de texto e preencha as seguintes variáveis:
 
 #### Variáveis relacionadas ao SGBD
-- `DB_DRIVERNAME` - Nome do SGBD a ser utilizado. Para mais detalhes, [clique aqui](https://docs.sqlalchemy.org/en/20/core/engines.html#backend-specific-urls).
-- `DB_USERNAME` e `DB_PASSWORD` - Nome de usuário e senha, respectivamente, registrados no SGBD.
-- `DB_HOST` e `DB_PORT` - Endereço e porta, respectivamente, onde o SGBD está hospedado.
-- `DB_DATABASE` - Nome do banco de dados no SGBD a ser utilizado pelo projeto.
+A URL de um banco de dados costuma seguir o seguinte formato: `<dialect>+<driver>://<username>:<password>@<host>:<port>/<database>`. A partir disso, seguem as seguintes variáveis:
+- `DB_DRIVERNAME` - Nome do SGBD a ser utilizado. O valor dessa variável depende que qual SGBD você vai utilizar neste projeto. É o mesmo valor que teria `<dialect>+<driver>` na URL. Para mais detalhes, [clique aqui](https://docs.sqlalchemy.org/en/20/core/engines.html#backend-specific-urls).
+- `DB_USERNAME` e `DB_PASSWORD` - Nome de usuário e senha, respectivamente, registrados no SGBD. São os mesmos valores que `<username>` e `<password>` teriam na URL, respectivamente.
+- `DB_HOST` e `DB_PORT` - Endereço e porta, respectivamente, onde o SGBD está hospedado. São os mesmos valores que `<host>` e `<port>` teriam na URL, respectivamente.
+- `DB_DATABASE` - Nome do banco de dados no SGBD a ser utilizado pelo projeto. É o mesmo valor que teria `<database>` na URL.
 
 #### Variáveis relacionadas ao SendGrid
 - `SENDGRID_API_KEY` - Chave API da aplicação no SendGrid.
 - `SENDGRID_EMAIL` - Email da sua conta no SendGrid.
 
 #### Variáveis relacionadas ao sistema de segurança da aplicação
-- `SECRET_KEY` - Chave aleatória a ser utilizada pela aplicação (*favor especificar mais detalhes de como deve ser essa chave (tamanho em bits, padrão, etc)*)
 - `ALGORITHM` - Algoritmo de assinatura a ser utilizado. O valor padrão é `HS256`. Todos os algorítmos suportados estão listados [aqui](https://python-jose.readthedocs.io/en/latest/jws/index.html#supported-algorithms).
+- `SECRET_KEY` - Chave secreta e aleatória a ser utilizada pela aplicação. É recomendado que o tamanho em bits dessa chave seja o mesmo (ou maior) utilizado pelo algoritmo especificado em `ALGORITHM` (por exemplo, se o algoritmo é o `HS256`, então é preferível que a chave tenha 256 bits de tamanho).
 - `ACCESS_TOKEN_EXPIRE_MINUTES` - Duração em minutos em que os tokens gerados para os usuários irão expirar. O padrão é 30.
 
 ## Executando a aplicação
