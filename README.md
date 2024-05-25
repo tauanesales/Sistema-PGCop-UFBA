@@ -33,7 +33,8 @@ A imagem abaixo mostra a arquitetura do lado back-end da aplicação.
 <img src="./arquitetura_sistema.jpg" width="80%"/>
 
 ### Links:
+- [Tutorial de instalação: frontend e backend](https://docs.google.com/document/d/1YcuaeqOL8hw_qZtkXWW5xiz_TFoLFvJ-SSdYZ21bH0w/edit?usp=sharing)
 - [Aplicação em Produção](https://back-mate-85-topicos-em-sistemas-de-informacao-e-web-i.vercel.app/)
 - [Gestão do Projeto (Jira)](https://taysales6.atlassian.net/jira/software/projects/KAN/boards/1?atlOrigin=eyJpIjoiNTY5MGQyZmVhOTMwNDJiYjhkMmJjY2NjNjhmYWYwYmIiLCJwIjoiaiJ9)
-- [Getting Started](./getting-started.pdf)
+- [Getting Started](./getting-started.md)
 - [Repositório do Front-End do Projeto](https://github.com/tauanesales/FRONT-MATE85-Topicos-em-sistemas-de-informacao-e-web-i)
