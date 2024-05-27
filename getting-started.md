@@ -9,7 +9,9 @@ executar o servidor e implementar novas features de forma segura.
 - [Para o desenvolvedor](#para-o-desenvolvedor)
 
 ## Antes da instalação
-Certifique-se que o `makefile` esteja instalado em sua máquina. Caso contrário, você pode instalá-lo seguindo os tutoriais para [Linux](https://ioflood.com/blog/install-make-command-linux/) ou [Windows](https://leangaurav.medium.com/how-to-setup-install-gnu-make-on-windows-324480f1da69).
+Certifique-se que o `git` esteja instalado e configurado em sua máquina. Caso contrário, você pode instalá-lo seguindo os tutoriais para [Linux](https://diolinux.com.br/tutoriais/instalar-e-usar-git-no-linux-2.html) ou [Windows](https://phoenixnap.com/kb/how-to-install-git-windows).
+
+Certifique-se também que que o `makefile` esteja instalado. Caso contrário, você pode instalá-lo seguindo os tutoriais para [Linux](https://ioflood.com/blog/install-make-command-linux/) ou [Windows](https://leangaurav.medium.com/how-to-setup-install-gnu-make-on-windows-324480f1da69).
 
 Você deve possuir algum Sistema de Gerenciamento de Banco de Dados (SGBD) rodando localmente ou remotamente, como MySQL, PostgreSQL, SQLite, etc. Mais detalhes [aqui](https://docs.sqlalchemy.org/en/20/dialects/index.html).
 
@@ -41,21 +43,21 @@ make install
 ### 4. Configure as variáveis de ambiente
 Na pasta do projeto há um arquivo chamado `.env.sample`. Renomeie-o para `.env`, abra-o como arquivo de texto e preencha as seguintes variáveis:
 
-> *As descrições a seguir das variáveis foram deduzidas a partir de seus nomes e também por rápida lida do código e documentações. Favor melhorem ou corrija-as para uma maior precisão.*
 #### Variáveis relacionadas ao SGBD
-- `DB_DRIVERNAME` - Nome do SGBD a ser utilizado. Para mais detalhes, [clique aqui](https://docs.sqlalchemy.org/en/20/core/engines.html#backend-specific-urls).
-- `DB_USERNAME` e `DB_PASSWORD` - Nome de usuário e senha registrados no SGBD.
-- `DB_HOST` e `DB_PORT` - Endereço e porta onde o SGBD está hospedado
-- `DB_DATABASE` - Nome do banco de dados a ser utilizado pelo projeto.
+A URL de um banco de dados costuma seguir o seguinte formato: `<dialect>+<driver>://<username>:<password>@<host>:<port>/<database>`. A partir disso, seguem as seguintes variáveis:
+- `DB_DRIVERNAME` - Nome do SGBD a ser utilizado. O valor dessa variável depende de qual SGBD você vai utilizar neste projeto. É o mesmo valor que teria `<dialect>+<driver>` na URL. Para mais detalhes, [clique aqui](https://docs.sqlalchemy.org/en/20/core/engines.html#backend-specific-urls).
+- `DB_USERNAME` e `DB_PASSWORD` - Nome de usuário e senha, respectivamente, registrados no SGBD. São os mesmos valores que `<username>` e `<password>` teriam na URL, respectivamente.
+- `DB_HOST` e `DB_PORT` - Endereço e porta, respectivamente, onde o SGBD está hospedado. São os mesmos valores que `<host>` e `<port>` teriam na URL, respectivamente.
+- `DB_DATABASE` - Nome do banco de dados no SGBD a ser utilizado pelo projeto. É o mesmo valor que teria `<database>` na URL.
 
 #### Variáveis relacionadas ao SendGrid
 - `SENDGRID_API_KEY` - Chave API da aplicação no SendGrid.
 - `SENDGRID_EMAIL` - Email da sua conta no SendGrid.
 
-#### Variáveis relacionadas a execução da aplicação
-- `SECRET_KEY` - Chave aleatória a ser utilizada pela aplicação (*favor espacificar mais detalhes de como deve ser essa chave (tamanho em bits, padrão, etc)*)
-- `ALGORITHM` - *Pesteíssu?*
-- `ACCESS_TOKEN_EXPIRE_MINUTES` - Duração em minutos dos tokens gerados para o sistema de login<del>, eu acho</del>.
+#### Variáveis relacionadas ao sistema de segurança da aplicação
+- `ALGORITHM` - Algoritmo de assinatura a ser utilizado. O valor padrão é `HS256`. Todos os algorítmos suportados estão listados [aqui](https://python-jose.readthedocs.io/en/latest/jws/index.html#supported-algorithms).
+- `SECRET_KEY` - Chave secreta e aleatória a ser utilizada pela aplicação. É recomendado que o tamanho em bits dessa chave seja o mesmo (ou maior) utilizado pelo algoritmo especificado em `ALGORITHM` (por exemplo, se o algoritmo é o `HS256`, então é preferível que a chave tenha 256 bits de tamanho).
+- `ACCESS_TOKEN_EXPIRE_MINUTES` - Duração em minutos em que os tokens gerados para os usuários irão expirar. O padrão é 30.
 
 ## Executando a aplicação
 Depois de instalado, insira o seguinte comando dentro da pasta do projeto para executá-lo:
