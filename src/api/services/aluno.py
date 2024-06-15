@@ -2,7 +2,7 @@ from src.api.database.models.tarefa import Tarefa
 from src.api.entrypoints.alunos.schema import AlunoCreate
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from src.api.services.auth import ServiceAuth, oauth2_scheme
 from src.api.database.models.professor import Professor
 from src.api.database.models.aluno import Aluno

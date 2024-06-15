@@ -1,6 +1,9 @@
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
+from src.api.entrypoints.alunos.errors import StudentNotFoundException
+from src.api.entrypoints.professores.errors import ProfessorNotFoundException
 from src.api.entrypoints.new_password.errors import AuthenticationException, EmailNotFoundException
+from src.api.entrypoints.new_password.schema import NewPasswordCodeAuth
 from src.api.services.aluno import ServiceAluno
 from src.api.services.professor import ServiceProfessor
 from src.api.database.models.professor import Professor
@@ -25,15 +28,19 @@ class ServiceNewPassword:
 
     @staticmethod
     def __get_user_by_email(db: Session, email: str) -> Optional[Union[Aluno, Professor]]:
-        user = ServiceAluno.obter_por_email(db, email)
+        user = None
+
+        try: user = ServiceAluno.obter_por_email(db, email)
+        except StudentNotFoundException: pass
 
         if not user:
-            user = ServiceProfessor.obter_por_email(db, email)
+            try: user = ServiceProfessor.obter_por_email(db, email)
+            except ProfessorNotFoundException: pass
 
         return user
 
     @staticmethod
-    def authenticate(db: Session, email: str, token: str) -> Union[Aluno, Professor]:
+    def authenticate(db: Session, email: str, token: str) -> None:
         user = ServiceNewPassword.__get_user_by_email(db, email)
 
         if not user:
@@ -41,30 +48,29 @@ class ServiceNewPassword:
         
         if user.new_password_token != token:
             raise AuthenticationException()
-
-        return user
     
     @staticmethod
-    def create_token(db: Session, email: str) -> Union[Aluno, Professor]:
-        user = ServiceNewPassword.__get_user_by_email(db, email)
+    def create_token(db: Session, email: str) -> NewPasswordCodeAuth:
+        db_user = ServiceNewPassword.__get_user_by_email(db, email)
 
-        if not user:
+        if not db_user:
             raise EmailNotFoundException()
         
         token = generate_token(6)
 
-        user.new_password_token = token
+        db_user.new_password_token = token
         db.commit()
+        db.refresh(db_user)
 
         mailer.send_message(
             dest_email=email, 
             subject="Seu código de confirmação chegou!",
-            html_content=f"Olá, {user.nome}! <br>Este é o seu código: <b>{token}</b>"
+            html_content=f"Olá, {db_user.nome}! <br>Este é o seu código: <b>{token}</b>"
         )
-        return user
+        return NewPasswordCodeAuth(email=email, token=token)
 
     @staticmethod
-    def set_new_password(db: Session, email: str, new_password: str) -> Union[Aluno, Professor]:
+    def set_new_password(db: Session, email: str, new_password: str) -> None:
         user = ServiceNewPassword.__get_user_by_email(db, email)
 
         if not user:
@@ -74,4 +80,4 @@ class ServiceNewPassword:
         user.new_password_token = None
 
         db.commit()
-        return user
+        db.refresh()

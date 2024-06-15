@@ -5,6 +5,7 @@ import sys
 current_dir = os.path.join(os.getcwd())
 sys.path.append(current_dir)
 
+os.environ["TESTING"] = "true"
 
 def pytest_collection_modifyitems(items):
     """
@@ -15,6 +16,7 @@ def pytest_collection_modifyitems(items):
         "test_student_routes", 
         "test_professor_routes", 
         "test_login_route",
+        "test_set_new_password",
         "test_default_task_routes",
         "test_student_task_routes", 
         "test_mailer"

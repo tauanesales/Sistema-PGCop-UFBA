@@ -18,6 +18,8 @@ class Mailer(object):
         """
         Envia uma mensagem para o usuário.
         """
+        if Config.TESTING: return  # TODO: Está aqui porque ainda não conseguimos mockar o SendGrid
+
         message = Mail(
             from_email=Config.SENDGRID_CONFIG.EMAIL,
             to_emails=dest_email,
