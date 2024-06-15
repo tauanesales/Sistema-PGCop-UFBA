@@ -7,6 +7,7 @@ from core.base_professor import (
     role
 )
 
+from typing import Dict, Optional
 import pytest
 
 name = "New" +  name
@@ -20,7 +21,7 @@ valid_form = {
     "senha": password,
 }
 
-newPasswordAuth = None
+newPasswordAuth: Optional[Dict] = None
 
 
 @pytest.mark.dependency()
@@ -65,7 +66,9 @@ def test_set_new_password():
     assert 200 <= response.status_code <= 299
 
     # Set a new password.
-    assert 200 <= client.post("new_password/", json={"email": email, "nova_senha": new_password}).status_code <= 299
+    newPasswordJson = newPasswordAuth.copy()
+    newPasswordJson["nova_senha"] = new_password
+    assert 200 <= client.post("new_password/", json=newPasswordJson).status_code <= 299
 
     # It must not work anymore.
     response = client.post("token/", data=login_data, headers={"content-type": "application/x-www-form-urlencoded"})

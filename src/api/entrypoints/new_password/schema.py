@@ -9,5 +9,5 @@ class NewPasswordCodeAuth(NewPasswordRequest):
     token: constr(min_length=4) = Field(..., description="Código de autenticação.")
 
 
-class NewPasswordChange(NewPasswordRequest):
+class NewPasswordChange(NewPasswordCodeAuth):
     nova_senha: constr(min_length=7) = Field(..., description="Nova senha de acesso do usuário.")

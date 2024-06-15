@@ -70,11 +70,14 @@ class ServiceNewPassword:
         return NewPasswordCodeAuth(email=email, token=token)
 
     @staticmethod
-    def set_new_password(db: Session, email: str, new_password: str) -> None:
+    def set_new_password(db: Session, email: str, new_password: str, token: str) -> None:
         db_user = ServiceNewPassword.__get_user_by_email(db, email)
 
         if not db_user:
             raise EmailNotFoundException()
+        
+        if db_user.new_password_token != token:
+            raise AuthenticationException()
         
         db_user.senha_hash = pwd_context.hash(new_password)
         db_user.new_password_token = None
