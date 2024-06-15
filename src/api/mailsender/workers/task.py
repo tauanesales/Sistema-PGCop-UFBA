@@ -6,6 +6,7 @@ from src.api.database.models.aluno import Aluno
 from src.api.database.models.tarefa import Tarefa
 from src.api.mailsender.workers import MailerWorker
 from src.api.database.session import session
+from src.api.html_loader import load_html
 
 import asyncio
 
@@ -29,6 +30,7 @@ class TaskMailerWorker(MailerWorker):
                 Aluno.email, 
                 Tarefa.id.label("tarefa_id"), 
                 Tarefa.data_prazo, 
+                Tarefa.descricao,
                 Tarefa.nome.label("titulo")
             )
             .select_from(
@@ -43,7 +45,14 @@ class TaskMailerWorker(MailerWorker):
         while stop_function is None or not stop_function():
             for task in self.__get_tasks_near_to_deadline():
                 subject = f"[AVISO PGCOP] - Tarefa Pendente"
-                body = self.load_html("task_near_to_deadline", task.nome, task.titulo)
+
+                body = load_html(
+                    "task_near_to_deadline", 
+                    name=task.nome, 
+                    task_title=task.titulo,
+                    task_description=task.descricao.replace("\n", " "),
+                    task_deadline=task.data_prazo.strftime("%d.%.m.%Y")
+                )
 
                 self.send_message(task.email, subject, body)
 

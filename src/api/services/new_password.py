@@ -9,6 +9,7 @@ from src.api.services.professor import ServiceProfessor
 from src.api.database.models.professor import Professor
 from src.api.database.models.aluno import Aluno
 from src.api.mailsender.mailer import Mailer
+from src.api.html_loader import load_html
 
 from typing import Optional, Union
 import random
@@ -64,8 +65,8 @@ class ServiceNewPassword:
 
         mailer.send_message(
             dest_email=email, 
-            subject="Seu código de confirmação chegou!",
-            html_content=f"Olá, {db_user.nome}! <br>Este é o seu código: <b>{token}</b>"
+            subject="Código de redefinição de senha PGCop",
+            html_content=load_html("new_password_token", name=db_user.nome, token=token)
         )
         return NewPasswordCodeAuth(email=email, token=token)
 
