@@ -1,3 +1,5 @@
+from src.api.mailsender.localmail import localmail
+
 from core.application import client
 
 from core.base_professor import (
@@ -35,10 +37,12 @@ def test_create_token():
     assert 200 <= client.post("professores/", json=valid_form).status_code <= 299
 
     # Create token.
-    response = client.post("new_password/create_token", json={"email": email})
-    assert 200 <= response.status_code <= 299
+    assert 200 <= client.post("new_password/create_token", json={"email": email}).status_code <= 299
 
-    newPasswordAuth = response.json()
+    message: str = localmail.get_message(email).content.replace(" ", "")
+    token = message.split("</b>")[0][-6:]
+
+    newPasswordAuth = {"email": email, "token": token}
 
 
 @pytest.mark.dependency(depends=["test_create_token"])

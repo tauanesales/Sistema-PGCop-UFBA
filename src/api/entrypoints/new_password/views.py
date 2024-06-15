@@ -17,8 +17,8 @@ async def authenticate(request: NewPasswordCodeAuth, db: Session = Depends(get_d
     ServiceNewPassword.authenticate(db, request.email, request.token)
 
 
-@router.post("/create_token", response_model=NewPasswordCodeAuth, status_code=status.HTTP_201_CREATED)
+@router.post("/create_token", status_code=status.HTTP_201_CREATED)
 async def create_token(request: NewPasswordRequest, db: Session = Depends(get_db)):
-    return ServiceNewPassword.create_token(db, request.email)
+    ServiceNewPassword.create_token(db, request.email)
     
 
