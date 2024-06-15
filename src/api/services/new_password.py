@@ -41,12 +41,12 @@ class ServiceNewPassword:
 
     @staticmethod
     def authenticate(db: Session, email: str, token: str) -> None:
-        user = ServiceNewPassword.__get_user_by_email(db, email)
+        db_user = ServiceNewPassword.__get_user_by_email(db, email)
 
-        if not user:
+        if not db_user:
             raise AuthenticationException()
         
-        if user.new_password_token != token:
+        if db_user.new_password_token != token:
             raise AuthenticationException()
     
     @staticmethod
@@ -71,13 +71,13 @@ class ServiceNewPassword:
 
     @staticmethod
     def set_new_password(db: Session, email: str, new_password: str) -> None:
-        user = ServiceNewPassword.__get_user_by_email(db, email)
+        db_user = ServiceNewPassword.__get_user_by_email(db, email)
 
-        if not user:
+        if not db_user:
             raise EmailNotFoundException()
         
-        user.senha_hash = pwd_context.hash(new_password)
-        user.new_password_token = None
+        db_user.senha_hash = pwd_context.hash(new_password)
+        db_user.new_password_token = None
 
         db.commit()
-        db.refresh()
+        db.refresh(db_user)

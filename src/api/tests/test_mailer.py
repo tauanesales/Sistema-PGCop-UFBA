@@ -12,7 +12,7 @@ receiver_username = "youremailaddress@provider.com"
 receiver_password = "yourpassword"
     
 
-@pytest.mark.skip()
+@pytest.mark.skip()  # TODO: This is test is NOT completed.
 def test_send_email():
     """
     Check if mailer is able for sending emails.

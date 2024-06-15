@@ -9,7 +9,7 @@ router = APIRouter()
 
 @router.post("/", status_code=status.HTTP_200_OK)
 async def set_new_password(request: NewPasswordChange, db: Session = Depends(get_db)):
-    ServiceNewPassword.set_new_password(db, request.email)
+    ServiceNewPassword.set_new_password(db, request.email, request.nova_senha)
 
 
 @router.post("/auth", status_code=status.HTTP_200_OK)

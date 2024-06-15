@@ -11,6 +11,7 @@ import pytest
 
 name = "New" +  name
 email = "new" + email
+new_password = "new" + password
 
 valid_form = {
     "nome": name,
@@ -47,3 +48,32 @@ def test_authentication():
     # Authenticate token.
     assert 200 <= client.post("new_password/auth", json=newPasswordAuth).status_code <= 299
 
+
+@pytest.mark.dependency(depends=["test_authentication"])
+def test_set_new_password():
+    """
+    Test route for setting access token.
+    """
+
+    # Log in to the account.
+    login_data = {
+        "username": email, 
+        "password": password, 
+        "grant_type": "password"
+    }
+    response = client.post("token/", data=login_data, headers={"content-type": "application/x-www-form-urlencoded"})
+    assert 200 <= response.status_code <= 299
+
+    # Set a new password.
+    assert 200 <= client.post("new_password/", json={"email": email, "nova_senha": new_password}).status_code <= 299
+
+    # It must not work anymore.
+    response = client.post("token/", data=login_data, headers={"content-type": "application/x-www-form-urlencoded"})
+    assert 400 <= response.status_code <= 499
+
+    # Log in to the account.
+    login_data["password"] = new_password
+    
+    response = client.post("token/", data=login_data, headers={"content-type": "application/x-www-form-urlencoded"})
+    assert 200 <= response.status_code <= 299
+    
