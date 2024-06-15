@@ -80,3 +80,10 @@ def test_set_new_password():
     response = client.post("token/", data=login_data, headers={"content-type": "application/x-www-form-urlencoded"})
     assert 200 <= response.status_code <= 299
     
+@pytest.mark.dependency(depends=["test_set_new_password"])
+def test_authentication_after_reset_password():
+    """
+    Test route for checking access token behavior after setting a new password.
+    """
+    # Authenticate token.
+    assert 400 <= client.post("new_password/auth", json=newPasswordAuth).status_code <= 499
