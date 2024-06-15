@@ -88,7 +88,7 @@ class TaskMailerWorker(MailerWorker):
                 subject = f"[AVISO PGCOP] Tarefa Atrasada - Fique atento aos prazos"
 
                 body = load_html(
-                    "task_past_to_deadline", 
+                    "task_near_to_deadline", 
                     name=task.nome, 
                     task_title=task.titulo,
                     task_description=task.descricao.replace("\n", " "),

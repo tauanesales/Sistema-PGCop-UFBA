@@ -65,7 +65,7 @@ class ServiceNewPassword:
 
         mailer.send_message(
             dest_email=email, 
-            subject="Código de redefinição de senha PGCop",
+            subject="[PGCOP] Código de redefinição de senha",
             html_content=load_html("new_password_token", name=db_user.nome, token=token)
         )
         return NewPasswordCodeAuth(email=email, token=token)
