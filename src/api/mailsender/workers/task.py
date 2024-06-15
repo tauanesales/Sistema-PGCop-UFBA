@@ -14,7 +14,8 @@ import asyncio
 class TaskMailerWorker(MailerWorker):
     """
     Classe responsável por notificar por email 
-    os usuários sobre tarefas perto do prazo.
+    os usuários sobre tarefas perto do prazo,
+    ou tarefas atrasadas.
     """
 
     def __get_tasks_near_to_deadline(self):
