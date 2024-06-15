@@ -3,6 +3,7 @@ from fastapi.routing import APIRouter
 from src.api.entrypoints import alunos
 from src.api.entrypoints import mailer
 from src.api.entrypoints import monitoring
+from src.api.entrypoints import new_password
 from src.api.entrypoints import professores
 from src.api.entrypoints import token
 from src.api.entrypoints import tarefas
@@ -18,3 +19,4 @@ api_router.include_router(tarefas.router, prefix="/tarefas", tags=["Tarefas"])
 api_router.include_router(tarefas_base.router, prefix="/tarefas_base", tags=["Tarefas_base"])
 api_router.include_router(mailer.router, prefix="/mailer", tags=["Mailer"])
 api_router.include_router(usuarios.router, prefix="/usuarios", tags=["Usuarios"])
+api_router.include_router(new_password.router, prefix="/new_password/", tags=["New_Password"])

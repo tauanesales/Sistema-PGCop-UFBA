@@ -8,3 +8,4 @@ class Professor(Base):
     email = Column(String, unique=True, nullable=False, index=True)
     senha_hash = Column(String, nullable=False)
     role = Column(Enum("orientador", "coordenador"), nullable=False)
+    new_password_token = Column(String, nullable=True)
