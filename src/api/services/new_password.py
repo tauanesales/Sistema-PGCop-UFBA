@@ -5,11 +5,13 @@ from src.api.services.aluno import ServiceAluno
 from src.api.services.professor import ServiceProfessor
 from src.api.database.models.professor import Professor
 from src.api.database.models.aluno import Aluno
+from src.api.mailsender.mailer import Mailer
 
 from typing import Optional, Union
 import random
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+mailer = Mailer()
 
 
 def generate_token(length = 10) -> str:
@@ -49,9 +51,16 @@ class ServiceNewPassword:
         if not user:
             raise EmailNotFoundException()
         
-        user.new_password_token = generate_token(6)
+        token = generate_token(6)
 
+        user.new_password_token = token
         db.commit()
+
+        mailer.send_message(
+            dest_email=email, 
+            subject="Seu código de confirmação chegou!",
+            html_content=f"Olá, {user.nome}! <br>Este é o seu código: <b>{token}</b>"
+        )
         return user
 
     @staticmethod
