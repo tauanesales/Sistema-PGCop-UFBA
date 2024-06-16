@@ -79,5 +79,5 @@ class AlunoCreate(AlunoBase):
 class AlunoInDB(AlunoBase):
     id: int = Field(..., description="ID único do aluno no sistema.")
 
-    class Config:
+    class ConfigDict:
         from_attributes = True

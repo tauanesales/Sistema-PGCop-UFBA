@@ -27,5 +27,5 @@ class Tarefa_base_Base(BaseModel):
 class Tarefa_base_InDB(Tarefa_base_Base):
     id: int
 
-    class Config:
+    class ConfigDict:
         from_attributes = True

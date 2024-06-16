@@ -55,7 +55,7 @@ class ProfessorInDB(ProfessorBase):
     id: int
     senha_hash: Optional[str] = None  # Ajuste opcional do hash da senha
 
-    class Config:
+    class ConfigDict:
         from_attributes = (
             True  # Utiliza o ORM mode para compatibilidade com o SQLAlchemy
         )
