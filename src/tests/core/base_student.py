@@ -8,7 +8,7 @@ registration = "123456789"
 phone = "71991663737"
 cpf = "123.456.789-09"
 course = "M"
-password = "patao002"
+password = "1Password!"
 admission_date = str(datetime.now().date())
 
 lattes = None

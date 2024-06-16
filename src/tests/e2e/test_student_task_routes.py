@@ -1,20 +1,17 @@
+import pytest
 from core.application import client
-
 from core.base_student_task import (
     alternative_description,
     alternative_name,
     completed,
     completion_date,
-    description,
     deadline_date,
+    description,
     last_notified,
     name,
     student_form,
-    task_id
+    task_id,
 )
-
-import pytest
-
 
 valid_form = {
     "nome": name,
@@ -22,7 +19,7 @@ valid_form = {
     "completada": completed,
     "data_prazo": deadline_date,
     "last_notified": last_notified,
-    "data_conclusao": completion_date
+    "data_conclusao": completion_date,
 }
 student_id = None
 
@@ -45,9 +42,9 @@ def test_create_task():
 
     # Test sending a form with bad information.
     invalid_form_cases = [
-        {"nome": ""},                                                                          # Empty name
-        {"nome": " " * 20},                                                                    # Blank name
-        {"nome": "N"},                                                                         # Short name
+        {"nome": ""},  # Empty name
+        {"nome": " " * 20},  # Blank name
+        {"nome": "N"},  # Short name
     ]
     for invalid_form in invalid_form_cases:
         form = valid_form.copy()
@@ -57,7 +54,8 @@ def test_create_task():
 
     # Test sending a incomplete form.
     for key in valid_form.keys():
-        if valid_form[key] is None: continue
+        if valid_form[key] is None:
+            continue
 
         form = valid_form.copy()
         form.pop(key)
@@ -85,7 +83,7 @@ def test_get_task():
     Test route for getting the task from the database.
     """
     expected = {"nome": name, "descricao": description, "aluno_id": student_id}
-    
+
     response = client.get(f"/tarefas/{task_id}")
     assert 200 <= response.status_code <= 299
 
@@ -102,9 +100,13 @@ def test_get_tasks_by_student_id():
     """
     expected = [
         {"nome": name, "descricao": description, "aluno_id": student_id},
-        {"nome": alternative_name, "descricao": alternative_description, "aluno_id": student_id}
+        {
+            "nome": alternative_name,
+            "descricao": alternative_description,
+            "aluno_id": student_id,
+        },
     ]
-    
+
     response = client.get(f"/tarefas/aluno/{student_id}")
     assert 200 <= response.status_code <= 299
 
@@ -123,10 +125,10 @@ def test_update_task():
     url = f"/tarefas/{task_id}"
 
     new_data = {
-        "nome": "Th1s is 4 nic3 s#per ultr@ titl3!! =)", 
-        "descricao": "Th1s is 4 nic3 s#per ultr@ d3scr1ption!! =)", 
+        "nome": "Th1s is 4 nic3 s#per ultr@ titl3!! =)",
+        "descricao": "Th1s is 4 nic3 s#per ultr@ d3scr1ption!! =)",
     }
-    
+
     # Update user's information.
     form = valid_form.copy()
     form.update(new_data)
@@ -142,7 +144,7 @@ def test_update_task():
 
     for key, value in new_data.items():
         assert result.get(key, "") == value
-    
+
 
 @pytest.mark.dependency(depends=["test_create_task"])
 def test_delete_task():

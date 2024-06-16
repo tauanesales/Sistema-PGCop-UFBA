@@ -82,7 +82,7 @@ class ServiceProfessor:
     @staticmethod
     def atualizar_professor(db: Session, professor_id: int, professor: ProfessorBase):
         ServiceProfessor.validar_professor(db, professor)
-        db.query(Professor).filter(Professor.id == professor_id).update(professor.dict())
+        db.query(Professor).filter(Professor.id == professor_id).update(professor.model_dump())
         db.commit()
         db_professor = db.query(Professor).filter(Professor.id == professor_id).one()
         if db_professor is None:

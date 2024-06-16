@@ -1,16 +1,16 @@
-from src.api.mailsender.mailer import Mailer
-
-import imaplib
 import email
+import imaplib
 import random
 import time
 
 import pytest
 
+from src.api.mailsender.mailer import Mailer
+
 receiver_imap_server = "your.server.com"  # TODO: Change it
 receiver_username = "youremailaddress@provider.com"
 receiver_password = "yourpassword"
-    
+
 
 @pytest.mark.skip()  # TODO: This is test is NOT completed.
 def test_send_email():
@@ -23,12 +23,12 @@ def test_send_email():
     received = False
 
     target_subject = f"Unit Test - {int(time.time())}"
-    target_content = f"This is a message sent from an unit testing.\n<h3>Code:<h3> {code}"
+    target_content = (
+        f"This is a message sent from an unit testing.\n<h3>Code:<h3> {code}"
+    )
 
     mailer.send_message(
-        dest_email=receiver_username,
-        subject=target_subject,
-        message=target_content
+        dest_email=receiver_username, subject=target_subject, message=target_content
     )
 
     time.wait(5)  # Wait some time to check the inbox.
@@ -40,7 +40,6 @@ def test_send_email():
     n_first_messages = 3
 
     for index in range(n_messages, n_messages - n_first_messages, -1):
-
         res, message = client.fetch(str(index), "(RFC822)")
 
         for response in message:
@@ -51,20 +50,19 @@ def test_send_email():
 
             if isinstance(subject, bytes):
                 subject = subject.decode(encoding)
-                    
+
             # Decode email sender.
             origin, encoding = email.header.decode_header(message.get("From"))[0]
-                
+
             if isinstance(origin, bytes):
                 origin = origin.decode(encoding)
 
             # Get the email body
             body = message.get_payload(decode=True).decode()
-                
+
             # Caught the email.
             if target_content in body and subject == target_subject:
                 received = True
                 break
-    
-    assert received
 
+    assert received

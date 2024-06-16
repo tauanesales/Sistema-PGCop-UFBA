@@ -13,9 +13,12 @@ Certifique-se que o `git` esteja instalado e configurado em sua máquina. Caso c
 
 Certifique-se também que que o `makefile` esteja instalado. Caso contrário, você pode instalá-lo seguindo os tutoriais para [Linux](https://ioflood.com/blog/install-make-command-linux/) ou [Windows](https://leangaurav.medium.com/how-to-setup-install-gnu-make-on-windows-324480f1da69).
 
-Você deve possuir algum Sistema de Gerenciamento de Banco de Dados (SGBD) rodando localmente ou remotamente, como MySQL, PostgreSQL, SQLite, etc. Mais detalhes [aqui](https://docs.sqlalchemy.org/en/20/dialects/index.html).
+Você deve possuir algum Sistema de Gerenciamento de Banco de Dados (SGBD) rodando localmente ou remotamente, como MySQL, PostgreSQL, SQLite, etc. Mais detalhes [aqui](https://docs.sqlalchemy.org/en/20/dialects/index.html). Se desejar subir o banco via docker, você pode seguir [este tutorial](https://gist.github.com/martinsam16/4492957e3bbea34046f2c8b49c3e5ac0) para instalar o docker.
 
-Você também deve possuir uma conta no [SendGrid](https://sendgrid.com/), crucial para o envio automatizado de emails.
+Você também deve possuir uma conta no [SendGrid](https://sendgrid.com/), necessário para o envio automatizado de emails.
+
+Por fim, você deve possuir o Python 3.9.13 instalado em sua máquina. Recomenda-se utilizar o pyenv para gerenciar as versões do Python em sua máquina. Mais detalhes [aqui](https://github.com/pyenv/pyenv?tab=readme-ov-file#simple-python-version-management-pyenv)
+
 
 ## Instalação
 
@@ -71,7 +74,7 @@ Os seguintes comandos foram feitos para serem usados durante o desenvolvimento d
 ### Adicionando novas dependências ao projeto
 Para adicionar novas dependências, utilize o seguinte comando:
 ```sh
-make add-dependency DEPNAME="<nome_da_dependencia>"
+poetry add nome_da_dependencia
 ```
 
 Sempre que novas dependências forem adicionadas, o seguinte comando deve ser executado:

@@ -43,7 +43,7 @@ class ServiceTarefa:
         ServiceTarefa.validar_tarefa(db=db, tarefa=tarefa)
 
         try:
-            db.query(Tarefa).filter(Tarefa.id == tarefa_id).update(tarefa.dict())
+            db.query(Tarefa).filter(Tarefa.id == tarefa_id).update(tarefa.model_dump())
             db.commit()
         except SQLAlchemyError as e:
             db.rollback()

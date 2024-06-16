@@ -1,6 +1,5 @@
 from sqlalchemy import create_engine, URL
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, declarative_base
 from src.api.config import Config
 
 engine = create_engine(
