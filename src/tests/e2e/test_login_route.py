@@ -1,14 +1,6 @@
-from core.application import client
-
-from core.base_professor import (
-    email, 
-    name, 
-    password,
-    role
-)
-
 import pytest
-
+from core.application import client
+from core.base_professor import email, name, password, role
 
 valid_form = {
     "nome": name,
@@ -29,15 +21,15 @@ def test_login():
 
     # Create a new user.
     assert 200 <= client.post("professores/", json=valid_form).status_code <= 299
-    
-    # Log in to the account.
-    login_data = {
-        "username": email, 
-        "password": password, 
-        "grant_type": "password"
-    }
 
-    response = client.post("token/", data=login_data, headers={"content-type": "application/x-www-form-urlencoded"})
+    # Log in to the account.
+    login_data = {"username": email, "password": password, "grant_type": "password"}
+
+    response = client.post(
+        "token/",
+        data=login_data,
+        headers={"content-type": "application/x-www-form-urlencoded"},
+    )
 
     assert 200 <= response.status_code <= 299
 
@@ -51,22 +43,34 @@ def test_login():
         {"username": email, "password": " ", "grant_type": "password"},
         {"username": email, "password": " " * len(password), "grant_type": "password"},
         {"username": email, "password": password[:-1], "grant_type": "password"},
-        {"username": email, "password": password.capitalize(), "grant_type": "password"},
+        {
+            "username": email,
+            "password": password.capitalize(),
+            "grant_type": "password",
+        },
         {"username": email, "password": password.upper(), "grant_type": "password"},
     ]
 
     for test_case in test_cases:
-        response = client.post("token/", data=test_case, headers={"content-type": "application/x-www-form-urlencoded"})
+        response = client.post(
+            "token/",
+            data=test_case,
+            headers={"content-type": "application/x-www-form-urlencoded"},
+        )
         assert response.status_code >= 400
 
     # Try to log in to an account of different username but same password.
     login_data = {
-        "username": email.split("@")[0] + "@ufmg.br", 
-        "password": password, 
-        "grant_type": "password"
+        "username": email.split("@")[0] + "@ufmg.br",
+        "password": password,
+        "grant_type": "password",
     }
 
-    response = client.post("token/", data=login_data, headers={"content-type": "application/x-www-form-urlencoded"})
+    response = client.post(
+        "token/",
+        data=login_data,
+        headers={"content-type": "application/x-www-form-urlencoded"},
+    )
     assert response.status_code >= 400
 
 
@@ -76,7 +80,9 @@ def test_check_token():
     Test route for checking user access.
     """
 
-    headers = {"Authorization": f"{token['token_type'].capitalize()} {token['access_token']}"}
+    headers = {
+        "Authorization": f"{token['token_type'].capitalize()} {token['access_token']}"
+    }
 
     response = client.get("professores/me", headers=headers)
     assert 200 <= response.status_code <= 299

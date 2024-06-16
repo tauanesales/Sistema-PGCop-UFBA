@@ -10,6 +10,20 @@ on:
     branches: [ "master", "develop" ]
   workflow_dispatch:
 
+env:
+  RELOAD: ${{ secrets.RELOAD }}
+  SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+  SENDGRID_EMAIL: ${{ secrets.SENDGRID_EMAIL }}
+  SECRET_KEY: ${{ secrets.SECRET_KEY }}
+  ALGORITHM: ${{ secrets.ALGORITHM }}
+  ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}
+  DB_DRIVERNAME: ${{ secrets.DB_DRIVERNAME }}
+  DB_USERNAME: ${{ secrets.DB_USERNAME }}
+  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+  DB_HOST: ${{ secrets.DB_HOST }}
+  DB_PORT: ${{ secrets.DB_PORT }}
+  DB_DATABASE: ${{ secrets.DB_DATABASE }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -17,8 +31,8 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_DATABASE: testdb
-          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: ${{ secrets.DB_DATABASE }}
+          MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
@@ -33,26 +47,8 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install Dependencies
       run: |
-        export GITHUB_ACTIONS=true
-        make install
-    - name: Create env file
-      run: |
-        touch .env
-        echo RELOAD=true >> .env
-
-        echo DB_DRIVERNAME="mysql+mysqlconnector" >> .env
-        echo DB_USERNAME="root" >> .env
-        echo DB_PASSWORD="password" >> .env
-        echo DB_HOST="127.0.0.1" >> .env
-        echo DB_PORT=3306 >> .env
-        echo DB_DATABASE="testdb" >> .env
-
-        echo SENDGRID_API_KEY="secret" >> .env
-        echo SENDGRID_EMAIL="email" >> .env
-
-        echo SECRET_KEY="s585e8c7b402e0ge87c5d5b3151d0195ed7a3b647de6227f3ac6e655c38683b3c" >> .env
-        echo ALGORITHM="HS256" >> .env
-        echo ACCESS_TOKEN_EXPIRE_MINUTES=30 >> .env
+        pip install poetry
+        poetry install --no-root
     - name: Test Application
       run: |
         make test

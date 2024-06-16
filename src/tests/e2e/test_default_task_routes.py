@@ -1,24 +1,21 @@
+import pytest
 from core.application import client
-
 from core.base_default_task import (
     alternative_course,
     alternative_description,
     alternative_name,
     course,
-    description,
     deadline_in_months,
+    description,
     name,
-    task_id
+    task_id,
 )
-
-import pytest
-
 
 valid_form = {
     "nome": name,
     "descricao": description,
     "prazo_em_meses": deadline_in_months,
-    "curso": course
+    "curso": course,
 }
 
 
@@ -31,9 +28,9 @@ def test_create_default_task():
 
     # Test sending a form with bad information.
     invalid_form_cases = [
-        {"nome": ""},                                                                          # Empty name
-        {"nome": " " * 20},                                                                    # Blank name
-        {"nome": "N"},                                                                         # Short name
+        {"nome": ""},  # Empty name
+        {"nome": " " * 20},  # Blank name
+        {"nome": "N"},  # Short name
     ]
     for invalid_form in invalid_form_cases:
         form = valid_form.copy()
@@ -43,7 +40,8 @@ def test_create_default_task():
 
     # Test sending a incomplete form.
     for key in valid_form.keys():
-        if valid_form[key] is None: continue
+        if valid_form[key] is None:
+            continue
 
         form = valid_form.copy()
         form.pop(key)
@@ -66,7 +64,7 @@ def test_get_default_task():
     Test route for getting the default_task from the database.
     """
     expected = {"nome": name, "descricao": description, "curso": course}
-    
+
     response = client.get(f"/tarefas_base/{task_id}")
     assert 200 <= response.status_code <= 299
 
@@ -83,9 +81,13 @@ def test_get_default_tasks_by_course_type():
     """
     expected = [
         {"nome": name, "descricao": description, "curso": course},
-        {"nome": alternative_name, "descricao": alternative_description, "curso": course}
+        {
+            "nome": alternative_name,
+            "descricao": alternative_description,
+            "curso": course,
+        },
     ]
-    
+
     response = client.get(f"/tarefas_base/curso/{course}")
     assert 200 <= response.status_code <= 299
 
@@ -104,11 +106,11 @@ def test_update_default_task():
     url = f"/tarefas_base/{task_id}"
 
     new_data = {
-        "nome": "Th1s is 4 nic3 s#per ultr@ titl3!! =)", 
-        "descricao": "Th1s is 4 nic3 s#per ultr@ d3scr1ption!! =)", 
-        "curso": alternative_course
+        "nome": "Th1s is 4 nic3 s#per ultr@ titl3!! =)",
+        "descricao": "Th1s is 4 nic3 s#per ultr@ d3scr1ption!! =)",
+        "curso": alternative_course,
     }
-    
+
     # Update user's information.
     form = valid_form.copy()
     form.update(new_data)
@@ -124,7 +126,7 @@ def test_update_default_task():
 
     for key, value in new_data.items():
         assert result.get(key, "") == value
-    
+
 
 @pytest.mark.dependency(depends=["test_create_default_task"])
 def test_delete_default_task():
