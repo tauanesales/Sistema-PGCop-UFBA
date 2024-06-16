@@ -1,4 +1,5 @@
 from typing import List
+
 from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
@@ -17,7 +18,9 @@ def criar_aluno(aluno: AlunoCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/me", response_model=AlunoInDB)
-async def read_aluno_me(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+async def read_aluno_me(
+    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+):
     return ServiceAluno.get_current_aluno(token, db)
 
 
@@ -44,7 +47,7 @@ def get_aluno_cpf(aluno_cpf: str, db: Session = Depends(get_db)):
 
 @router.get("/email/{aluno_email}", response_model=AlunoInDB)
 def get_aluno_email(aluno_email: str, db: Session = Depends(get_db)):
-    return ServiceAluno.obter_por_email(db, aluno_email)
+    return AlunoInDB(**ServiceAluno.obter_por_email(db, aluno_email).__dict__)
 
 
 @router.get("/orientador/{orientador_id}", response_model=List[AlunoInDB])
