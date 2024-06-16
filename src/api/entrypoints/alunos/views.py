@@ -37,7 +37,7 @@ def deletar_aluno(aluno_id: int, db: Session = Depends(get_db)):
 
 @router.put("/{aluno_id}", response_model=AlunoInDB)
 def atualizar_aluno(aluno_id: int, aluno: AlunoBase, db: Session = Depends(get_db)):
-    return ServiceAluno.atualizar_aluno(db, aluno_id, aluno.model_dump())
+    return ServiceAluno.atualizar_aluno(db, aluno_id, aluno)
 
 
 @router.get("/cpf/{aluno_cpf}", response_model=AlunoInDB)

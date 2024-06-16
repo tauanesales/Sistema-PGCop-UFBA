@@ -81,16 +81,18 @@ class ServiceProfessor:
 
     @staticmethod
     def atualizar_professor(
-        db: Session, professor_id: int, professor: ProfessorBase
+        db: Session, professor_id: int, updates_professor: ProfessorBase
     ) -> ProfessorInDB:
-        ServiceProfessor.validar_professor(db, professor)
-        db.query(Professor).filter(Professor.id == professor_id).update(
-            professor.model_dump()
+        ServiceProfessor.validar_professor(db, updates_professor)
+        db_professor = (
+            db.query(Professor).filter(Professor.id == professor_id).one_or_none()
         )
-        db.commit()
-        db_professor = db.query(Professor).filter(Professor.id == professor_id).one()
         if db_professor is None:
             raise ProfessorNotFoundException()
+        for key, value in updates_professor.model_dump().items():
+            setattr(db_professor, key, value)
+        db.commit()
+        db.refresh(db_professor)
         return ProfessorInDB(**db_professor.__dict__)
 
     @staticmethod

@@ -15,7 +15,7 @@ from src.api.entrypoints.alunos.errors import (
     MatriculaAlreadyRegisteredException,
     StudentNotFoundException,
 )
-from src.api.entrypoints.alunos.schema import AlunoCreate, AlunoInDB
+from src.api.entrypoints.alunos.schema import AlunoBase, AlunoCreate, AlunoInDB
 from src.api.services.auth import ServiceAuth, oauth2_scheme
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -32,7 +32,7 @@ class ServiceAluno:
         return AlunoInDB(**aluno.__dict__)
 
     @staticmethod
-    def validar_aluno(db: Session, aluno: AlunoCreate) -> None:
+    def validar_aluno(db: Session, aluno: AlunoBase) -> None:
         if db.query(Aluno).filter_by(cpf=aluno.cpf).first():
             raise CPFAlreadyRegisteredException()
         if (
@@ -70,14 +70,17 @@ class ServiceAluno:
         return AlunoInDB(**aluno.__dict__)
 
     @staticmethod
-    def atualizar_aluno(db: Session, aluno_id: int, updates) -> AlunoInDB:
-        aluno = db.query(Aluno).filter_by(id=aluno_id).one_or_none()
-        if not aluno:
+    def atualizar_aluno(
+        db: Session, aluno_id: int, updates_aluno: AlunoBase
+    ) -> AlunoInDB:
+        db_aluno = db.query(Aluno).filter_by(id=aluno_id).one_or_none()
+        if not db_aluno:
             raise StudentNotFoundException()
-        for key, value in updates.items():
-            setattr(aluno, key, value)
+        for key, value in updates_aluno.model_dump().items():
+            setattr(db_aluno, key, value)
         db.commit()
-        return AlunoInDB(**aluno.__dict__)
+        db.refresh(db_aluno)
+        return AlunoInDB(**db_aluno.__dict__)
 
     @staticmethod
     def deletar_aluno(db: Session, aluno_id: int) -> None:
