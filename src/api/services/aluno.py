@@ -125,8 +125,6 @@ class ServiceAluno:
     @staticmethod
     def obter_alunos_por_orientador(db: Session, orientador_id: int) -> List[AlunoInDB]:
         alunos = db.query(Aluno).filter_by(orientador_id=orientador_id).all()
-        if not alunos:
-            raise StudentNotFoundException()
         return [AlunoInDB(**aluno.__dict__) for aluno in alunos]
 
     @staticmethod
