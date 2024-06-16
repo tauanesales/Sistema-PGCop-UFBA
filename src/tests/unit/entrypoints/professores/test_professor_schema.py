@@ -127,7 +127,7 @@ def test_professor_create_short_password_error(valid_professor_data, password):
     with pytest.raises(ValidationError) as exc:
         ProfessorCreate(**valid_professor_data)
 
-    assert "String should have at least 7 characters" in exc.value.errors()[0].get(
+    assert "String should have at least 8 characters" in exc.value.errors()[0].get(
         "msg"
     )
 

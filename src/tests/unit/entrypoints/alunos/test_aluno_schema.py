@@ -131,7 +131,7 @@ def test_aluno_create_short_password_error(valid_student_data, password):
     with pytest.raises(ValidationError) as exc:
         AlunoCreate(**valid_student_data)
 
-    assert "String should have at least 7 characters" in exc.value.errors()[0].get(
+    assert "String should have at least 8 characters" in exc.value.errors()[0].get(
         "msg"
     )
 

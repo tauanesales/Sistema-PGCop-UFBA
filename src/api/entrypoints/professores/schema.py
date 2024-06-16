@@ -18,7 +18,7 @@ class ProfessorBase(BaseModel):
 
 
 class ProfessorCreate(ProfessorBase):
-    senha: constr(min_length=7)
+    senha: constr(min_length=8)
 
     @field_validator("nome", mode="before")
     def blank_string(cls, value):

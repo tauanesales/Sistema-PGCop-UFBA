@@ -44,7 +44,7 @@ class AlunoBase(BaseModel):
 
 
 class AlunoCreate(AlunoBase):
-    senha: constr(min_length=7) = Field(..., description="Senha de acesso do aluno.")
+    senha: constr(min_length=8) = Field(..., description="Senha de acesso do aluno.")
 
     @field_validator("nome", "telefone", "matricula", "lattes", mode="before")
     def blank_string(cls, value):
