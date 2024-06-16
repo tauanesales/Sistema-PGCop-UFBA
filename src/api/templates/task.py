@@ -14,8 +14,7 @@ import asyncio
 class TaskMailerWorker(MailerWorker):
     """
     Classe responsável por notificar por email 
-    os usuários sobre tarefas perto do prazo,
-    ou tarefas atrasadas.
+    os usuários sobre tarefas perto do prazo.
     """
 
     def __get_tasks_near_to_deadline(self):
@@ -89,7 +88,7 @@ class TaskMailerWorker(MailerWorker):
                 subject = f"[AVISO PGCOP] Tarefa Atrasada - Fique atento aos prazos"
 
                 body = load_html(
-                    "task_past_to_deadline", 
+                    "task_near_to_deadline", 
                     name=task.nome, 
                     task_title=task.titulo,
                     task_description=task.descricao.replace("\n", " "),

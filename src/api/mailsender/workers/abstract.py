@@ -2,12 +2,8 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable, Optional
 from src.api.mailsender.mailer import Mailer
 
-import os
-
 
 __all__ = ["MailerWorker",]
-
-template_path = os.path.join(os.path.dirname(__file__), "templates")
 
 
 class MailerWorker(ABC, Mailer):
@@ -22,15 +18,3 @@ class MailerWorker(ABC, Mailer):
         Inicializa o worker para executar em loop.
         """
         raise NotImplementedError()
-    
-    def load_html(self, filename: str, *params: Any) -> str:
-        """
-        Retorna o conteúdo de um arquivo template HTML. 
-        """
-        if not filename.endswith(".html"):
-            filename += ".html"
-            
-        with open(os.path.join(template_path, filename), encoding="UTF-8") as file:
-            content = file.read()
-
-        return content.format(*params)
