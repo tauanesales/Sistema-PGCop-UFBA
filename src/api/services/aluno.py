@@ -17,12 +17,7 @@ from src.api.entrypoints.alunos.errors import (
     NumberAlreadyRegisteredException,
     StudentNotFoundException,
 )
-from src.api.entrypoints.alunos.schema import (
-    AlunoBase,
-    AlunoCreate,
-    AlunoInDB,
-    AlunoUpdate,
-)
+from src.api.entrypoints.alunos.schema import AlunoBase, AlunoCreate, AlunoInDB
 from src.api.services.auth import ServiceAuth, oauth2_scheme
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -58,16 +53,21 @@ class ServiceAluno:
             raise MatriculaAlreadyRegisteredException()
 
     @staticmethod
-    def validar_atualizar_aluno(db: Session, aluno_id: int, aluno: AlunoUpdate):
+    def validar_atualizar_aluno(db: Session, aluno_id: int, aluno):
         if (
-            aluno.orientador_id
-            and not db.query(Professor).filter_by(id=aluno.orientador_id).first()
+            aluno.get("orientador_id")
+            and not db.query(Professor).filter_by(id=aluno.get("orientador_id")).first()
         ):
             raise ExcecaoIdOrientadorNaoEncontrado()
 
         if (
-            db.query(Aluno)
-            .filter(and_(not_(Aluno.id == aluno_id), Aluno.telefone == aluno.telefone))
+            aluno.get("telefone")
+            and db.query(Aluno)
+            .filter(
+                and_(
+                    not_(Aluno.id == aluno_id), Aluno.telefone == aluno.get("telefone")
+                )
+            )
             .one_or_none()
         ):
             raise NumberAlreadyRegisteredException()
@@ -94,17 +94,16 @@ class ServiceAluno:
         return AlunoInDB(**aluno.__dict__)
 
     @staticmethod
-    def atualizar_aluno(
-        db: Session, aluno_id: int, updates_aluno: AlunoUpdate
-    ) -> AlunoInDB:
-        ServiceAluno.validar_atualizar_aluno(db, aluno_id, updates_aluno)
+    def atualizar_aluno(db: Session, aluno_id: int, updates) -> AlunoInDB:
+        ServiceAluno.validar_atualizar_aluno(db, aluno_id, updates)
         db_aluno = db.query(Aluno).filter_by(id=aluno_id).one_or_none()
         if not db_aluno:
             raise StudentNotFoundException()
 
-        for key, value in updates_aluno.model_dump().items():
-            if not value:
-                continue
+        db_aluno = db.query(Aluno).filter_by(id=aluno_id).one_or_none()
+        if not db_aluno:
+            raise StudentNotFoundException()
+        for key, value in updates.items():
             setattr(db_aluno, key, value)
         db.commit()
         db.refresh(db_aluno)

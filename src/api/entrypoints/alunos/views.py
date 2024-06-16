@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
 from src.api.database.session import get_db
-from src.api.entrypoints.alunos.schema import AlunoCreate, AlunoInDB, AlunoUpdate
+from src.api.entrypoints.alunos.schema import AlunoCreate, AlunoInDB
 from src.api.services.aluno import ServiceAluno
 
 router = APIRouter()
@@ -36,7 +36,7 @@ def deletar_aluno(aluno_id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/{aluno_id}", response_model=AlunoInDB)
-def atualizar_aluno(aluno_id: int, aluno: AlunoUpdate, db: Session = Depends(get_db)):
+def atualizar_aluno(aluno_id: int, aluno: dict, db: Session = Depends(get_db)):
     return ServiceAluno.atualizar_aluno(db, aluno_id, aluno)
 
 
