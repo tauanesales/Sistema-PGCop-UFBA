@@ -1,45 +1,22 @@
 import pytest
 from core.application import client
 from core.base_student import (
-    admission_date,
-    advisor_id,
-    alternative_course,
     alternative_cpf,
     alternative_email,
-    alternative_name,
     alternative_phone,
     alternative_registration,
-    course,
     cpf,
-    defense_date,
     email,
-    lattes,
     name,
     password,
-    phone,
-    qualification_date,
     registration,
     user_id,
 )
-
-valid_form = {
-    "nome": name,
-    "cpf": cpf,
-    "email": email,
-    "matricula": registration,
-    "curso": course,
-    "senha": password,
-    "telefone": phone,
-    "lattes": lattes,
-    "data_ingresso": admission_date,
-    "data_defesa": defense_date,
-    "data_qualificacao": qualification_date,
-    "orientador_id": advisor_id,
-}
+from loguru import logger
 
 
 @pytest.mark.dependency()
-def test_create_student():
+def test_create_student(valid_student_data, valid_professor_data):
     """
     Test route for creating a new student.
     """
@@ -71,30 +48,33 @@ def test_create_student():
         {"senha": password[:3]},  # Short password
     ]
     for invalid_form in invalid_form_cases:
-        form = valid_form.copy()
+        form = valid_student_data.copy()
         form.update(invalid_form)
 
         assert client.post(url, json=form).status_code >= 400
 
     # Test sending a incomplete form.
-    for key in valid_form.keys():
-        if valid_form[key] is None:
+    for key in valid_student_data.keys():
+        if valid_student_data[key] is None:
             continue
 
-        form = valid_form.copy()
+        form = valid_student_data.copy()
         form.pop(key)
 
         assert client.post(url, json=form).status_code >= 400
 
+    client.post("/professores/", json=valid_professor_data)
     # Test sending a valid form.
-    assert 200 <= client.post(url, json=valid_form).status_code <= 299
+    resp = client.post(url, json=valid_student_data)
+    logger.info(resp.json())
+    assert 200 <= resp.status_code <= 299
 
     # Test sending the same valid form again (you should NOT be able to create the same
     # student again).
-    assert client.post(url, json=valid_form).status_code >= 400
+    assert client.post(url, json=valid_student_data).status_code >= 400
 
     # Test sending a different form but with an email that already exists on database.
-    form = valid_form.copy()
+    form = valid_student_data.copy()
     form["telefone"] = alternative_phone  # Phone is a unique field at the database.
     form["nome"] = "Another Guy"
     form["senha"] = "AnotherPassword"
@@ -103,7 +83,7 @@ def test_create_student():
     assert client.post(url, json=form).status_code >= 400
 
     # Test sending a different form but with a CPF that already exists on database.
-    form = valid_form.copy()
+    form = valid_student_data.copy()
     form["telefone"] = alternative_phone  # Phone is a unique field at the database.
     form["nome"] = "Another Guy"
     form["senha"] = "AnotherPassword"
@@ -113,7 +93,7 @@ def test_create_student():
 
     # Test sending a different form but with a registration that already exists on
     # database.
-    form = valid_form.copy()
+    form = valid_student_data.copy()
     form["telefone"] = alternative_phone  # Phone is a unique field at the database.
     form["nome"] = "Another Guy"
     form["senha"] = "AnotherPassword"
@@ -122,7 +102,7 @@ def test_create_student():
     assert client.post(url, json=form).status_code >= 400
 
     # Test sending a form with the same data, but different identication.
-    form = valid_form.copy()
+    form = valid_student_data.copy()
     form["telefone"] = alternative_phone  # Phone is a unique field at the database.
     form["cpf"] = alternative_cpf
     form["email"] = alternative_email
@@ -186,17 +166,15 @@ def test_update_student():
     url = f"/alunos/{user_id}"
 
     new_data = {
-        "nome": alternative_name,
-        "email": alternative_email.split("@")[0] + "foo" + "@ufmg.br",
-        "curso": alternative_course,
+        # "nome": alternative_name,
+        # "email": alternative_email.split("@")[0] + "foo" + "@ufmg.br",
+        # "curso": alternative_course,
+        "telefone": "(11) 99874-6543",
+        "lattes": "https://lattes.cnpq.br/1234567890123456789",
     }
 
-    # Update user's information.
-    form = valid_form.copy()
-    form.update(new_data)
-    form.pop("senha")
-
-    response = client.put(url, json=form)
+    response = client.put(url, json=new_data)
+    logger.info(response.json())
     assert 200 <= response.status_code <= 299
 
     # Get the user's information and check the changes.

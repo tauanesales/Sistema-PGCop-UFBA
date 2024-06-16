@@ -10,6 +10,7 @@ from core.base_professor import (
     role,
     user_id,
 )
+from loguru import logger
 
 valid_form = {
     "nome": name,
@@ -64,7 +65,9 @@ def test_create_professor():
         assert client.post(url, json=form).status_code >= 400
 
     # Test sending a valid form.
-    assert 200 <= client.post(url, json=valid_form).status_code <= 299
+    resp = client.post(url, json=valid_form)
+    logger.info(resp.json())
+    assert 200 <= resp.status_code <= 299
 
     # Test sending the same valid form again (you should NOT be able to create the same
     # professor again).

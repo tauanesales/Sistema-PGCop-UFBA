@@ -21,9 +21,15 @@ def test_aluno_create_valid(valid_student_data: dict):
     assert aluno.orientador_id == valid_student_data.get("orientador_id")
     assert aluno.curso == valid_student_data.get("curso")
     assert aluno.lattes == valid_student_data.get("lattes")
-    assert aluno.data_ingresso == valid_student_data.get("data_ingresso")
-    assert aluno.data_qualificacao == valid_student_data.get("data_qualificacao")
-    assert aluno.data_defesa == valid_student_data.get("data_defesa")
+    assert aluno.data_ingresso.strftime("%Y-%m-%d") == valid_student_data.get(
+        "data_ingresso"
+    )
+    assert aluno.data_qualificacao.strftime("%Y-%m-%d") == valid_student_data.get(
+        "data_qualificacao"
+    )
+    assert aluno.data_defesa.strftime("%Y-%m-%d") == valid_student_data.get(
+        "data_defesa"
+    )
     assert aluno.senha == valid_student_data.get("senha")
 
 

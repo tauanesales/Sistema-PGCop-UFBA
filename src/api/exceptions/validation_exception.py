@@ -21,3 +21,8 @@ class PasswordWithoutLowercaseError(ValueError):
 class PasswordWithoutSpecialCharacterError(ValueError):
     def __init__(self):
         super().__init__("A senha deve conter pelo menos um caractere especial.")
+
+
+class MatriculaNotNumericError(ValueError):
+    def __init__(self):
+        super().__init__("A matrícula deve conter apenas números.")

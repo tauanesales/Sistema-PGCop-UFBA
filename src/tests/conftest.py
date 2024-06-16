@@ -1,9 +1,8 @@
 import os
 import sys
-from datetime import date
 
 import pytest
-from core import base_professor, base_student
+from core import base_professor, base_student, base_student_task
 
 current_dir = os.path.join(os.getcwd())
 sys.path.append(current_dir)
@@ -17,8 +16,8 @@ def pytest_collection_modifyitems(items):
     """
     MODULE_ORDER = [
         "test_application",
-        "test_student_routes",
         "test_professor_routes",
+        "test_student_routes",
         "test_login_route",
         "test_set_new_password",
         "test_default_task_routes",
@@ -49,9 +48,9 @@ def valid_student_data():
         "orientador_id": 1,
         "curso": base_student.course,
         "lattes": base_student.lattes,
-        "data_ingresso": date(2021, 1, 1),
-        "data_qualificacao": date(2022, 6, 1),
-        "data_defesa": date(2023, 12, 1),
+        "data_ingresso": "2021-01-01",
+        "data_qualificacao": "2022-06-01",
+        "data_defesa": "2023-12-01",
         "senha": base_student.password,
     }
 
@@ -63,4 +62,16 @@ def valid_professor_data():
         "email": base_professor.email,
         "role": base_professor.role,
         "senha": base_professor.password,
+    }
+
+
+@pytest.fixture
+def valid_task_data():
+    return {
+        "nome": base_student_task.name,
+        "descricao": base_student_task.description,
+        "completada": base_student_task.completed,
+        "data_prazo": base_student_task.deadline_date,
+        "last_notified": base_student_task.last_notified,
+        "data_conclusao": base_student_task.completion_date,
     }

@@ -2,6 +2,7 @@ from typing import List
 
 from fastapi import Depends
 from passlib.context import CryptContext
+from sqlalchemy import and_, not_
 from sqlalchemy.orm import Session
 
 from src.api.database.models.aluno import Aluno
@@ -13,9 +14,15 @@ from src.api.entrypoints.alunos.errors import (
     EmailAlreadyRegisteredException,
     ExcecaoIdOrientadorNaoEncontrado,
     MatriculaAlreadyRegisteredException,
+    NumberAlreadyRegisteredException,
     StudentNotFoundException,
 )
-from src.api.entrypoints.alunos.schema import AlunoBase, AlunoCreate, AlunoInDB
+from src.api.entrypoints.alunos.schema import (
+    AlunoBase,
+    AlunoCreate,
+    AlunoInDB,
+    AlunoUpdate,
+)
 from src.api.services.auth import ServiceAuth, oauth2_scheme
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -40,13 +47,30 @@ class ServiceAluno:
             or db.query(Professor).filter_by(email=aluno.email).first()
         ):
             raise EmailAlreadyRegisteredException()
+        if db.query(Aluno).filter_by(telefone=aluno.telefone).first():
+            raise NumberAlreadyRegisteredException()
+        if (
+            not aluno.orientador_id
+            or not db.query(Professor).filter_by(id=aluno.orientador_id).first()
+        ):
+            raise ExcecaoIdOrientadorNaoEncontrado()
+        if db.query(Aluno).filter_by(matricula=aluno.matricula).first():
+            raise MatriculaAlreadyRegisteredException()
+
+    @staticmethod
+    def validar_atualizar_aluno(db: Session, aluno_id: int, aluno: AlunoUpdate):
         if (
             aluno.orientador_id
             and not db.query(Professor).filter_by(id=aluno.orientador_id).first()
         ):
             raise ExcecaoIdOrientadorNaoEncontrado()
-        if db.query(Aluno).filter_by(matricula=aluno.matricula).first():
-            raise MatriculaAlreadyRegisteredException()
+
+        if (
+            db.query(Aluno)
+            .filter(and_(not_(Aluno.id == aluno_id), Aluno.telefone == aluno.telefone))
+            .one_or_none()
+        ):
+            raise NumberAlreadyRegisteredException()
 
     @staticmethod
     def criar_aluno(db: Session, aluno: AlunoCreate) -> AlunoInDB:
@@ -71,12 +95,16 @@ class ServiceAluno:
 
     @staticmethod
     def atualizar_aluno(
-        db: Session, aluno_id: int, updates_aluno: AlunoBase
+        db: Session, aluno_id: int, updates_aluno: AlunoUpdate
     ) -> AlunoInDB:
+        ServiceAluno.validar_atualizar_aluno(db, aluno_id, updates_aluno)
         db_aluno = db.query(Aluno).filter_by(id=aluno_id).one_or_none()
         if not db_aluno:
             raise StudentNotFoundException()
+
         for key, value in updates_aluno.model_dump().items():
+            if not value:
+                continue
             setattr(db_aluno, key, value)
         db.commit()
         db.refresh(db_aluno)

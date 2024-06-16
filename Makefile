@@ -16,7 +16,7 @@ install: ## Install Python requirements.
 
 .PHONY: test
 test: ## Run tests.
-	poetry run pytest ./src/tests -vv -s
+	poetry run python -m pytest . -vv -s
 
 .PHONY: export-requirements
 export-requirements: ## Export requirements to requirements.txt, so it can be used by Vercel.

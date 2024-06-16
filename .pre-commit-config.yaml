@@ -3,11 +3,8 @@ repos:
     rev: "1.7.0"
     hooks:
       - id: poetry-check
-        args: [--directory=backend]
       - id: poetry-lock
-        args: [--directory=backend]
       - id: poetry-install
-        args: [--directory=backend]
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:

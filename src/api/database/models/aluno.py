@@ -10,7 +10,7 @@ class Aluno(Base):
     nome = Column(String(255), nullable=False, unique=False, index=True)
     cpf = Column(String(14), nullable=False, unique=True, index=True)
     email = Column(String(255), nullable=False, unique=True, index=True)
-    telefone = Column(String(20), nullable=False, unique=True, index=True)
+    telefone = Column(String(23), nullable=False, unique=True, index=True)
     matricula = Column(String(20), nullable=False, unique=True, index=True)
     lattes = Column(String(255), nullable=True, index=True)
     orientador_id = Column(
