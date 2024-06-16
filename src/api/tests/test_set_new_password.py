@@ -27,11 +27,12 @@ newPasswordAuth: Optional[Dict] = None
 
 
 @pytest.mark.dependency()
-def test_create_token():
+def test_create_token(mocker):
     """
     Test route for creating a token to allow setting a new password.
     """
-    global newPasswordAuth
+    token = "123456"
+    mocker.patch("src.api.services.new_password.generate_token", return_value=token)
 
     # A new user must be created for testing.
     assert 200 <= client.post("professores/", json=valid_form).status_code <= 299
@@ -39,9 +40,7 @@ def test_create_token():
     # Create token.
     assert 200 <= client.post("new_password/create_token", json={"email": email}).status_code <= 299
 
-    message: str = localmail.get_message(email).content.replace(" ", "")
-    token = message.split("</b>")[0][-6:]
-
+    global newPasswordAuth
     newPasswordAuth = {"email": email, "token": token}
 
 
