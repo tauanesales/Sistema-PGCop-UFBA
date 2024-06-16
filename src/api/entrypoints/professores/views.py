@@ -3,7 +3,6 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 
 from src.api.database.session import get_db
-from src.api.entrypoints.professores.errors import EmailAlreadyRegisteredException, ProfessorNotFoundException
 from src.api.entrypoints.professores.schema import ProfessorBase, ProfessorCreate, ProfessorInDB
 from src.api.services.professor import ServiceProfessor
 from src.api.services.auth import ServiceAuth  # Se necessário para autenticação

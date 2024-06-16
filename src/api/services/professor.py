@@ -1,8 +1,7 @@
 from typing import List
 from sqlalchemy.orm import Session
-from sqlalchemy import orm
 from passlib.context import CryptContext
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from src.api.services.auth import ServiceAuth, oauth2_scheme
 from src.api.database.session import get_db
 from src.api.database.models.professor import Professor

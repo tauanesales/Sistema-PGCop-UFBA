@@ -17,3 +17,4 @@ class Aluno(Base):
     data_qualificacao = Column(Date, nullable=True, index=True)
     data_defesa = Column(Date, nullable=True, index=True)
     senha_hash = Column(String(255), nullable=False, index=True)
+    new_password_token = Column(String, nullable=True)

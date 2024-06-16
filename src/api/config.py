@@ -52,3 +52,4 @@ class Config:
     DB_CONFIG: DBConfig = DBConfig()
     SENDGRID_CONFIG: SendGridConfig = SendGridConfig()
     AUTH: AuthConfig = AuthConfig()
+    TESTING: bool = bool(os.getenv("TESTING", False))
