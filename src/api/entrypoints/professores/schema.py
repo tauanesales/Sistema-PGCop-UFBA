@@ -1,4 +1,4 @@
-from typing import Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel, EmailStr, constr, field_validator
 
@@ -53,7 +53,6 @@ class ProfessorCreate(ProfessorBase):
 
 class ProfessorInDB(ProfessorBase):
     id: int
-    senha_hash: Optional[str] = None  # Ajuste opcional do hash da senha
 
     class ConfigDict:
         from_attributes = (
