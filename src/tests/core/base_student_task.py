@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from core import base_student
+
 task_id = 1
 
 name = "Title for the Task 1"
@@ -13,8 +15,6 @@ completion_date = None
 alternative_name = "Another Title for the Task 2"
 alternative_description = "The goal of this task is getting gold 4 at the new CS:GO 2"
 
-
-from core import base_student
 
 student_form = {
     "nome": base_student.name,

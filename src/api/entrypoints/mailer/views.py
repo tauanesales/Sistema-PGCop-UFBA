@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter
+
 from src.api.entrypoints.mailer.schema import Mail
 from src.api.mailsender.mailer import Mailer
 
