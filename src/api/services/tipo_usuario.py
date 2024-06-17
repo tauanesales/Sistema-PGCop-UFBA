@@ -9,7 +9,6 @@ from sqlalchemy.orm import Session
 from src.api.database.models.usuario import Usuario
 from src.api.entrypoints.alunos.schema import AlunoInDB
 from src.api.entrypoints.professores.schema import ProfessorInDB
-from src.api.entrypoints.usuarios.schema import TipoUsuarioInDB
 from src.api.services.aluno import ServicoAluno
 from src.api.services.auth import ServiceAuth
 from src.api.services.professor import ServiceProfessor
@@ -46,16 +45,13 @@ class TipoUsuarioService:
     @staticmethod
     def obter_usuario_atual(
         db: Session, token: str = Depends(oauth2_scheme)
-    ) -> TipoUsuarioInDB:
+    ) -> Union[AlunoInDB, ProfessorInDB]:
         """Obtém o usuário atual com base no token fornecido."""
         logger.info("Obtendo usuário atual com base no token fornecido.")
         email = ServiceAuth.verificar_token(token)
         logger.info("Token verificado com sucesso.")
         usuario: Usuario = ServiceUsuario.obter_por_email(db=db, email=email)
         logger.info("Usuário encontrado com sucesso.")
-        return TipoUsuarioInDB(
-            tipo=usuario.tipo_usuario.titulo,
-            dados=TipoUsuarioService.buscar_dados_por_tipo(
-                db=db, usuario=usuario, token=token
-            ),
+        return TipoUsuarioService.buscar_dados_por_tipo(
+            db=db, usuario=usuario, token=token
         )
