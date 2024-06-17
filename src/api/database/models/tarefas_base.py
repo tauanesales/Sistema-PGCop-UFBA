@@ -1,12 +1,16 @@
-from sqlalchemy import Column, Enum, Integer, String, Text
+from sqlalchemy import Enum, String
+from sqlalchemy.orm import Mapped, mapped_column
 
-from src.api.database.session import Base
+from src.api.database.models.base_model import BaseModel
+from src.api.utils.enums import CursoAlunoEnum
 
 
-class TarefasBase(Base):
+class TarefasBase(BaseModel):
     __tablename__ = "tarefas_base"
-    id = Column(Integer, primary_key=True, index=True, nullable=False)
-    nome = Column(String(255), nullable=False)
-    descricao = Column(Text, nullable=False)
-    prazo_em_meses = Column(Integer, nullable=False)
-    curso = Column(Enum("M", "D"), nullable=False, index=True)
+
+    nome: Mapped[str] = mapped_column(String(255), nullable=False)
+    descricao: Mapped[str] = mapped_column(String(255), nullable=False)
+    prazo_em_meses: Mapped[int] = mapped_column(nullable=False)
+    curso: Mapped[CursoAlunoEnum] = mapped_column(
+        Enum(CursoAlunoEnum), nullable=False, index=True
+    )

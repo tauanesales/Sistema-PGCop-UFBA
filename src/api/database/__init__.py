@@ -1,1 +1,9 @@
-from src.api.database.models import aluno, professor, tarefa, tarefas_base  # noqa
+from src.api.database.models import (  # noqa
+    aluno,
+    professor,
+    solicitacoes,
+    tarefa,
+    tarefas_base,
+    tipo_usuario,
+    usuario,
+)

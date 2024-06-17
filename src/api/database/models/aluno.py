@@ -1,26 +1,36 @@
-from sqlalchemy import Column, Date, Enum, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
+from datetime import date
 
-from src.api.database.session import Base
+from sqlalchemy import Date, ForeignKey, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from src.api.database.models.base_model import BaseModel
+from src.api.utils.enums import CursoAlunoEnum
 
 
-class Aluno(Base):
+class Aluno(BaseModel):
     __tablename__ = "alunos"
-    id = Column(Integer, nullable=False, primary_key=True, index=True)
-    nome = Column(String(255), nullable=False, unique=False, index=True)
-    cpf = Column(String(14), nullable=False, unique=True, index=True)
-    email = Column(String(255), nullable=False, unique=True, index=True)
-    telefone = Column(String(23), nullable=False, unique=True, index=True)
-    matricula = Column(String(20), nullable=False, unique=True, index=True)
-    lattes = Column(String(255), nullable=True, index=True)
-    orientador_id = Column(
-        Integer, ForeignKey("professores.id"), nullable=True, index=True
+
+    cpf: Mapped[str] = mapped_column(
+        String(14), nullable=False, unique=True, index=True
     )
-    orientador = relationship("Professor", back_populates="alunos")
-    curso = Column(Enum("M", "D"), nullable=False, index=True)
-    data_ingresso = Column(Date, nullable=False, index=True)
-    data_qualificacao = Column(Date, nullable=True, index=True)
-    data_defesa = Column(Date, nullable=True, index=True)
-    senha_hash = Column(String(255), nullable=False, index=True)
-    new_password_token = Column(String(255), nullable=True)
-    tarefas = relationship("Tarefa", back_populates="aluno")
+    telefone: Mapped[str] = mapped_column(
+        String(23), nullable=False, unique=True, index=True
+    )
+    matricula: Mapped[str] = mapped_column(
+        String(20), nullable=False, unique=True, index=True
+    )
+    lattes: Mapped[str] = mapped_column(String(255), nullable=True, index=True)
+    curso: Mapped[CursoAlunoEnum] = mapped_column(nullable=False, index=True)
+    data_ingresso: Mapped[date] = mapped_column(Date(), nullable=False, index=True)
+    data_qualificacao: Mapped[date] = mapped_column(Date(), nullable=True, index=True)
+    data_defesa: Mapped[date] = mapped_column(Date(), nullable=True, index=True)
+    tarefas: Mapped["Tarefa"] = relationship(  # noqa: F821
+        "Tarefa", back_populates="aluno"
+    )
+
+    orientador_id: Mapped[int] = mapped_column(
+        ForeignKey("professores.id"), nullable=True, index=True
+    )
+    orientador: Mapped["Professor"] = relationship(  # noqa: F821
+        "Professor", back_populates="alunos"
+    )
