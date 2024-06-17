@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from src.api.database.models.aluno import Aluno
 from src.api.database.models.tarefa import Tarefa
-from src.api.entrypoints.alunos.errors import StudentNotFoundException
+from src.api.entrypoints.alunos.errors import AlunoNaoEncontradoException
 from src.api.entrypoints.tarefas.errors import (
     ExcecaoGenerica,
     ExcecaoIdAlunoNaoEncontrado,
@@ -17,7 +17,7 @@ class ServiceTarefa:
     def validar_tarefa(db: Session, tarefa: TarefaBase):
         try:
             ServiceTarefa.obter_aluno(db, aluno_id=tarefa.aluno_id)
-        except StudentNotFoundException:
+        except AlunoNaoEncontradoException:
             raise ExcecaoIdAlunoNaoEncontrado()
 
     @staticmethod
@@ -82,5 +82,5 @@ class ServiceTarefa:
     def obter_aluno(db: Session, aluno_id: int):
         db_aluno = db.query(Aluno).filter(Aluno.id == aluno_id).one_or_none()
         if db_aluno is None:
-            raise StudentNotFoundException()
+            raise AlunoNaoEncontradoException()
         return db_aluno

@@ -11,7 +11,7 @@ class CPFAlreadyRegisteredException(HTTPException):
         super().__init__(status_code=400, detail="CPF já cadastrado")
 
 
-class EmailAlreadyRegisteredException(HTTPException):
+class EmailJaRegistradoException(HTTPException):
     """
     Use this exception when trying to create
     a new student with an existing CPF.
@@ -21,7 +21,7 @@ class EmailAlreadyRegisteredException(HTTPException):
         super().__init__(status_code=400, detail="Email já cadastrado")
 
 
-class MatriculaAlreadyRegisteredException(HTTPException):
+class MatriculaJaRegistradaException(HTTPException):
     """
     Use this exception when trying to create
     a new student with an existing CPF.
@@ -31,7 +31,7 @@ class MatriculaAlreadyRegisteredException(HTTPException):
         super().__init__(status_code=400, detail="Matrícula já cadastrada")
 
 
-class StudentNotFoundException(HTTPException):
+class AlunoNaoEncontradoException(HTTPException):
     """
     Use this exception when it is not possible
     to find the student which the request requires.
@@ -41,7 +41,7 @@ class StudentNotFoundException(HTTPException):
         super().__init__(status_code=404, detail="Aluno não encontrado")
 
 
-class ExcecaoIdOrientadorNaoEncontrado(HTTPException):
+class OrientadorNaoEncontradoException(HTTPException):
     def __init__(self):
         super().__init__(
             status_code=400,
@@ -63,6 +63,6 @@ class ExcecaoGenerica(HTTPException):
         )
 
 
-class NumberAlreadyRegisteredException(HTTPException):
+class NumeroJaRegistradoException(HTTPException):
     def __init__(self):
         super().__init__(status_code=400, detail="Telefone já cadastrado")

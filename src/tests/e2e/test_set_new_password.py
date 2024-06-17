@@ -2,7 +2,7 @@ from typing import Dict, Optional
 
 import pytest
 from core.application import client
-from core.base_professor import email, name, password, role
+from core.base_professor import email, name, password, tipo_usuario
 
 name = "New" + name
 email = "new" + email
@@ -11,7 +11,7 @@ new_password = "new" + password
 valid_form = {
     "nome": name,
     "email": email,
-    "role": role,
+    "tipo_usuario": tipo_usuario,
     "senha": password,
 }
 

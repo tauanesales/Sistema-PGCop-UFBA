@@ -29,6 +29,7 @@ pytest-dependency = "^0.6.0"
 alembic = "^1.13.1"
 pydantic-extra-types = "^2.8.2"
 phonenumbers = "^8.13.39"
+strenum = "^0.4.15"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1.1"

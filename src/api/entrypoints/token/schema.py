@@ -4,7 +4,7 @@ from typing import Optional
 
 from pydantic import BaseModel, EmailStr, constr, field_validator
 
-from src.api.exceptions.validation_exception import (
+from src.api.exceptions.value_error_validation_exception import (
     PasswordWithoutLowercaseError,
     PasswordWithoutNumberError,
     PasswordWithoutSpecialCharacterError,

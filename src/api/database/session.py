@@ -1,5 +1,5 @@
 from sqlalchemy import URL, create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
 from src.api.config import Config
 
@@ -17,9 +17,6 @@ engine = create_engine(
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 session = SessionLocal
-
-Base = declarative_base()
-Base.metadata.create_all(bind=engine)
 
 
 def get_db():

@@ -2,7 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from src.api.entrypoints.alunos.schema import AlunoCreate
-from src.api.exceptions.validation_exception import (
+from src.api.exceptions.value_error_validation_exception import (
     PasswordWithoutLowercaseError,
     PasswordWithoutNumberError,
     PasswordWithoutSpecialCharacterError,

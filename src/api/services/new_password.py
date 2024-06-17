@@ -1,22 +1,17 @@
 import random
-from typing import Optional, Union
 
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
-from src.api.database.models.aluno import Aluno
-from src.api.database.models.professor import Professor
-from src.api.entrypoints.alunos.errors import StudentNotFoundException
+from src.api.database.models.usuario import Usuario
 from src.api.entrypoints.new_password.errors import (
     AuthenticationException,
     EmailNotFoundException,
 )
 from src.api.entrypoints.new_password.schema import NewPasswordCodeAuth
-from src.api.entrypoints.professores.errors import ProfessorNotFoundException
 from src.api.html_loader import load_html
 from src.api.mailsender.mailer import Mailer
-from src.api.services.aluno import ServiceAluno
-from src.api.services.professor import ServiceProfessor
+from src.api.services.usuario import ServiceUsuario
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 mailer = Mailer()
@@ -31,27 +26,8 @@ def generate_token(length=10) -> str:
 
 class ServiceNewPassword:
     @staticmethod
-    def __get_user_by_email(
-        db: Session, email: str
-    ) -> Optional[Union[Aluno, Professor]]:
-        user = None
-
-        try:
-            user = ServiceAluno.obter_por_email(db, email)
-        except StudentNotFoundException:
-            pass
-
-        if not user:
-            try:
-                user = ServiceProfessor.obter_por_email(db, email)
-            except ProfessorNotFoundException:
-                pass
-
-        return user
-
-    @staticmethod
     def authenticate(db: Session, email: str, token: str) -> None:
-        db_user = ServiceNewPassword.__get_user_by_email(db, email)
+        db_user: Usuario = ServiceUsuario.obter_por_email(db, email)
 
         if not db_user:
             raise AuthenticationException()
@@ -61,7 +37,7 @@ class ServiceNewPassword:
 
     @staticmethod
     def create_token(db: Session, email: str) -> NewPasswordCodeAuth:
-        db_user = ServiceNewPassword.__get_user_by_email(db, email)
+        db_user: Usuario = ServiceUsuario.obter_por_email(db, email)
 
         if not db_user:
             raise EmailNotFoundException()
@@ -85,7 +61,7 @@ class ServiceNewPassword:
     def set_new_password(
         db: Session, email: str, new_password: str, token: str
     ) -> None:
-        db_user = ServiceNewPassword.__get_user_by_email(db, email)
+        db_user: Usuario = ServiceUsuario.obter_por_email(db, email)
 
         if not db_user:
             raise EmailNotFoundException()

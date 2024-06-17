@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from src.api.database.session import Base
+from src.api.database.models.entity_model_base import EntityModelBase
 
 SQLALCHEMY_DATABASE_URL = "sqlite://"
 
@@ -13,7 +13,7 @@ engine = create_engine(
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-Base.metadata.create_all(bind=engine)
+EntityModelBase.metadata.create_all(bind=engine)
 
 
 def override_get_db():
