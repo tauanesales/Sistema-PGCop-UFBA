@@ -1,13 +1,23 @@
-from sqlalchemy import Column, Date, Integer, String
-from src.api.database.session import Base
+from datetime import date
 
-class Tarefa(Base):
+from sqlalchemy import Date, ForeignKey, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from src.api.database.models.entity_model_base import EntityModelBase
+
+
+class Tarefa(EntityModelBase):
     __tablename__ = "tarefas"
-    id = Column(Integer, primary_key=True, index=False)
-    nome = Column(String, nullable=False)
-    descricao = Column(String, nullable=False)
-    completada = Column(Integer,nullable=False, default=0)
-    data_prazo = Column(Date, nullable=False)
-    aluno_id = Column(Integer, nullable=False)
-    last_notified = Column(Date, nullable=True)
-    data_conclusao = Column(Date, nullable=True)
+
+    nome: Mapped[str] = mapped_column(String(255), nullable=False)
+    descricao: Mapped[str] = mapped_column(String(255), nullable=False)
+    data_prazo: Mapped[date] = mapped_column(Date, nullable=False)
+    data_ultima_notificacao: Mapped[date] = mapped_column(Date, nullable=True)
+    data_conclusao: Mapped[date] = mapped_column(Date, nullable=True)
+
+    aluno_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("alunos.id"), nullable=False, unique=False, index=True
+    )
+    aluno: Mapped["Aluno"] = relationship(  # noqa: F821
+        "Aluno", back_populates="tarefas"
+    )

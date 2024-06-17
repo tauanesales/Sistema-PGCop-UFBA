@@ -1,9 +1,7 @@
-from src.api.mailsender.workers.abstract import MailerWorker
-from src.api.mailsender.workers.task import TaskMailerWorker
-
+import asyncio
 from typing import Callable, Optional
 
-import asyncio
+from src.api.mailsender.workers.task import TaskMailerWorker
 
 
 async def start_mailer_workers(stop_function: Optional[Callable] = None):

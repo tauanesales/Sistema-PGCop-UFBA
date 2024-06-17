@@ -1,4 +1,5 @@
 import uvicorn
+
 from src.api.config import Config
 
 

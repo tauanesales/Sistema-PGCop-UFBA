@@ -1,7 +1,16 @@
-from pydantic import BaseModel, EmailStr, constr, validator
-from typing import Optional
-from enum import Enum
 from datetime import datetime
+from enum import Enum
+from typing import Optional
+
+from pydantic import BaseModel, EmailStr, constr, field_validator
+
+from src.api.exceptions.value_error_validation_exception import (
+    PasswordWithoutLowercaseError,
+    PasswordWithoutNumberError,
+    PasswordWithoutSpecialCharacterError,
+    PasswordWithoutUppercaseError,
+    PasswordWithSpacesError,
+)
 
 
 class TokenType(Enum):
@@ -24,10 +33,16 @@ class Login(BaseModel):
     email: EmailStr
     senha: constr(min_length=8)  # Exigindo mínimo de 8 caracteres
 
-    @validator("senha")
-    def senha_strength(cls, value):
-        if not any(char.isdigit() for char in value):
-            raise ValueError("Senha deve conter pelo menos um número")
-        if not any(char.isupper() for char in value):
-            raise ValueError("Senha deve conter pelo menos uma letra maiúscula")
-        return value
+    @field_validator("senha")
+    def senha_strength(cls, senha: str):
+        if " " in senha:
+            raise PasswordWithSpacesError()
+        if not any(char.isdigit() for char in senha):
+            raise PasswordWithoutNumberError()
+        if not any(char.isupper() for char in senha):
+            raise PasswordWithoutUppercaseError()
+        if not any(char.islower() for char in senha):
+            raise PasswordWithoutLowercaseError()
+        if senha.isalnum():
+            raise PasswordWithoutSpecialCharacterError()
+        return senha

@@ -15,6 +15,7 @@ class LocalMail(object):
     """
     Class for simulating a mail locally.
     """
+
     def __init__(self):
         self.__accounts = dict()
 
@@ -22,21 +23,20 @@ class LocalMail(object):
         """
         Send a mail.
         """
-        if not dest_email in self.__accounts:
+        if dest_email not in self.__accounts:
             self.__accounts[dest_email] = list()
 
         inbox = self.__accounts[dest_email]
         inbox.append(Mail(from_email, subject, html_content))
-    
-    def get_message(self, email, index = -1) -> Mail:
+
+    def get_message(self, email, index=-1) -> Mail:
         """
         Get a mail.
         """
-        if not email in self.__accounts:
+        if email not in self.__accounts:
             return None
-        
+
         return self.__accounts[email][index]
-    
+
 
 localmail = LocalMail()
-

@@ -1,46 +1,99 @@
 from datetime import date
-from typing import Literal, Optional
-from pydantic import BaseModel, EmailStr, constr, validator, Field
+from typing import Optional
+
+from pydantic import BaseModel, Field, HttpUrl, constr, field_validator
 from pydantic_br import CPF
+from pydantic_extra_types.phone_numbers import PhoneNumber
+
+from src.api.exceptions.value_error_validation_exception import MatriculaNotNumericError
+from src.api.schemas.usuario import UsuarioBase, UsuarioCreate, UsuarioInDB
+from src.api.utils.enums import CursoAlunoEnum, TipoUsuarioEnum
+
+PhoneNumber.phone_format = "NATIONAL"
+PhoneNumber.default_region_code = "BR"
+PhoneNumber.min_length = 10
+PhoneNumber.max_length = 22
 
 
-class AlunoBase(BaseModel):
-    nome: constr(min_length=2, max_length=100) = Field(..., description="Nome completo do aluno.")
+class AlunoBase(UsuarioBase):
     cpf: CPF = Field(..., description="CPF do aluno.")
-    email: EmailStr = Field(..., description="Endereço de email do aluno.")
-    telefone: constr(strip_whitespace=True, min_length=10, max_length=11) = Field(..., description="Número de telefone do aluno.")
-    matricula: constr(min_length=6, max_length=12) = Field(..., description="Matrícula do aluno.")
-    orientador_id: Optional[int] = Field(None, description="ID do orientador do aluno, se houver.")
-    curso: Literal["M", "D"] = Field(..., description="Curso do aluno, Mestrado (M) ou Doutorado (D).")
-    lattes: Optional[constr(min_length=2, max_length=100)] = Field(None, description="Link para o currículo Lattes do aluno.")
+    telefone: PhoneNumber = Field(..., description="Número de telefone do aluno.")
+    matricula: constr(min_length=6, max_length=12) = Field(
+        ..., description="Matrícula do aluno."
+    )
+    orientador_id: Optional[int] = Field(
+        None, description="ID do orientador do aluno, se houver."
+    )
+    curso: CursoAlunoEnum = Field(
+        ..., description="Curso do aluno, Mestrado (M) ou Doutorado (D)."
+    )
+    lattes: Optional[constr(min_length=2, max_length=100)] = Field(
+        None, description="Link para o currículo Lattes do aluno."
+    )
     data_ingresso: date = Field(..., description="Data de ingresso do aluno no curso.")
-    data_qualificacao: Optional[date] = Field(None, description="Data de qualificação do aluno, se aplicável.")
-    data_defesa: Optional[date] = Field(None, description="Data de defesa do aluno, se aplicável.")
+    data_qualificacao: Optional[date] = Field(
+        None, description="Data de qualificação do aluno, se aplicável."
+    )
+    data_defesa: Optional[date] = Field(
+        None, description="Data de defesa do aluno, se aplicável."
+    )
+    tipo_usuario: TipoUsuarioEnum = TipoUsuarioEnum.ALUNO
 
-class AlunoCreate(AlunoBase):
-    senha: constr(min_length=7) = Field(..., description="Senha de acesso do aluno.")
-
-    @validator("nome", "telefone", "matricula", "lattes", pre=True)
-    def blank_string(cls, value):
-        if isinstance(value, str) and value.replace(" ", "").replace("\t", "").replace("\r", "") == "":
+    @field_validator("telefone", "matricula", "lattes", mode="before")
+    def validar_string_vazia(cls, value):
+        value = value.replace("\t", "").replace("\r", "").replace("\n", "")
+        if not value.replace(" ", ""):
             raise ValueError("O campo não pode estar em branco")
         return value
-    
-    @validator("nome", pre=True)
-    def validar_nome(cls, nome):
-        for char in nome:
-            if char in "1234567890!@#$%&*()-=+\/|[]{}'\";:":
-                raise ValueError("O nome não pode conter números ou símbolos")
-        return nome
 
-    @validator("senha")
-    def validar_senha(cls, senha):
-        if " " in senha:
-            raise ValueError("A senha não pode conter espaços.")
-        return senha
+    @field_validator("matricula", mode="after")
+    def validar_matricula(cls, matricula: str):
+        if not matricula.isnumeric():
+            raise MatriculaNotNumericError()
+        return matricula
 
-class AlunoInDB(AlunoBase):
-    id: int = Field(..., description="ID único do aluno no sistema.")
+    @field_validator("telefone", mode="before")
+    def validate_telefone(cls, value):
+        return (
+            value.replace(" ", "").replace("\t", "").replace("\r", "").replace("\n", "")
+        )
 
-    class Config:
-        from_attributes = True
+    @field_validator("lattes")
+    def validar_lattes(cls, lattes: str):
+        HttpUrl(lattes)
+        return lattes
+
+
+class AlunoCreate(AlunoBase, UsuarioCreate):
+    pass
+
+
+class AlunoInDB(AlunoBase, UsuarioInDB):
+    pass
+
+
+class AlunoUpdate(BaseModel):
+    telefone: PhoneNumber = Field(..., description="Número de telefone do aluno.")
+    lattes: Optional[constr(min_length=2, max_length=100)] = Field(
+        None, description="Link para o currículo Lattes do aluno."
+    )
+    orientador_id: Optional[int] = Field(
+        None, description="ID do orientador do aluno, se houver."
+    )
+    data_qualificacao: Optional[date] = Field(
+        None, description="Data de qualificação do aluno, se aplicável."
+    )
+    data_defesa: Optional[date] = Field(
+        None, description="Data de defesa do aluno, se aplicável."
+    )
+
+    @field_validator("telefone", mode="before")
+    def blank_string(cls, value):
+        return (
+            value.replace(" ", "").replace("\t", "").replace("\r", "").replace("\n", "")
+        )
+
+    @field_validator("lattes")
+    def validar_lattes(cls, lattes: str):
+        HttpUrl(lattes)
+        return lattes
