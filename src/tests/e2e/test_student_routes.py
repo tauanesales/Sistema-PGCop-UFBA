@@ -63,7 +63,10 @@ def test_create_student(valid_student_data, valid_professor_data):
 
         assert client.post(url, json=form).status_code >= 400
 
-    client.post("/professores/", json=valid_professor_data)
+    # Must have a professor associated to the student.
+    resp = client.post("/professores/", json=valid_professor_data)
+    valid_student_data["orientador_id"] = resp.json()["id"]
+
     # Test sending a valid form.
     resp = client.post(url, json=valid_student_data)
     logger.info(resp.json())

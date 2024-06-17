@@ -10,16 +10,17 @@ from core.base_student_task import (
 from loguru import logger
 
 
+aluno_id: int = 1
+
+
 @pytest.mark.dependency()
 def test_create_task(valid_professor_data, valid_student_data, valid_task_data):
     """
     Test route for creating a new task.
     """
-    client.post("/professores/")
+    global aluno_id
 
     url = "/tarefas/"
-
-    valid_task_data["aluno_id"] = 1
 
     # Test sending a form with bad information.
     invalid_form_cases = [
@@ -44,6 +45,15 @@ def test_create_task(valid_professor_data, valid_student_data, valid_task_data):
         assert client.post(url, json=form).status_code >= 400
 
     # Test sending a valid form.
+    valid_professor_data["email"] = valid_professor_data["email"] + "newProfessor"
+    
+    resp_professor = client.post("/professores/", json=valid_professor_data)
+    valid_student_data["orientador_id"] = resp_professor.json()["id"]
+
+    resp_aluno = client.post("/alunos/", json=valid_student_data)
+    aluno_id = resp_aluno.json()["id"]
+    valid_task_data["aluno_id"] = aluno_id
+
     resp2 = client.post(url, json=valid_task_data)
     logger.info(resp2.json())
     assert 200 <= resp2.status_code <= 299
@@ -65,7 +75,7 @@ def test_get_task():
     """
     Test route for getting the task from the database.
     """
-    expected = {"nome": name, "descricao": description, "aluno_id": 1}
+    expected = {"nome": name, "descricao": description, "aluno_id": aluno_id}
 
     response = client.get(f"/tarefas/{task_id}")
     assert 200 <= response.status_code <= 299
@@ -81,16 +91,18 @@ def test_get_tasks_by_student_id():
     """
     Test route for getting the tasks from the database by the ID of a student.
     """
+    global aluno_id
+
     expected = [
-        {"nome": name, "descricao": description, "aluno_id": 1},
+        {"nome": name, "descricao": description, "aluno_id": aluno_id},
         {
             "nome": alternative_name,
             "descricao": alternative_description,
-            "aluno_id": 1,
+            "aluno_id": aluno_id,
         },
     ]
 
-    response = client.get(f"/tarefas/aluno/{1}")
+    response = client.get(f"/tarefas/aluno/{aluno_id}")
     assert 200 <= response.status_code <= 299
 
     result = sorted(response.json(), key=lambda x: x["id"])
@@ -105,6 +117,8 @@ def test_update_task(valid_task_data):
     """
     Test route for updating the task's information on the database.
     """
+    global aluno_id
+
     url = f"/tarefas/{task_id}"
 
     new_data = {
@@ -115,7 +129,7 @@ def test_update_task(valid_task_data):
     # Update user's information.
     form = valid_task_data.copy()
     form.update(new_data)
-    form["aluno_id"] = 1
+    form["aluno_id"] = aluno_id
 
     response = client.put(url, json=form)
     logger.info(response.json())
