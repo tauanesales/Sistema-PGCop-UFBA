@@ -1,35 +1,41 @@
 import pytest
 from core.application import client
-from core.base_professor import email, name, password, role
 
-valid_form = {
-    "nome": name,
-    "email": email,
-    "role": role,
-    "senha": password,
-}
+from loguru import logger
 
 token = None
 
 
 @pytest.mark.dependency()
-def test_login():
+def test_login(valid_professor_data):
     """
     Test route for log in to an account.
     """
     global token
 
+    valid_professor_data["email"] = valid_professor_data["email"] + "new"
+
+    email = valid_professor_data["email"]
+    password = valid_professor_data["senha"]
+
     # Create a new user.
-    assert 200 <= client.post("professores/", json=valid_form).status_code <= 299
+    resp = client.post("/professores/", json=valid_professor_data)
+    assert 200 <= resp.status_code <= 299
 
     # Log in to the account.
-    login_data = {"username": email, "password": password, "grant_type": "password"}
+    login_data = {
+        "username": email, 
+        "password": password, 
+        "grant_type": "password",
+        "scope": "items:read items:write users:read profile openid"
+    }
 
     response = client.post(
         "token/",
         data=login_data,
         headers={"content-type": "application/x-www-form-urlencoded"},
     )
+    logger.info(response.json())
 
     assert 200 <= response.status_code <= 299
 
