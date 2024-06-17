@@ -11,7 +11,7 @@ class EmailAlreadyRegisteredException(HTTPException):
         super().__init__(status_code=400, detail="Email já cadastrado")
 
 
-class ProfessorNotFoundException(HTTPException):
+class ProfessorNaoEncontradoException(HTTPException):
     """
     Use this exception when it is not possible
     to find the user which the request requires.

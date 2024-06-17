@@ -1,10 +1,12 @@
+from enum import auto
+
 from strenum import StrEnum
 
 
 class TipoUsuarioEnum(StrEnum):
-    COORDENADOR = "coordenador"
-    PROFESSOR = "professor"
-    ALUNO = "aluno"
+    COORDENADOR = auto()
+    PROFESSOR = auto()
+    ALUNO = auto()
 
 
 class StatusSolicitacaoEnum(StrEnum):

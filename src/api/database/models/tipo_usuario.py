@@ -1,13 +1,14 @@
-from sqlalchemy import Enum
+from sqlalchemy import Enum, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.api.database.models.base_model import BaseModel
+from src.api.database.models.entity_model_base import EntityModelBase
 from src.api.utils.enums import TipoUsuarioEnum
 
 
-class TipoUsuario(BaseModel):
+class TipoUsuario(EntityModelBase):
     __tablename__ = "tipo_usuario"
 
-    tipo_usuario: Mapped[TipoUsuarioEnum] = mapped_column(
+    titulo: Mapped[TipoUsuarioEnum] = mapped_column(
         Enum(TipoUsuarioEnum), nullable=False, index=True
     )
+    descricao: Mapped[str] = mapped_column(String(255), nullable=False, index=True)

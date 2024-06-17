@@ -7,7 +7,7 @@ from core.base_professor import (
     email,
     name,
     password,
-    role,
+    tipo_usuario,
     user_id,
 )
 from loguru import logger
@@ -15,7 +15,7 @@ from loguru import logger
 valid_form = {
     "nome": name,
     "email": email,
-    "role": role,
+    "tipo_usuario": tipo_usuario,
     "senha": password,
 }
 
@@ -40,9 +40,9 @@ def test_create_professor():
         {
             "email": email.split("@")[0] + "some@name@ufba.br"
         },  # Invalid email (illegal char)
-        {"role": ""},  # Empty role
-        {"role": " " * 20},  # Blank role
-        {"role": "SomeRole"},  # Illegal role
+        {"tipo_usuario": ""},  # Empty tipo_usuario
+        {"tipo_usuario": " " * 20},  # Blank tipo_usuario
+        {"tipo_usuario": "SomeRole"},  # Illegal tipo_usuario
         {"senha": ""},  # Empty password
         {"senha": " " * 10},  # Blank password
         {"senha": password + " " + "something"},  # Illegal password (with spaces)
@@ -90,7 +90,7 @@ def test_get_professor():
     """
     Test route for getting the professor from the database.
     """
-    expected = {"nome": name, "email": email, "role": role}
+    expected = {"nome": name, "email": email, "tipo_usuario": tipo_usuario}
 
     response = client.get(f"/professores/{user_id}")
     assert 200 <= response.status_code <= 299
@@ -106,7 +106,7 @@ def test_get_professor_by_email():
     """
     Test route for getting the professor from the database by his email.
     """
-    expected = {"nome": name, "email": email, "role": role}
+    expected = {"nome": name, "email": email, "tipo_usuario": tipo_usuario}
 
     response = client.get(f"/professores/email/{email}")
     assert 200 <= response.status_code <= 299
@@ -127,7 +127,7 @@ def test_update_professor():
     new_data = {
         "nome": alternative_name,
         "email": alternative_email.split("@")[0] + "foo" + "@ufmg.br",
-        "role": alternative_role,
+        "tipo_usuario": alternative_role,
     }
 
     # Update user's information.

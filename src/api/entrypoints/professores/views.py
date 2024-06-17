@@ -19,14 +19,14 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 @router.post("/", response_model=ProfessorInDB, status_code=status.HTTP_201_CREATED)
 def criar_professor(professor: ProfessorCreate, db: Session = Depends(get_db)):
-    return ServiceProfessor.criar_professor(db=db, professor=professor)
+    return ServiceProfessor.criar(db=db, novo_professor=professor)
 
 
 @router.get("/me", response_model=ProfessorInDB)
 async def read_professor_me(
     token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
 ):
-    return ServiceProfessor.get_current_professor(token, db)
+    return ServiceProfessor.buscar_atual(db, token)
 
 
 @router.get("/todos", response_model=List[ProfessorInDB])
@@ -41,7 +41,7 @@ def ler_professor(professor_id: int, db: Session = Depends(get_db)):
 
 @router.delete("/{professor_id}", status_code=status.HTTP_204_NO_CONTENT)
 def deletar_professor(professor_id: int, db: Session = Depends(get_db)):
-    ServiceProfessor.deletar_professor(db, professor_id)
+    ServiceProfessor.deletar(db, professor_id)
     return {"ok": True}
 
 
@@ -54,4 +54,6 @@ def atualizar_professor(
 
 @router.get("/email/{email}", response_model=ProfessorInDB)
 def obter_professor_por_email(email: str, db: Session = Depends(get_db)):
-    return ProfessorInDB(**ServiceProfessor.obter_por_email(db, email=email).__dict__)
+    return ServiceProfessor.de_professor_para_professor_in_db(
+        ServiceProfessor.obter_por_email(db, email=email)
+    )

@@ -7,9 +7,10 @@ from sqlalchemy import join, select, update
 
 from src.api.database.models.aluno import Aluno
 from src.api.database.models.tarefa import Tarefa
+from src.api.database.models.usuario import Usuario
 from src.api.database.session import session
 from src.api.html_loader import load_html
-from src.api.mailsender.workers import MailerWorker
+from src.api.mailsender.workers.abstract import MailerWorker
 
 
 class TaskMailerWorker(MailerWorker):
@@ -28,16 +29,20 @@ class TaskMailerWorker(MailerWorker):
         query = (
             select(
                 Aluno.id,
-                Aluno.nome,
-                Aluno.email,
+                Usuario.nome,
+                Usuario.email,
                 Tarefa.id.label("tarefa_id"),
                 Tarefa.data_prazo,
                 Tarefa.descricao,
                 Tarefa.nome.label("titulo"),
             )
-            .select_from(join(Aluno, Tarefa, Aluno.id == Tarefa.aluno_id))
+            .select_from(
+                join(Aluno, Tarefa, Aluno.id == Tarefa.aluno_id).join(
+                    Usuario, Aluno.usuario_id == Usuario.id
+                )
+            )
             .where(Tarefa.data_prazo <= deadline.date())
-            .where(Tarefa.last_notified.is_(None))
+            .where(Tarefa.data_ultima_notificacao.is_(None))
         )
         return session().execute(query)
 
@@ -48,16 +53,20 @@ class TaskMailerWorker(MailerWorker):
         query = (
             select(
                 Aluno.id,
-                Aluno.nome,
-                Aluno.email,
+                Usuario.nome,
+                Usuario.email,
                 Tarefa.id.label("tarefa_id"),
                 Tarefa.data_prazo,
                 Tarefa.descricao,
                 Tarefa.nome.label("titulo"),
             )
-            .select_from(join(Aluno, Tarefa, Aluno.id == Tarefa.aluno_id))
+            .select_from(
+                join(Aluno, Tarefa, Aluno.id == Tarefa.aluno_id).join(
+                    Usuario, Aluno.usuario_id == Usuario.id
+                )
+            )
             .where(Tarefa.data_prazo < datetime.now())
-            .where(Tarefa.last_notified <= Tarefa.data_prazo)
+            .where(Tarefa.data_ultima_notificacao <= Tarefa.data_prazo)
         )
         return session().execute(query)
 
@@ -84,7 +93,7 @@ class TaskMailerWorker(MailerWorker):
                 query = (
                     update(Tarefa)
                     .where(Tarefa.id == task.tarefa_id)
-                    .values(last_notified=str(datetime.now().date()))
+                    .values(data_ultima_notificacao=str(datetime.now().date()))
                 )
 
                 current_session = session()
@@ -111,7 +120,7 @@ class TaskMailerWorker(MailerWorker):
                 query = (
                     update(Tarefa)
                     .where(Tarefa.id == task.tarefa_id)
-                    .values(last_notified=str(datetime.now().date()))
+                    .values(data_ultima_notificacao=str(datetime.now().date()))
                 )
 
                 current_session = session()

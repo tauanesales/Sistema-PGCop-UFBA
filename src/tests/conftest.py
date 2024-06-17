@@ -4,6 +4,8 @@ import sys
 import pytest
 from core import base_professor, base_student, base_student_task
 
+from src.api.utils.enums import TipoUsuarioEnum
+
 current_dir = os.path.join(os.getcwd())
 sys.path.append(current_dir)
 
@@ -52,6 +54,7 @@ def valid_student_data():
         "data_qualificacao": "2022-06-01",
         "data_defesa": "2023-12-01",
         "senha": base_student.password,
+        "tipo_usuario": TipoUsuarioEnum.ALUNO,
     }
 
 
@@ -60,7 +63,7 @@ def valid_professor_data():
     return {
         "nome": base_professor.name,
         "email": base_professor.email,
-        "role": base_professor.role,
+        "tipo_usuario": base_professor.tipo_usuario,
         "senha": base_professor.password,
     }
 
@@ -75,3 +78,32 @@ def valid_task_data():
         "last_notified": base_student_task.last_notified,
         "data_conclusao": base_student_task.completion_date,
     }
+
+
+# from src.api.database.models import (  # noqa
+#     aluno,
+#     professor,
+#     solicitacoes,
+#     tarefa,
+#     tarefas_base,
+#     tipo_usuario,
+#     usuario,
+# )
+# from src.tests.core.mocked_database import engine
+
+# @pytest.fixture(scope="function", autouse=True)
+# def setup_database():
+#     aluno.Aluno.metadata.drop_all(bind=engine)
+#     aluno.Aluno.metadata.create_all(bind=engine)
+#     professor.Professor.metadata.drop_all(bind=engine)
+#     professor.Professor.metadata.create_all(bind=engine)
+#     solicitacoes.Solicitacao.metadata.drop_all(bind=engine)
+#     solicitacoes.Solicitacao.metadata.create_all(bind=engine)
+#     tarefa.Tarefa.metadata.drop_all(bind=engine)
+#     tarefa.Tarefa.metadata.create_all(bind=engine)
+#     tarefas_base.TarefasBase.metadata.drop_all(bind=engine)
+#     tarefas_base.TarefasBase.metadata.create_all(bind=engine)
+#     tipo_usuario.TipoUsuario.metadata.drop_all(bind=engine)
+#     tipo_usuario.TipoUsuario.metadata.create_all(bind=engine)
+#     usuario.Usuario.metadata.drop_all(bind=engine)
+#     usuario.Usuario.metadata.create_all(bind=engine)

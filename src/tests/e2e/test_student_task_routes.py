@@ -9,7 +9,6 @@ from core.base_student_task import (
 )
 from loguru import logger
 
-
 aluno_id: int = 1
 
 
@@ -46,8 +45,9 @@ def test_create_task(valid_professor_data, valid_student_data, valid_task_data):
 
     # Test sending a valid form.
     valid_professor_data["email"] = valid_professor_data["email"] + "newProfessor"
-    
+
     resp_professor = client.post("/professores/", json=valid_professor_data)
+    logger.info(resp_professor.json())
     valid_student_data["orientador_id"] = resp_professor.json()["id"]
 
     resp_aluno = client.post("/alunos/", json=valid_student_data)

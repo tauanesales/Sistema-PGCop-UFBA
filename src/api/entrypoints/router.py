@@ -5,6 +5,7 @@ from src.api.entrypoints.mailer import views as mailer
 from src.api.entrypoints.monitoring import views as monitoring
 from src.api.entrypoints.new_password import views as new_password
 from src.api.entrypoints.professores import views as professores
+from src.api.entrypoints.solicitacao import views as solicitacao
 from src.api.entrypoints.tarefas import views as tarefas
 from src.api.entrypoints.tarefas_base import views as tarefas_base
 from src.api.entrypoints.token import views as token
@@ -25,4 +26,7 @@ api_router.include_router(mailer.router, prefix="/mailer", tags=["Mailer"])
 api_router.include_router(usuarios.router, prefix="/usuarios", tags=["Usuarios"])
 api_router.include_router(
     new_password.router, prefix="/new_password", tags=["New_Password"]
+)
+api_router.include_router(
+    solicitacao.router, prefix="/solicitacoes", tags=["Solicitacoes"]
 )

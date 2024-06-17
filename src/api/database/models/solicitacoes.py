@@ -1,11 +1,11 @@
 from sqlalchemy import Enum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.api.database.models.base_model import BaseModel
+from src.api.database.models.entity_model_base import EntityModelBase
 from src.api.utils.enums import StatusSolicitacaoEnum
 
 
-class Solicitacao(BaseModel):
+class Solicitacao(EntityModelBase):
     __tablename__ = "solicitacoes"
 
     aluno_id: Mapped[int] = mapped_column(ForeignKey("alunos.id"), nullable=False)
@@ -14,7 +14,7 @@ class Solicitacao(BaseModel):
     )
 
     professor_id: Mapped[int] = mapped_column(
-        ForeignKey("professores.id"), nullable=False
+        ForeignKey("professores.id"), nullable=False, unique=False, index=True
     )
     professor: Mapped["Professor"] = relationship(  # noqa: F821
         "Professor", back_populates="solicitacoes"

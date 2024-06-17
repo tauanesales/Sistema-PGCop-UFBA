@@ -2,7 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from src.api.entrypoints.professores.schema import ProfessorCreate
-from src.api.exceptions.validation_exception import (
+from src.api.exceptions.value_error_validation_exception import (
     PasswordWithoutLowercaseError,
     PasswordWithoutNumberError,
     PasswordWithoutSpecialCharacterError,
@@ -15,7 +15,7 @@ def test_professor_create_valid(valid_professor_data: dict):
     professor = ProfessorCreate(**valid_professor_data)
     assert professor.nome == valid_professor_data.get("nome")
     assert professor.email == valid_professor_data.get("email")
-    assert professor.role == valid_professor_data.get("role")
+    assert professor.tipo_usuario == valid_professor_data.get("tipo_usuario")
     assert professor.senha == valid_professor_data.get("senha")
 
 
