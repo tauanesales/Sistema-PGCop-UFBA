@@ -11,7 +11,7 @@ class Usuario(EntityModelBase):
         String(255), nullable=False, unique=False, index=True
     )
     email: Mapped[str] = mapped_column(
-        String(255), nullable=False, unique=True, index=True
+        String(255), nullable=False, unique=False, index=True
     )
     senha_hash: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     new_password_token: Mapped[str] = mapped_column(String(255), nullable=True)

@@ -11,13 +11,13 @@ class Aluno(EntityModelBase):
     __tablename__ = "alunos"
 
     cpf: Mapped[str] = mapped_column(
-        String(14), nullable=False, unique=True, index=True
+        String(14), nullable=False, unique=False, index=True
     )
     telefone: Mapped[str] = mapped_column(
-        String(23), nullable=False, unique=True, index=True
+        String(23), nullable=False, unique=False, index=True
     )
     matricula: Mapped[str] = mapped_column(
-        String(20), nullable=False, unique=True, index=True
+        String(20), nullable=False, unique=False, index=True
     )
     lattes: Mapped[str] = mapped_column(String(255), nullable=True, index=True)
     curso: Mapped[CursoAlunoEnum] = mapped_column(nullable=False, index=True)
