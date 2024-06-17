@@ -33,6 +33,10 @@ down: ## Stop all docker services from this project.
 rm-containers: ## Remove all docker containers.
 	docker rm -f $$(docker ps -aq)
 
+.PHONY: start-docker
+start-docker: ## WSL needs to manually start docker.
+	sudo service docker start
+
 .PHONY: revision
 revision: ## Create a new revision of the database using alembic. Use MESSAGE="your message" to add a message.
 	poetry run alembic revision --autogenerate -m "$(MESSAGE)"
@@ -44,6 +48,19 @@ migrate: ## Apply the migrations to the database.
 .PHONY: downgrade
 downgrade: ## Undo the last migration.
 	poetry run alembic downgrade -1
+
+.PHONY: db-full-clean
+db-full-clean:
+	docker compose exec db mysql -u ${DB_USERNAME} -p${DB_PASSWORD} -e "DROP DATABASE IF EXISTS ${DB_DATABASE}; CREATE DATABASE ${DB_DATABASE};"
+
+.PHONY: db-regenerate
+db-regenerate: db-full-clean migrate ## Regenerate the database.
+	docker compose exec db mysql -u ${DB_USERNAME} -p${DB_PASSWORD} -e "\
+		USE ${DB_DATABASE}; \
+		INSERT INTO tipo_usuario (titulo, descricao, created_at, updated_at) \
+		VALUES ('ALUNO', 'Aluno description', UTC_TIMESTAMP(), UTC_TIMESTAMP()), \
+				('PROFESSOR', 'Professor description', UTC_TIMESTAMP(), UTC_TIMESTAMP()), \
+				('COORDENADOR', 'Coordenador description', UTC_TIMESTAMP(), UTC_TIMESTAMP());"
 
 .PHONY: pre-commit
 pre-commit: ## Run pre-commit checks.
