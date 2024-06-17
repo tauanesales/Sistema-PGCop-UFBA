@@ -24,3 +24,4 @@ class Aluno(Base):
     senha_hash = Column(String(255), nullable=False, index=True)
     new_password_token = Column(String(255), nullable=True)
     tarefas = relationship("Tarefa", back_populates="aluno")
+    orientador_status = Column(Enum('aceito','recusado','nao_respondido'), nullable=False, index=True)

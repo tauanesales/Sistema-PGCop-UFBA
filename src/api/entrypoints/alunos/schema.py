@@ -12,6 +12,8 @@ from src.api.exceptions.validation_exception import (
     PasswordWithoutSpecialCharacterError,
     PasswordWithoutUppercaseError,
     PasswordWithSpacesError,
+    CursoNotValidError,
+    OrientadorStatusNotValidError
 )
 
 PhoneNumber.phone_format = "NATIONAL"
@@ -47,6 +49,10 @@ class AlunoBase(BaseModel):
         None, description="Data de defesa do aluno, se aplicável."
     )
 
+    orientador_status: Literal['nao_respondido', 'aceito','recusado'] = Field(
+        ..., description="Aceite do orientador, 'aceito', 'recusado' ou 'nao_respondido'."
+    )
+
     @field_validator("nome", "telefone", "matricula", "lattes", mode="before")
     def blank_string(cls, value):
         value = value.replace("\t", "").replace("\r", "").replace("\n", "")
@@ -76,7 +82,6 @@ class AlunoBase(BaseModel):
     def validar_lattes(cls, lattes: str):
         HttpUrl(lattes)
         return lattes
-
 
 class AlunoCreate(AlunoBase):
     senha: constr(min_length=8) = Field(..., description="Senha de acesso do aluno.")
@@ -116,6 +121,10 @@ class AlunoUpdate(BaseModel):
     )
     data_defesa: Optional[date] = Field(
         None, description="Data de defesa do aluno, se aplicável."
+    )
+
+    orientador_status: Literal['nao_respondido','aceito','recusado'] = Field(
+        ..., description="Aceite do orientador, 'aceito', 'recusado' ou 'nao_respondido'."
     )
 
     @field_validator("telefone", mode="before")

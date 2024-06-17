@@ -26,3 +26,11 @@ class PasswordWithoutSpecialCharacterError(ValueError):
 class MatriculaNotNumericError(ValueError):
     def __init__(self):
         super().__init__("A matrícula deve conter apenas números.")
+
+class OrientadorStatusNotValidError(ValueError):
+    def __init__(self):
+        super().__init__("Status do orientador deve ser 'nao_respondido', 'aceito','recusado'.")
+
+class CursoNotValidError(ValueError):
+    def __init__(self):
+        super().__init__(detail="Curso deve ser 'M' ou 'D'.")
