@@ -1,5 +1,7 @@
-from sqlalchemy import Column, Date, Integer, String, Text, Enum
+from sqlalchemy import Column, Enum, Integer, String, Text
+
 from src.api.database.session import Base
+
 
 class TarefasBase(Base):
     __tablename__ = "tarefas_base"

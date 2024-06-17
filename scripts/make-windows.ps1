@@ -41,6 +41,6 @@ if ($Args[0] -eq "install") {
         poetry add $Args[1]
 
     }
-    
+
     deactivate
 }

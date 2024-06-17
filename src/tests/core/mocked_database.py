@@ -1,10 +1,8 @@
-from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from src.api.database.session import Base, get_db
-
+from src.api.database.session import Base
 
 SQLALCHEMY_DATABASE_URL = "sqlite://"
 
@@ -24,5 +22,6 @@ def override_get_db():
         yield db
     finally:
         db.close()
+
 
 mocked_database = override_get_db
