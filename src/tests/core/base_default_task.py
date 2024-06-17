@@ -1,5 +1,3 @@
-from datetime import datetime
-
 task_id = 1
 
 name = "Title for the Task 1"

@@ -10,4 +10,6 @@ class NewPasswordCodeAuth(NewPasswordRequest):
 
 
 class NewPasswordChange(NewPasswordCodeAuth):
-    nova_senha: constr(min_length=7) = Field(..., description="Nova senha de acesso do usuário.")
+    nova_senha: constr(min_length=7) = Field(
+        ..., description="Nova senha de acesso do usuário."
+    )

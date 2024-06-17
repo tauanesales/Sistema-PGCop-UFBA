@@ -30,6 +30,9 @@ up-db: ## Start local MySQL database using docker.
 down: ## Stop all docker services from this project.
 	docker compose -f docker-compose.yml down
 
+rm-containers: ## Remove all docker containers.
+	docker rm -f $$(docker ps -aq)
+
 .PHONY: revision
 revision: ## Create a new revision of the database using alembic. Use MESSAGE="your message" to add a message.
 	poetry run alembic revision --autogenerate -m "$(MESSAGE)"
@@ -44,7 +47,7 @@ downgrade: ## Undo the last migration.
 
 .PHONY: pre-commit
 pre-commit: ## Run pre-commit checks.
-	poetry run pre-commit run --config ./.pre-commit-config.yaml
+	poetry run pre-commit run --config ./.pre-commit-config.yaml --all-files
 
 .PHONY: patch
 patch: ## Bump project version to next patch (bugfix release/chores).

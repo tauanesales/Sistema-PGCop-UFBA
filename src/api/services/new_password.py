@@ -1,24 +1,28 @@
-from sqlalchemy.orm import Session
+import random
+from typing import Optional, Union
+
 from passlib.context import CryptContext
+from sqlalchemy.orm import Session
+
+from src.api.database.models.aluno import Aluno
+from src.api.database.models.professor import Professor
 from src.api.entrypoints.alunos.errors import StudentNotFoundException
-from src.api.entrypoints.professores.errors import ProfessorNotFoundException
-from src.api.entrypoints.new_password.errors import AuthenticationException, EmailNotFoundException
+from src.api.entrypoints.new_password.errors import (
+    AuthenticationException,
+    EmailNotFoundException,
+)
 from src.api.entrypoints.new_password.schema import NewPasswordCodeAuth
+from src.api.entrypoints.professores.errors import ProfessorNotFoundException
+from src.api.html_loader import load_html
+from src.api.mailsender.mailer import Mailer
 from src.api.services.aluno import ServiceAluno
 from src.api.services.professor import ServiceProfessor
-from src.api.database.models.professor import Professor
-from src.api.database.models.aluno import Aluno
-from src.api.mailsender.mailer import Mailer
-from src.api.html_loader import load_html
-
-from typing import Optional, Union
-import random
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 mailer = Mailer()
 
 
-def generate_token(length = 10) -> str:
+def generate_token(length=10) -> str:
     charset = "".join([chr(i) for i in range(ord("A"), ord("Z") + 1)])
     charset += "1234567890"
 
@@ -26,17 +30,22 @@ def generate_token(length = 10) -> str:
 
 
 class ServiceNewPassword:
-
     @staticmethod
-    def __get_user_by_email(db: Session, email: str) -> Optional[Union[Aluno, Professor]]:
+    def __get_user_by_email(
+        db: Session, email: str
+    ) -> Optional[Union[Aluno, Professor]]:
         user = None
 
-        try: user = ServiceAluno.obter_por_email(db, email)
-        except StudentNotFoundException: pass
+        try:
+            user = ServiceAluno.obter_por_email(db, email)
+        except StudentNotFoundException:
+            pass
 
         if not user:
-            try: user = ServiceProfessor.obter_por_email(db, email)
-            except ProfessorNotFoundException: pass
+            try:
+                user = ServiceProfessor.obter_por_email(db, email)
+            except ProfessorNotFoundException:
+                pass
 
         return user
 
@@ -46,17 +55,17 @@ class ServiceNewPassword:
 
         if not db_user:
             raise AuthenticationException()
-        
+
         if db_user.new_password_token != token:
             raise AuthenticationException()
-    
+
     @staticmethod
     def create_token(db: Session, email: str) -> NewPasswordCodeAuth:
         db_user = ServiceNewPassword.__get_user_by_email(db, email)
 
         if not db_user:
             raise EmailNotFoundException()
-        
+
         token = generate_token(6)
 
         db_user.new_password_token = token
@@ -64,22 +73,26 @@ class ServiceNewPassword:
         db.refresh(db_user)
 
         mailer.send_message(
-            dest_email=email, 
+            dest_email=email,
             subject="[PGCOP] Código de redefinição de senha",
-            html_content=load_html("new_password_token", name=db_user.nome, token=token)
+            html_content=load_html(
+                "new_password_token", name=db_user.nome, token=token
+            ),
         )
         return NewPasswordCodeAuth(email=email, token=token)
 
     @staticmethod
-    def set_new_password(db: Session, email: str, new_password: str, token: str) -> None:
+    def set_new_password(
+        db: Session, email: str, new_password: str, token: str
+    ) -> None:
         db_user = ServiceNewPassword.__get_user_by_email(db, email)
 
         if not db_user:
             raise EmailNotFoundException()
-        
+
         if db_user.new_password_token != token:
             raise AuthenticationException()
-        
+
         db_user.senha_hash = pwd_context.hash(new_password)
         db_user.new_password_token = None
 

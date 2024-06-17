@@ -1,17 +1,19 @@
 from datetime import datetime, timedelta
+from enum import Enum
+
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
-from src.api.entrypoints.alunos.errors import StudentNotFoundException
-from src.api.entrypoints.professores.errors import ProfessorNotFoundException
-from src.api.exceptions.credentials_exception import CredentialsException
+from sqlalchemy.orm import Session
+
 from src.api.config import Config
 from src.api.database.session import get_db
+from src.api.entrypoints.alunos.errors import StudentNotFoundException
+from src.api.entrypoints.professores.errors import ProfessorNotFoundException
+from src.api.entrypoints.token.schema import Token
+from src.api.exceptions.credentials_exception import CredentialsException
+from src.api.services.aluno import ServiceAluno
 from src.api.services.auth import ServiceAuth
 from src.api.services.professor import ServiceProfessor
-from src.api.services.aluno import ServiceAluno
-from src.api.entrypoints.token.schema import Token
-from sqlalchemy.orm import Session
-from enum import Enum
 
 router = APIRouter()
 
