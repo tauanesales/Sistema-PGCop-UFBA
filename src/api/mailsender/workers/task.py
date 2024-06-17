@@ -9,7 +9,7 @@ from src.api.database.models.aluno import Aluno
 from src.api.database.models.tarefa import Tarefa
 from src.api.database.session import session
 from src.api.html_loader import load_html
-from src.api.mailsender.workers import MailerWorker
+from src.api.mailsender.workers.abstract import MailerWorker
 
 
 class TaskMailerWorker(MailerWorker):
