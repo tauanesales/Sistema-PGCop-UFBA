@@ -4,6 +4,7 @@ from loguru import logger
 from pytest import Session
 
 from src.api.database.models.professor import Professor
+from src.api.database.models.usuario import Usuario
 from src.api.database.repository import PGCopRepository
 from src.api.entrypoints.professores.errors import ProfessorNaoEncontradoException
 from src.api.entrypoints.professores.schema import ProfessorUpdate
@@ -11,7 +12,9 @@ from src.api.exceptions.http_service_exception import (
     DeveSeSubmeterPeloMenosUmCampoParaAtualizarException,
     EmailJaRegistradoException,
     TipoUsuarioInvalidoException,
+    UsuarioNaoEncontradoException,
 )
+from src.api.schemas.usuario import UsuarioBase
 from src.api.utils.enums import TipoUsuarioEnum
 
 
@@ -60,3 +63,13 @@ class ServicoValidador:
             db, db_professor.usuario.email, professor_id
         )
         logger.info(f"{professor_id=} | Email não está em uso.")
+
+    @staticmethod
+    def validar_email_registrado(db: Session, usuario: UsuarioBase) -> None:
+        if PGCopRepository.obter_usuario_por_email(db, usuario.email):
+            raise EmailJaRegistradoException()
+
+    @staticmethod
+    def validar_usuario_existe(db_usuario: Optional[Usuario]):
+        if db_usuario is None:
+            raise UsuarioNaoEncontradoException()

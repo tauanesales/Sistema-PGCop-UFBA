@@ -10,7 +10,6 @@ from src.api.database.models.professor import Professor
 from src.api.database.models.solicitacoes import Solicitacao
 from src.api.database.models.usuario import Usuario
 from src.api.database.repository import PGCopRepository
-from src.api.entrypoints.professores.errors import ProfessorNaoEncontradoException
 from src.api.entrypoints.professores.schema import (
     ProfessorCreate,
     ProfessorInDB,
@@ -60,14 +59,11 @@ class ServiceProfessor(ServicoBase):
     @staticmethod
     def obter_professor(db: Session, professor_id: int) -> ProfessorInDB:
         db_professor = PGCopRepository.obter_por_id(db, professor_id, Professor)
-        if db_professor is None:
-            raise ProfessorNaoEncontradoException()
+        ServicoValidador.validar_professor_existe(db_professor)
         return ServiceProfessor.de_professor_para_professor_in_db(db_professor)
 
     def obter_professores(db: Session) -> List[ProfessorInDB]:
         db_professors = PGCopRepository.obter_todos(db, Professor)
-        if db_professors is None:
-            raise ProfessorNaoEncontradoException()
         return [
             ServiceProfessor.de_professor_para_professor_in_db(professor)
             for professor in db_professors
@@ -76,8 +72,7 @@ class ServiceProfessor(ServicoBase):
     @staticmethod
     def deletar(db: Session, professor_id: int) -> None:
         professor: Professor = PGCopRepository.obter_por_id(db, professor_id, Professor)
-        if not professor:
-            raise ProfessorNaoEncontradoException()
+        ServicoValidador.validar_professor_existe(professor)
         professor.deleted_at = datetime.now()
         professor.usuario.deleted_at = datetime.now()
         solicitacoes: list[Solicitacao] = professor.solicitacoes or []
@@ -124,6 +119,5 @@ class ServiceProfessor(ServicoBase):
     @staticmethod
     def obter_por_email(db: Session, email: str) -> Professor:
         db_professor = PGCopRepository.obter_professor_por_email(db, email)
-        if db_professor is None:
-            raise ProfessorNaoEncontradoException()
+        ServicoValidador.validar_professor_existe(db_professor)
         return db_professor
