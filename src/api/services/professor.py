@@ -95,8 +95,8 @@ class ServiceProfessor(ServicoBase):
         logger.info(
             f"{professor_id=} | Iniciando verificações para atualizar professor."
         )
-        ServicoValidador.validar_atualizacao_de_professor(
-            professor_id, updates_professor, db_professor
+        await ServicoValidador.validar_atualizacao_de_professor(
+            db, professor_id, updates_professor, db_professor
         )
 
         db_professor.usuario.nome = updates_professor.nome or db_professor.usuario.nome

@@ -129,3 +129,18 @@ class PGCopRepository:
             )
             .all()
         )
+
+    async def obter_usuario_por_email_excluindo_id(
+        db: Session, email: str, id: int
+    ) -> Usuario:
+        return (
+            db.query(Usuario)
+            .filter(
+                and_(
+                    Usuario.email == email,
+                    Usuario.id != id,
+                    Usuario.deleted_at == None,  # noqa: E711
+                )
+            )
+            .first()
+        )
