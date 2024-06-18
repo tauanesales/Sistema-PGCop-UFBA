@@ -12,13 +12,14 @@ from src.api.database.models.usuario import Usuario
 from src.api.database.repository import PGCopRepository
 from src.api.entrypoints.professores.errors import ProfessorNaoEncontradoException
 from src.api.entrypoints.professores.schema import (
-    ProfessorBase,
     ProfessorCreate,
     ProfessorInDB,
+    ProfessorUpdate,
 )
 from src.api.services.auth import ServiceAuth, oauth2_scheme
 from src.api.services.usuario import ServiceUsuario
 from src.api.services.usuario_tipo_base import ServicoBase
+from src.api.services.validador import ServicoValidador
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -85,20 +86,40 @@ class ServiceProfessor(ServicoBase):
         db.commit()
 
     @staticmethod
-    def atualizar_professor(
-        db: Session, professor_id: int, updates_professor: ProfessorBase
+    async def atualizar_professor(
+        db: Session, professor_id: int, updates_professor: ProfessorUpdate
     ) -> ProfessorInDB:
-        ServiceProfessor.validar_professor(db, updates_professor)
-        db_professor = (
-            db.query(Professor).filter(Professor.id == professor_id).one_or_none()
+        db_professor: Professor = PGCopRepository.obter_por_id(
+            db, professor_id, Professor
         )
-        if db_professor is None:
-            raise ProfessorNaoEncontradoException()
-        for key, value in updates_professor.model_dump().items():
-            setattr(db_professor, key, value)
+        logger.info(
+            f"{professor_id=} | Iniciando verificações para atualizar professor."
+        )
+        ServicoValidador.validar_atualizacao_de_professor(
+            professor_id, updates_professor, db_professor
+        )
+
+        db_professor.usuario.nome = updates_professor.nome or db_professor.usuario.nome
+        db_professor.usuario.email = (
+            updates_professor.email or db_professor.usuario.email
+        )
+        db_professor.usuario.tipo_usuario_id = (
+            PGCopRepository.obter_id_tipo_usuario_por_titulo(
+                db, updates_professor.tipo_usuario
+            )
+            if updates_professor.tipo_usuario
+            else db_professor.usuario.tipo_usuario_id
+        )
+        db_professor.usuario.senha_hash = (
+            pwd_context.hash(updates_professor.senha)
+            if updates_professor.senha
+            else db_professor.usuario.senha_hash
+        )
+
         db.commit()
         db.refresh(db_professor)
-        return ProfessorInDB(**db_professor.__dict__)
+        logger.info(f"{professor_id=} | Professor atualizado com sucesso.")
+        return ServiceProfessor.de_professor_para_professor_in_db(db_professor)
 
     @staticmethod
     def obter_por_email(db: Session, email: str) -> Professor:
