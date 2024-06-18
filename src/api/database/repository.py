@@ -68,7 +68,7 @@ class PGCopRepository:
         )
 
     @staticmethod
-    def obter_id_tipo_usuario_por_titulo(db: Session, titulo: str) -> int:
+    def obter_id_tipo_usuario_por_titulo(db: Session, titulo: TipoUsuarioEnum) -> int:
         return (
             db.query(TipoUsuario)
             .filter(

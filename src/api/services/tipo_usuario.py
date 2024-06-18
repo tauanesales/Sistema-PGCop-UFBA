@@ -23,7 +23,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-class TipoUsuarioService:
+class ServicoTipoUsuario:
     user_service_map = {
         TipoUsuarioEnum.COORDENADOR: ServiceProfessor,
         TipoUsuarioEnum.PROFESSOR: ServiceProfessor,
@@ -34,7 +34,7 @@ class TipoUsuarioService:
     def buscar_dados_por_tipo(
         db: Session, usuario: Usuario, token: str = Depends(oauth2_scheme)
     ) -> Union[AlunoInDB, ProfessorInDB]:
-        tipo_usuario_service: ServicoBase = TipoUsuarioService.user_service_map[
+        tipo_usuario_service: ServicoBase = ServicoTipoUsuario.user_service_map[
             usuario.tipo_usuario.titulo
         ]
         logger.info(
@@ -52,6 +52,6 @@ class TipoUsuarioService:
         logger.info("Token verificado com sucesso.")
         usuario: Usuario = ServiceUsuario.obter_por_email(db=db, email=email)
         logger.info("Usuário encontrado com sucesso.")
-        return TipoUsuarioService.buscar_dados_por_tipo(
+        return ServicoTipoUsuario.buscar_dados_por_tipo(
             db=db, usuario=usuario, token=token
         )

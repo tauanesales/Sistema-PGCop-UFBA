@@ -4,9 +4,6 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from src.api.database.models.usuario import Usuario
-
-# from src.api.database.session import get_db
-# from src.api.exceptions.credentials_exception import CredentialsException
 from src.api.database.repository import PGCopRepository
 from src.api.exceptions.http_service_exception import (
     EmailJaRegistradoException,
@@ -15,11 +12,6 @@ from src.api.exceptions.http_service_exception import (
 from src.api.schemas.usuario import UsuarioBase, UsuarioCreate, UsuarioInDB
 from src.api.services.usuario_tipo_base import ServicoBase
 
-# from src.api.services.aluno import ServiceAluno
-# from src.api.services.auth import ServiceAuth
-# from src.api.services.professor import ServiceProfessor
-
-# Instanciando o OAuth2PasswordBearer
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 # Configuração do hash de senha
