@@ -24,7 +24,7 @@ class TaskMailerWorker(MailerWorker):
         """
         Retorna as tarefas pendentes, próximas ao prazo de entrega.
         """
-        deadline = datetime.now() + timedelta(days=30)  # Expires in 1 month
+        deadline = datetime.utcnow() + timedelta(days=30)  # Expires in 1 month
 
         query = (
             select(
@@ -65,7 +65,7 @@ class TaskMailerWorker(MailerWorker):
                     Usuario, Aluno.usuario_id == Usuario.id
                 )
             )
-            .where(Tarefa.data_prazo < datetime.now())
+            .where(Tarefa.data_prazo < datetime.utcnow())
             .where(Tarefa.data_ultima_notificacao <= Tarefa.data_prazo)
         )
         return session().execute(query)
@@ -93,7 +93,7 @@ class TaskMailerWorker(MailerWorker):
                 query = (
                     update(Tarefa)
                     .where(Tarefa.id == task.tarefa_id)
-                    .values(data_ultima_notificacao=str(datetime.now().date()))
+                    .values(data_ultima_notificacao=str(datetime.utcnow().date()))
                 )
 
                 current_session = session()
@@ -120,7 +120,7 @@ class TaskMailerWorker(MailerWorker):
                 query = (
                     update(Tarefa)
                     .where(Tarefa.id == task.tarefa_id)
-                    .values(data_ultima_notificacao=str(datetime.now().date()))
+                    .values(data_ultima_notificacao=str(datetime.utcnow().date()))
                 )
 
                 current_session = session()

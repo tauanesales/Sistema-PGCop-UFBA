@@ -67,7 +67,15 @@ class OrientadorNaoEncontradoException(HTTPException):
     def __init__(self):
         super().__init__(
             status_code=400,
-            detail="Erro ao adicionar aluno: Id do orientador não encontrado.",
+            detail="Erro ao adicionar aluno: orientador não encontrado.",
+        )
+
+
+class OrientadorDeveSerInformadoException(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=400,
+            detail="Erro ao adicionar aluno: orientador deve ser informado.",
         )
 
 

@@ -7,6 +7,7 @@ from src.api.exceptions.value_error_validation_exception import (
     PasswordWithoutUppercaseError,
     PasswordWithSpacesError,
 )
+from src.api.utils.decorators import partial_model
 from src.api.utils.enums import TipoUsuarioEnum
 
 
@@ -30,7 +31,7 @@ class UsuarioBase(BaseModel):
         return nome
 
 
-class UsuarioCreate(UsuarioBase):
+class ValidadorDeSenhaUsuario:
     senha: constr(min_length=8)
 
     @field_validator("senha")
@@ -47,6 +48,15 @@ class UsuarioCreate(UsuarioBase):
         if senha.isalnum():
             raise PasswordWithoutSpecialCharacterError()
         return senha
+
+
+class UsuarioCriacao(UsuarioBase, ValidadorDeSenhaUsuario):
+    pass
+
+
+@partial_model
+class UsuarioAtualizado(UsuarioCriacao):
+    pass
 
 
 class UsuarioInDB(UsuarioBase):

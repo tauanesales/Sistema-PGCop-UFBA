@@ -1,4 +1,3 @@
-import asyncio
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -9,6 +8,7 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.inmemory import InMemoryBackend
 
 from src.api.entrypoints.router import api_router
+
 # from src.api.mailsender.workers import start_mailer_workers
 
 APP_ROOT = Path(__file__).parent

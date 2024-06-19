@@ -24,20 +24,31 @@ class Aluno(EntityModelBase):
     data_ingresso: Mapped[date] = mapped_column(Date(), nullable=False, index=True)
     data_qualificacao: Mapped[date] = mapped_column(Date(), nullable=True, index=True)
     data_defesa: Mapped[date] = mapped_column(Date(), nullable=True, index=True)
-    tarefas: Mapped["Tarefa"] = relationship(  # noqa: F821
-        "Tarefa", back_populates="aluno", uselist=True
-    )
 
     orientador_id: Mapped[int] = mapped_column(
         ForeignKey("professores.id"), nullable=True, index=True
     )
-    orientador: Mapped["Professor"] = relationship(  # noqa: F821
-        "Professor", back_populates="alunos"
-    )
 
     usuario_id: Mapped[int] = mapped_column(ForeignKey("usuarios.id"))
-    usuario: Mapped["Usuario"] = relationship("Usuario")  # noqa: F821
 
-    solicitacoes: Mapped["Solicitacao"] = relationship(  # noqa: F821
-        "Solicitacao", back_populates="aluno"
+    usuario: Mapped["Usuario"] = relationship(  # noqa: F821
+        "Usuario",
+        lazy="joined",
+    )
+
+    tarefas: Mapped["Tarefa"] = relationship(  # noqa: F821
+        "Tarefa",
+        back_populates="aluno",
+        uselist=True,
+        lazy="joined",
+    )
+    orientador: Mapped["Professor"] = relationship(  # noqa: F821
+        "Professor",
+        back_populates="alunos",
+        lazy="joined",
+    )
+    solicitacoes: Mapped[list["Solicitacao"]] = relationship(  # noqa: F821
+        "Solicitacao",
+        back_populates="aluno",
+        lazy="joined",
     )

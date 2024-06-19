@@ -10,14 +10,14 @@ class Solicitacao(EntityModelBase):
 
     aluno_id: Mapped[int] = mapped_column(ForeignKey("alunos.id"), nullable=False)
     aluno: Mapped["Aluno"] = relationship(  # noqa: F821
-        "Aluno", back_populates="solicitacoes"
+        "Aluno", back_populates="solicitacoes", lazy="joined", uselist=False
     )
 
     professor_id: Mapped[int] = mapped_column(
         ForeignKey("professores.id"), nullable=False, unique=False, index=True
     )
     professor: Mapped["Professor"] = relationship(  # noqa: F821
-        "Professor", back_populates="solicitacoes"
+        "Professor", back_populates="solicitacoes", lazy="immediate", uselist=False
     )
 
     status: Mapped[StatusSolicitacaoEnum] = mapped_column(

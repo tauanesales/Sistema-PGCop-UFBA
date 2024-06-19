@@ -1,12 +1,12 @@
 from datetime import date
 from typing import Optional
 
-from pydantic import BaseModel, Field, HttpUrl, constr, field_validator
+from pydantic import Field, HttpUrl, constr, field_validator
 from pydantic_br import CPF
 from pydantic_extra_types.phone_numbers import PhoneNumber
 
 from src.api.exceptions.value_error_validation_exception import MatriculaNotNumericError
-from src.api.schemas.usuario import UsuarioBase, UsuarioCreate, UsuarioInDB
+from src.api.schemas.usuario import UsuarioBase, UsuarioCriacao, UsuarioInDB
 from src.api.utils.decorators import partial_model
 from src.api.utils.enums import CursoAlunoEnum, TipoUsuarioEnum
 
@@ -65,7 +65,7 @@ class AlunoBase(UsuarioBase):
         return lattes
 
 
-class AlunoNovo(AlunoBase, UsuarioCreate):
+class AlunoNovo(AlunoBase, UsuarioCriacao):
     pass
 
 

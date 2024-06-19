@@ -1,7 +1,9 @@
-from typing import AsyncGenerator
+from fastapi import HTTPException
+from loguru import logger
+from pydantic import ValidationError
 from sqlalchemy import URL
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
 
 from src.api.config import Config
 from src.api.database.repository import PGCopRepository
@@ -14,14 +16,27 @@ engine = create_async_engine(
         host=Config.DB_CONFIG.DB_HOST,
         port=Config.DB_CONFIG.DB_PORT,
         database=Config.DB_CONFIG.DB_DATABASE,
-        query={"charset": "utf8"},
+        query={"charset": "UTF8MB4"},
     )
 )
 
 async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
 
-def get_repo(repository = PGCopRepository):
+
+def get_repo(repository=PGCopRepository):
     async def _get_repo():
         async with async_session() as session:
-            yield repository(session)
+            try:
+                yield repository(session)
+                await session.commit()
+            except Exception as e:
+                await session.rollback()
+                if not isinstance(e, (HTTPException, ValidationError)):
+                    logger.warning(
+                        f"Rollback realizado na transação atual devido ao erro: {e};"
+                    )
+                raise e
+            finally:
+                await session.close()
+
     return _get_repo

@@ -169,3 +169,8 @@ def downgrade() -> None:
     op.drop_index(op.f("ix_alunos_cpf"), table_name="alunos")
     op.create_index("ix_alunos_cpf", "alunos", ["cpf"], unique=True)
     # ### end Alembic commands ###
+    op.execute("DELETE FROM solicitacoes WHERE id = 1")
+    op.execute("DELETE FROM alunos WHERE id = 1")
+    op.execute("DELETE FROM professores WHERE id IN (1, 2)")
+    op.execute("DELETE FROM usuarios WHERE id IN (1, 2, 3)")
+    op.execute("DELETE FROM tipo_usuario WHERE id IN (1, 2, 3)")

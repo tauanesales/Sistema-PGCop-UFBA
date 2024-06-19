@@ -1,6 +1,6 @@
-from datetime import date, datetime
+from datetime import datetime
 
-from sqlalchemy import Date, MetaData
+from sqlalchemy import DateTime, MetaData
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -10,10 +10,10 @@ class EntityModelBase(DeclarativeBase):
     metadata = MetaData()
 
     id: Mapped[int] = mapped_column(nullable=False, primary_key=True, index=True)
-    created_at: Mapped[date] = mapped_column(
-        Date(), default=datetime.utcnow(), nullable=False
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(), default=datetime.utcnow(), nullable=False
     )
-    updated_at: Mapped[date] = mapped_column(
-        Date(), default=datetime.utcnow(), nullable=False, onupdate=datetime.utcnow
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(), default=datetime.utcnow(), nullable=False, onupdate=datetime.utcnow
     )
-    deleted_at: Mapped[date] = mapped_column(Date(), nullable=True)
+    deleted_at: Mapped[datetime] = mapped_column(DateTime(), nullable=True)
