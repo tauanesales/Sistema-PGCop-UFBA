@@ -4,7 +4,7 @@ from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from loguru import logger
 from passlib.context import CryptContext
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.database.models.usuario import Usuario
 from src.api.entrypoints.alunos.schema import AlunoInDB
@@ -32,7 +32,7 @@ class ServicoTipoUsuario:
 
     @staticmethod
     def buscar_dados_por_tipo(
-        db: Session, usuario: Usuario, token: str = Depends(oauth2_scheme)
+        db: AsyncSession, usuario: Usuario, token: str = Depends(oauth2_scheme)
     ) -> Union[AlunoInDB, ProfessorInDB]:
         tipo_usuario_service: ServicoBase = ServicoTipoUsuario.user_service_map[
             usuario.tipo_usuario.titulo
@@ -44,7 +44,7 @@ class ServicoTipoUsuario:
 
     @staticmethod
     def obter_usuario_atual(
-        db: Session, token: str = Depends(oauth2_scheme)
+        db: AsyncSession, token: str = Depends(oauth2_scheme)
     ) -> Union[AlunoInDB, ProfessorInDB]:
         """Obtém o usuário atual com base no token fornecido."""
         logger.info("Obtendo usuário atual com base no token fornecido.")

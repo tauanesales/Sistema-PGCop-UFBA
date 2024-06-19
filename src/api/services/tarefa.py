@@ -1,28 +1,25 @@
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.database.models.aluno import Aluno
 from src.api.database.models.tarefa import Tarefa
-from src.api.entrypoints.alunos.errors import AlunoNaoEncontradoException
+from src.api.exceptions.http_service_exception import AlunoNaoEncontradoException
 from src.api.entrypoints.tarefas.errors import (
     ExcecaoGenerica,
-    ExcecaoIdAlunoNaoEncontrado,
     ExcecaoTarefaNaoEncontrada,
 )
 from src.api.entrypoints.tarefas.schema import TarefaBase
+from src.api.services.aluno import ServicoAluno
 
 
 class ServiceTarefa:
     @staticmethod
-    def validar_tarefa(db: Session, tarefa: TarefaBase):
-        try:
-            ServiceTarefa.obter_aluno(db, aluno_id=tarefa.aluno_id)
-        except AlunoNaoEncontradoException:
-            raise ExcecaoIdAlunoNaoEncontrado()
+    async def validar_tarefa(db: AsyncSession, tarefa: TarefaBase):
+        await ServicoAluno.obter_aluno(db, tarefa.aluno_id)
 
     @staticmethod
-    def criar_tarefa(db: Session, tarefa: TarefaBase):
-        ServiceTarefa.validar_tarefa(db=db, tarefa=tarefa)
+    async def criar_tarefa(db: AsyncSession, tarefa: TarefaBase):
+        await ServiceTarefa.validar_tarefa(db=db, tarefa=tarefa)
 
         db_tarefa = Tarefa(
             aluno_id=tarefa.aluno_id,
@@ -40,8 +37,8 @@ class ServiceTarefa:
         return db_tarefa
 
     @staticmethod
-    def atualizar_tarefa(db: Session, tarefa_id: int, tarefa: TarefaBase):
-        ServiceTarefa.validar_tarefa(db=db, tarefa=tarefa)
+    async def atualizar_tarefa(db: AsyncSession, tarefa_id: int, tarefa: TarefaBase):
+        await ServiceTarefa.validar_tarefa(db=db, tarefa=tarefa)
 
         try:
             db.query(Tarefa).filter(Tarefa.id == tarefa_id).update(tarefa.model_dump())
@@ -56,31 +53,20 @@ class ServiceTarefa:
         return db_tarefa
 
     @staticmethod
-    def deletar_tarefa(db: Session, tarefa_id: int):
-        db_tarefa = db.query(Tarefa).filter(Tarefa.id == tarefa_id).one_or_none()
-
-        if not db_tarefa:
-            raise ExcecaoTarefaNaoEncontrada()
-        db.delete(db_tarefa)
+    async def deletar_tarefa(db: AsyncSession, id: int):
+        db.delete(ServiceTarefa.obter_tarefa(db, id))
         db.commit()
 
     @staticmethod
-    def obter_tarefa(db: Session, id: int):
+    async def obter_tarefa(db: AsyncSession, id: int):
         db_tarefa = db.query(Tarefa).filter(Tarefa.id == id).one_or_none()
-        if db_tarefa is None:
+        if not db_tarefa:
             raise ExcecaoTarefaNaoEncontrada()
         return db_tarefa
 
     @staticmethod
-    def obter_tarefas_por_aluno(db: Session, aluno_id: int):
+    async def obter_tarefas_por_aluno(db: AsyncSession, aluno_id: int):
         db_aluno = db.query(Tarefa).filter(Tarefa.aluno_id == aluno_id).all()
         if db_aluno is None:
             raise ExcecaoTarefaNaoEncontrada()
-        return db_aluno
-
-    @staticmethod
-    def obter_aluno(db: Session, aluno_id: int):
-        db_aluno = db.query(Aluno).filter(Aluno.id == aluno_id).one_or_none()
-        if db_aluno is None:
-            raise AlunoNaoEncontradoException()
         return db_aluno

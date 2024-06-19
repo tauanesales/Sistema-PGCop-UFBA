@@ -4,7 +4,7 @@ router = APIRouter()
 
 
 @router.get("/health-check", status_code=200, tags=["Monitoring"])
-def health_check() -> dict:
+async def health_check() -> dict:
     """
     Checks the health of the project.
 

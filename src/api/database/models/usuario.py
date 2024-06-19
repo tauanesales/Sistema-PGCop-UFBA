@@ -16,7 +16,7 @@ class Usuario(EntityModelBase):
     senha_hash: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     new_password_token: Mapped[str] = mapped_column(String(255), nullable=True)
 
-    tipo_usuario: Mapped["TipoUsuario"] = relationship("TipoUsuario")  # noqa: F821
+    tipo_usuario: Mapped["TipoUsuario"] = relationship("TipoUsuario", lazy='joined')  # noqa: F821
     tipo_usuario_id: Mapped[int] = mapped_column(
         ForeignKey("tipo_usuario.id"), nullable=False, unique=False, index=True
     )

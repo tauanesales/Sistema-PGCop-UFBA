@@ -3,7 +3,9 @@ from abc import abstractmethod
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.api.database.repository import PGCopRepository
 
 # Instanciando o OAuth2PasswordBearer
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -13,10 +15,11 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class ServicoBase:
-    @abstractmethod
-    def buscar_atual(db: Session, token: str = Depends(oauth2_scheme)):
+    def __init__(self, repository):
+        self._repo = repository
+
+    def buscar_atual(self, token: str = Depends(oauth2_scheme)):
         pass
 
-    @abstractmethod
-    def obter_por_email(db: Session, email: str):
+    def obter_por_email(self, email: str):
         pass

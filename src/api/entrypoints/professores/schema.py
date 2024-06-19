@@ -15,10 +15,7 @@ class ProfessorCreate(UsuarioCreate):
 
 @partial_model
 class ProfessorUpdate(ProfessorCreate):
-    nome: constr(min_length=3, max_length=100)
-    email: EmailStr
-    tipo_usuario: TipoUsuarioEnum
-    senha: constr(min_length=8)
+    pass
 
 
 class ProfessorInDB(UsuarioInDB):

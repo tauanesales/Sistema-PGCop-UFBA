@@ -1,5 +1,7 @@
-from sqlalchemy import and_, or_
-from sqlalchemy.orm import Session
+from typing import Optional
+from sqlalchemy import and_, or_, delete, select, update
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import class_mapper
 
 from src.api.database.models.aluno import Aluno
 from src.api.database.models.entity_model_base import EntityModelBase
@@ -11,10 +13,32 @@ from src.api.utils.enums import StatusSolicitacaoEnum, TipoUsuarioEnum
 
 
 class PGCopRepository:
-    @staticmethod
-    def obter_usuario_por_email(db: Session, email: str) -> Usuario:
+    def __init__(self, session: AsyncSession):
+        self._session: AsyncSession = session
+
+    async def buscar_por_id(self, id: int, model: EntityModelBase) -> Optional[EntityModelBase]:
+        query = select(model).where(and_(model.id == id, model.deleted_at == None))
+        result = await self._session.execute(query)
+        return result.scalar()
+
+    async def filtrar(self, model: EntityModelBase, **kwargs) -> list[EntityModelBase]:
+        return await self._session.execute(select(model).filter_by(**kwargs)).fetchall()
+        
+    async def criar(self, model: EntityModelBase) -> EntityModelBase:
+        self._session.add(model)
+        self._session.flush()
+        self._session.refresh(model)
+        return model
+        
+    async def atualizar_por_id(self, id: int, model: EntityModelBase, **kwargs) -> EntityModelBase:
+        await self._session.execute(
+            update(model).where(model.id == id).values(**kwargs)
+        )
+        return await self.buscar_por_id(id, model)
+
+    async def buscar_usuario_por_email(self, email: str) -> Optional[Usuario]:
         return (
-            db.query(Usuario)
+            self._session.query(Usuario)
             .filter(
                 and_(
                     Usuario.email == email,
@@ -24,10 +48,9 @@ class PGCopRepository:
             .first()
         )
 
-    @staticmethod
-    def obter_aluno_por_email(db: Session, email: str) -> Aluno:
+    async def buscar_aluno_por_email(self, email: str) -> Optional[Aluno]:
         return (
-            db.query(Aluno)
+            self._session.query(Aluno)
             .join(Usuario, Usuario.id == Aluno.usuario_id)
             .filter(
                 and_(
@@ -39,10 +62,9 @@ class PGCopRepository:
             .first()
         )
 
-    @staticmethod
-    def obter_professor_por_email(db: Session, email: str) -> Usuario:
+    async def buscar_professor_por_email(self, email: str) -> Optional[Usuario]:
         return (
-            db.query(Professor)
+            self._session.query(Professor)
             .join(Usuario, Professor.usuario_id == Usuario.id)
             .join(TipoUsuario, Usuario.tipo_usuario_id == TipoUsuario.id)
             .filter(
@@ -59,18 +81,12 @@ class PGCopRepository:
             .first()
         )
 
-    @staticmethod
-    def obter_usuario_por_id(db: Session, id: int) -> Usuario:
-        return (
-            db.query(Usuario)
-            .filter(and_(Usuario.id == id, Usuario.deleted_at == None))  # noqa: E711
-            .first()
-        )
+    async def buscar_usuario_por_id(self, id: int) -> Optional[Usuario]:
+        return await self.buscar_por_id(id, Usuario)
 
-    @staticmethod
-    def obter_id_tipo_usuario_por_titulo(db: Session, titulo: TipoUsuarioEnum) -> int:
+    async def buscar_id_tipo_usuario_por_titulo(self, titulo: TipoUsuarioEnum) -> int:
         return (
-            db.query(TipoUsuario)
+            self._session.query(TipoUsuario)
             .filter(
                 and_(
                     TipoUsuario.titulo == titulo,
@@ -81,24 +97,16 @@ class PGCopRepository:
             .id
         )
 
-    @staticmethod
-    def obter_por_id(db: Session, id: int, model: EntityModelBase) -> EntityModelBase:
-        return (
-            db.query(model)
-            .filter(and_(model.id == id, model.deleted_at == None))  # noqa: E711
-            .first()
-        )
 
-    @staticmethod
-    def obter_todos(db: Session, model: EntityModelBase) -> EntityModelBase:
-        return db.query(model).filter(model.deleted_at == None).all()  # noqa: E711
+    async def buscar_todos(self, model: EntityModelBase) -> list[EntityModelBase]:
+        async with self._session.begin():
+            return (await self._session.execute(select(model).where(model.deleted_at == None))).fetchall()  # noqa: E711
 
-    @staticmethod
-    def obter_todos_orientandos_de_um_professor(
-        db: Session, orientador_id: int
+    async def buscar_todos_orientandos_de_um_professor(self, 
+        orientador_id: int
     ) -> Aluno:
         return (
-            db.query(Aluno)
+            self._session.query(Aluno)
             .filter(
                 and_(
                     Aluno.orientador_id == orientador_id,
@@ -108,18 +116,18 @@ class PGCopRepository:
             .all()
         )
 
-    def obter_aluno_por_cpf(db: Session, cpf: str) -> Aluno:
+    async def buscar_aluno_por_cpf(self, cpf: str) -> Optional[Aluno]:
         return (
-            db.query(Aluno)
+            self._session.query(Aluno)
             .filter(and_(Aluno.cpf == cpf, Aluno.deleted_at == None))  # noqa: E711
             .first()
         )
 
-    def obter_lista_de_solicitacoes_de_professor(
-        db: Session, professor_id: int, status: StatusSolicitacaoEnum
+    def buscar_lista_de_solicitacoes_de_professor(self,
+        professor_id: int, status: StatusSolicitacaoEnum
     ) -> list[Solicitacao]:
         return (
-            db.query(Solicitacao)
+            self._session.query(Solicitacao)
             .filter(
                 and_(
                     Solicitacao.professor_id == professor_id,
@@ -130,16 +138,43 @@ class PGCopRepository:
             .all()
         )
 
-    async def obter_usuario_por_email_excluindo_id(
-        db: Session, email: str, id: int
-    ) -> Usuario:
+    async def buscar_usuario_por_email_excluindo_id(self, 
+        email: str, id: int
+    ) -> Optional[Usuario]:
         return (
-            db.query(Usuario)
+            self._session.query(Usuario)
             .filter(
                 and_(
                     Usuario.email == email,
                     Usuario.id != id,
                     Usuario.deleted_at == None,  # noqa: E711
+                )
+            )
+            .first()
+        )
+    
+    
+    async def buscar_aluno_por_telefone(self, telefone: str) -> Optional[Aluno]:
+        return (
+            self._session.query(Aluno)
+            .filter(
+                and_(
+                    Aluno.telefone == telefone,
+                    Aluno.deleted_at == None,  # noqa: E711
+                )
+            )
+            .first()
+        )
+
+
+    async def buscar_aluno_por_telefone_excluindo_id(self, telefone: str, id: int) -> Optional[Aluno]:
+        return (
+            self._session.query(Aluno)
+            .filter(
+                and_(
+                    Aluno.telefone == telefone,
+                    Aluno.id != id,
+                    Aluno.deleted_at == None,  # noqa: E711
                 )
             )
             .first()

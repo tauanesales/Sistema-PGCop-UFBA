@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSessionmaker
 from sqlalchemy.pool import StaticPool
 
 from src.api.database.models.entity_model_base import EntityModelBase

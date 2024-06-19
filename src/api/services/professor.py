@@ -4,7 +4,7 @@ from typing import List
 from fastapi import Depends
 from loguru import logger
 from passlib.context import CryptContext
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.database.models.professor import Professor
 from src.api.database.models.solicitacoes import Solicitacao
@@ -24,7 +24,9 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class ServiceProfessor(ServicoBase):
-    def buscar_atual(db: Session, token: str = Depends(oauth2_scheme)) -> ProfessorInDB:
+    _repo: PGCopRepository
+
+    def buscar_atual(db: AsyncSession, token: str = Depends(oauth2_scheme)) -> ProfessorInDB:
         email = ServiceAuth.verificar_token(token)
         professor: Professor = ServiceProfessor.obter_por_email(db, email)
         return ProfessorInDB(
@@ -36,7 +38,7 @@ class ServiceProfessor(ServicoBase):
         )
 
     @staticmethod
-    def criar(db: Session, novo_professor: ProfessorCreate) -> ProfessorInDB:
+    def criar(db: AsyncSession, novo_professor: ProfessorCreate) -> ProfessorInDB:
         db_usuario_professor: Usuario = ServiceUsuario.criar(db, novo_professor)
         logger.info(f"Criando professor {novo_professor.tipo_usuario}")
         db_professor = Professor(usuario=db_usuario_professor)
@@ -47,31 +49,34 @@ class ServiceProfessor(ServicoBase):
         logger.info("Professor criado com sucesso.")
         return ServiceProfessor.de_professor_para_professor_in_db(db_professor)
 
-    def de_professor_para_professor_in_db(professor: Professor) -> ProfessorInDB:
+    async def de_professor_para_professor_in_db(professor: Professor) -> ProfessorInDB:
+        usuario: Usuario = professor.usuario
         return ProfessorInDB(
             id=professor.id,
-            nome=professor.usuario.nome,
-            email=professor.usuario.email,
-            tipo_usuario=professor.usuario.tipo_usuario.titulo,
-            user_id=professor.usuario.id,
+            nome=usuario.nome,
+            email=usuario.email,
+            tipo_usuario=(usuario.tipo_usuario).titulo,
+            user_id=usuario.id,
         )
 
-    @staticmethod
-    def obter_professor(db: Session, professor_id: int) -> ProfessorInDB:
-        db_professor = PGCopRepository.obter_por_id(db, professor_id, Professor)
+    async def obter_professor(self, professor_id: int) -> ProfessorInDB:
+        db_professor = await self._repo.buscar_por_id(professor_id, Professor)
         ServicoValidador.validar_professor_existe(db_professor)
-        return ServiceProfessor.de_professor_para_professor_in_db(db_professor)
+        return await ServiceProfessor.de_professor_para_professor_in_db(db_professor)
 
-    def obter_professores(db: Session) -> List[ProfessorInDB]:
-        db_professors = PGCopRepository.obter_todos(db, Professor)
+    async def obter_professores(db: AsyncSession) -> List[ProfessorInDB]:
+        db_professores = await PGCopRepository.buscar_todos(db, Professor)
+
+        logger.info(db_professores[0])
+        logger.info(dir(db_professores[0]))
         return [
             ServiceProfessor.de_professor_para_professor_in_db(professor)
-            for professor in db_professors
+            for professor in db_professores
         ]
 
     @staticmethod
-    def deletar(db: Session, professor_id: int) -> None:
-        professor: Professor = PGCopRepository.obter_por_id(db, professor_id, Professor)
+    async def deletar(db: AsyncSession, professor_id: int) -> None:
+        professor: Professor =await  PGCopRepository.buscar_por_id(db, professor_id, Professor)
         ServicoValidador.validar_professor_existe(professor)
         professor.deleted_at = datetime.now()
         professor.usuario.deleted_at = datetime.now()
@@ -82,9 +87,9 @@ class ServiceProfessor(ServicoBase):
 
     @staticmethod
     async def atualizar_professor(
-        db: Session, professor_id: int, updates_professor: ProfessorUpdate
+        db: AsyncSession, professor_id: int, updates_professor: ProfessorUpdate
     ) -> ProfessorInDB:
-        db_professor: Professor = PGCopRepository.obter_por_id(
+        db_professor: Professor = await PGCopRepository.buscar_por_id(
             db, professor_id, Professor
         )
         logger.info(
@@ -99,7 +104,7 @@ class ServiceProfessor(ServicoBase):
             updates_professor.email or db_professor.usuario.email
         )
         db_professor.usuario.tipo_usuario_id = (
-            PGCopRepository.obter_id_tipo_usuario_por_titulo(
+           await PGCopRepository.buscar_id_tipo_usuario_por_titulo(
                 db, updates_professor.tipo_usuario
             )
             if updates_professor.tipo_usuario
@@ -117,7 +122,7 @@ class ServiceProfessor(ServicoBase):
         return ServiceProfessor.de_professor_para_professor_in_db(db_professor)
 
     @staticmethod
-    def obter_por_email(db: Session, email: str) -> Professor:
-        db_professor = PGCopRepository.obter_professor_por_email(db, email)
+    async def obter_por_email(db: AsyncSession, email: str) -> Professor:
+        db_professor = await  PGCopRepository.buscar_professor_por_email(db, email)
         ServicoValidador.validar_professor_existe(db_professor)
         return db_professor

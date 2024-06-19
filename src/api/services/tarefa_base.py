@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.database.models.tarefas_base import TarefasBase
 from src.api.entrypoints.tarefas_base.errors import ExcecaoTarefaNaoEncontrada
@@ -7,7 +7,7 @@ from src.api.entrypoints.tarefas_base.schema import Tarefa_base_Base
 
 class ServiceTarefaBase:
     @staticmethod
-    def criar_tarefa_base(db: Session, tarefa: Tarefa_base_Base):
+    async def criar_tarefa_base(db: AsyncSession, tarefa: Tarefa_base_Base):
         db_tarefa = TarefasBase(
             nome=tarefa.nome,
             descricao=tarefa.descricao,
@@ -21,7 +21,7 @@ class ServiceTarefaBase:
         return db_tarefa
 
     @staticmethod
-    def atualizar_tarefa_base(db: Session, tarefa_id: int, update_data: dict):
+    async def atualizar_tarefa_base(db: AsyncSession, tarefa_id: int, update_data: dict):
         db.query(TarefasBase).filter(TarefasBase.id == tarefa_id).update(update_data)
         db.commit()
 
@@ -31,7 +31,7 @@ class ServiceTarefaBase:
         return db_tarefa
 
     @staticmethod
-    def deletar_tarefa_base(db: Session, tarefa_id: int):
+    async def deletar_tarefa_base(db: AsyncSession, tarefa_id: int):
         db_tarefa = (
             db.query(TarefasBase).filter(TarefasBase.id == tarefa_id).one_or_none()
         )
@@ -41,14 +41,14 @@ class ServiceTarefaBase:
         db.commit()
 
     @staticmethod
-    def obter_tarefa_base(db: Session, id: int):
+    async def obter_tarefa_base(db: AsyncSession, id: int):
         db_tarefa = db.query(TarefasBase).filter(TarefasBase.id == id).one_or_none()
         if db_tarefa is None:
             raise ExcecaoTarefaNaoEncontrada()
         return db_tarefa
 
     @staticmethod
-    def obter_tarefas_base_por_curso(db: Session, curso: str):
+    async def obter_tarefas_base_por_curso(db: AsyncSession, curso: str):
         db_tarefas = db.query(TarefasBase).filter(TarefasBase.curso == curso).all()
         if db_tarefas is None:
             raise ExcecaoTarefaNaoEncontrada()

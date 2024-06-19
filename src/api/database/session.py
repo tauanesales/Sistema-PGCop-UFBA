@@ -1,9 +1,12 @@
-from sqlalchemy import URL, create_engine
+from typing import AsyncGenerator
+from sqlalchemy import URL
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from src.api.config import Config
+from src.api.database.repository import PGCopRepository
 
-engine = create_engine(
+engine = create_async_engine(
     URL(
         drivername=Config.DB_CONFIG.DB_DRIVERNAME,
         username=Config.DB_CONFIG.DB_USERNAME,
@@ -15,13 +18,10 @@ engine = create_engine(
     )
 )
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-session = SessionLocal
+async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
 
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+def get_repo(repository = PGCopRepository):
+    async def _get_repo():
+        async with async_session() as session:
+            yield repository(session)
+    return _get_repo

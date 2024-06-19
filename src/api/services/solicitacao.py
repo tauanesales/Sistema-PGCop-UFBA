@@ -1,5 +1,5 @@
 from loguru import logger
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.database.models.solicitacoes import Solicitacao
 from src.api.database.repository import PGCopRepository
@@ -9,7 +9,7 @@ from src.api.utils.enums import StatusSolicitacaoEnum
 
 class ServicoSolicitacao:
     @staticmethod
-    def criar(db: Session, aluno_id, professor_id) -> SolicitacaoInDB:
+    async def criar(db: AsyncSession, aluno_id, professor_id) -> SolicitacaoInDB:
         db_solicitacao: Solicitacao = Solicitacao(
             aluno_id=aluno_id,
             professor_id=professor_id,
@@ -22,12 +22,12 @@ class ServicoSolicitacao:
         return ServicoSolicitacao.de_solicitacao_para_solicitacao_in_db(db_solicitacao)
 
     @staticmethod
-    def listar(
-        db: Session, professor_id: int, status: StatusSolicitacaoEnum
+    async def listar(
+        db: AsyncSession, professor_id: int, status: StatusSolicitacaoEnum
     ) -> list[SolicitacaoInDB]:
         solicitacoes: list[
             Solicitacao
-        ] = PGCopRepository.obter_lista_de_solicitacoes_de_professor(
+        ] = await  PGCopRepository.buscar_lista_de_solicitacoes_de_professor(
             db, professor_id=professor_id, status=status
         )
         logger.info(
@@ -52,10 +52,10 @@ class ServicoSolicitacao:
             status=db_solicitacao.status,
         )
 
-    def atualizar_status_solicitacao(
-        db: Session, solicitacao_id: int, status: StatusSolicitacaoEnum
+    async def atualizar_status_solicitacao(
+        db: AsyncSession, solicitacao_id: int, status: StatusSolicitacaoEnum
     ) -> SolicitacaoInDB:
-        db_solicitacao: Solicitacao = PGCopRepository.obter_por_id(
+        db_solicitacao: Solicitacao = await PGCopRepository.buscar_por_id(
             db, solicitacao_id, Solicitacao
         )
         db_solicitacao.status = status

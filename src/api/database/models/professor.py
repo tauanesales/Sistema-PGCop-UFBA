@@ -8,13 +8,13 @@ class Professor(EntityModelBase):
     __tablename__ = "professores"
 
     alunos: Mapped["Aluno"] = relationship(  # noqa: F821
-        "Aluno", back_populates="orientador"
+        "Aluno", back_populates="orientador", lazy='joined'
     )
     solicitacoes: Mapped["Solicitacao"] = relationship(  # noqa: F821
-        "Solicitacao", back_populates="professor"
+        "Solicitacao", back_populates="professor", lazy='joined'
     )
 
     usuario_id: Mapped[int] = mapped_column(
         ForeignKey("usuarios.id"), nullable=False, unique=False, index=True
     )
-    usuario: Mapped["Usuario"] = relationship("Usuario")  # noqa: F821
+    usuario: Mapped["Usuario"] = relationship("Usuario", lazy='joined')  # noqa: F821

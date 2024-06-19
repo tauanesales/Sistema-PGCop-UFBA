@@ -2,11 +2,11 @@ from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.config import Config
 from src.api.database.models.usuario import Usuario
-from src.api.database.session import get_db
+from src.api.database.session import get_repo
 from src.api.entrypoints.token.schema import Token
 from src.api.exceptions.credentials_exception import CredentialsException
 from src.api.services.auth import ServiceAuth
@@ -15,7 +15,7 @@ from src.api.services.usuario import ServiceUsuario
 router = APIRouter()
 
 
-def authenticate_user(db: Session, email: str, password: str):
+def authenticate_user(db: AsyncSession, email: str, password: str):
     user: Usuario = ServiceUsuario.obter_por_email(db, email)
     if ServiceAuth.verificar_senha(password, user.senha_hash):
         return user, user.tipo_usuario.titulo
@@ -24,7 +24,7 @@ def authenticate_user(db: Session, email: str, password: str):
 
 @router.post("/", response_model=Token)
 async def login_para_acessar_token(
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_repo),
     form_data: OAuth2PasswordRequestForm = Depends(),
 ) -> Token:
     usuario, tipo_usuario = authenticate_user(

@@ -1,7 +1,7 @@
 import random
 
 from passlib.context import CryptContext
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.database.models.usuario import Usuario
 from src.api.entrypoints.new_password.errors import (
@@ -26,8 +26,8 @@ def generate_token(length=10) -> str:
 
 class ServiceNewPassword:
     @staticmethod
-    def authenticate(db: Session, email: str, token: str) -> None:
-        db_user: Usuario = ServiceUsuario.obter_por_email(db, email)
+    async def authenticate(db: AsyncSession, email: str, token: str) -> None:
+        db_user: Usuario = await ServiceUsuario.obter_por_email(db, email)
 
         if not db_user:
             raise AuthenticationException()
@@ -36,8 +36,8 @@ class ServiceNewPassword:
             raise AuthenticationException()
 
     @staticmethod
-    def create_token(db: Session, email: str) -> NewPasswordCodeAuth:
-        db_user: Usuario = ServiceUsuario.obter_por_email(db, email)
+    async def create_token(db: AsyncSession, email: str) -> NewPasswordCodeAuth:
+        db_user: Usuario = await ServiceUsuario.obter_por_email(db, email)
 
         if not db_user:
             raise EmailNotFoundException()
@@ -58,10 +58,10 @@ class ServiceNewPassword:
         return NewPasswordCodeAuth(email=email, token=token)
 
     @staticmethod
-    def set_new_password(
-        db: Session, email: str, new_password: str, token: str
+    async def set_new_password(
+        db: AsyncSession, email: str, new_password: str, token: str
     ) -> None:
-        db_user: Usuario = ServiceUsuario.obter_por_email(db, email)
+        db_user: Usuario =await  ServiceUsuario.obter_por_email(db, email)
 
         if not db_user:
             raise EmailNotFoundException()

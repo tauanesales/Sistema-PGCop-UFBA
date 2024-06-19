@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from src.api.entrypoints.alunos.schema import AlunoCreate
+from src.api.entrypoints.alunos.schema import AlunoNovo
 from src.api.exceptions.value_error_validation_exception import (
     PasswordWithoutLowercaseError,
     PasswordWithoutNumberError,
@@ -12,7 +12,7 @@ from src.api.exceptions.value_error_validation_exception import (
 
 
 def test_aluno_create_valid(valid_student_data: dict):
-    aluno = AlunoCreate(**valid_student_data)
+    aluno = AlunoNovo(**valid_student_data)
     assert aluno.nome == valid_student_data.get("nome")
     assert aluno.cpf == valid_student_data.get("cpf")
     assert aluno.email == valid_student_data.get("email")
@@ -48,7 +48,7 @@ def test_aluno_create_valid(valid_student_data: dict):
 def test_aluno_create_password_with_spaces_error(valid_student_data, password):
     valid_student_data["senha"] = password
     with pytest.raises(ValidationError) as exc:
-        AlunoCreate(**valid_student_data)
+        AlunoNovo(**valid_student_data)
 
     assert str(PasswordWithSpacesError()) in exc.value.errors()[0].get("msg")
 
@@ -66,7 +66,7 @@ def test_aluno_create_password_with_spaces_error(valid_student_data, password):
 def test_aluno_create_password_without_number_error(valid_student_data, password):
     valid_student_data["senha"] = password
     with pytest.raises(ValidationError) as exc:
-        AlunoCreate(**valid_student_data)
+        AlunoNovo(**valid_student_data)
 
     assert str(PasswordWithoutNumberError()) in exc.value.errors()[0].get("msg")
 
@@ -82,7 +82,7 @@ def test_aluno_create_password_without_number_error(valid_student_data, password
 def test_aluno_create_password_without_uppercase_error(valid_student_data, password):
     valid_student_data["senha"] = password
     with pytest.raises(ValidationError) as exc:
-        AlunoCreate(**valid_student_data)
+        AlunoNovo(**valid_student_data)
 
     assert str(PasswordWithoutUppercaseError()) in exc.value.errors()[0].get("msg")
 
@@ -98,7 +98,7 @@ def test_aluno_create_password_without_uppercase_error(valid_student_data, passw
 def test_aluno_create_password_without_lowercase_error(valid_student_data, password):
     valid_student_data["senha"] = password
     with pytest.raises(ValidationError) as exc:
-        AlunoCreate(**valid_student_data)
+        AlunoNovo(**valid_student_data)
 
     assert str(PasswordWithoutLowercaseError()) in exc.value.errors()[0].get("msg")
 
@@ -116,7 +116,7 @@ def test_aluno_create_password_without_special_character_error(
 ):
     valid_student_data["senha"] = password
     with pytest.raises(ValidationError) as exc:
-        AlunoCreate(**valid_student_data)
+        AlunoNovo(**valid_student_data)
 
     assert str(PasswordWithoutSpecialCharacterError()) in exc.value.errors()[0].get(
         "msg"
@@ -135,7 +135,7 @@ def test_aluno_create_password_without_special_character_error(
 def test_aluno_create_short_password_error(valid_student_data, password):
     valid_student_data["senha"] = password
     with pytest.raises(ValidationError) as exc:
-        AlunoCreate(**valid_student_data)
+        AlunoNovo(**valid_student_data)
 
     assert "String should have at least 8 characters" in exc.value.errors()[0].get(
         "msg"
@@ -152,5 +152,5 @@ def test_aluno_create_short_password_error(valid_student_data, password):
 )
 def test_aluno_create_valid_password(valid_student_data, password):
     valid_student_data["senha"] = password
-    student = AlunoCreate(**valid_student_data)
+    student = AlunoNovo(**valid_student_data)
     assert student.senha == password

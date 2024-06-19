@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api.database.session import get_db
+from src.api.database.session import get_repo
 from src.api.entrypoints.new_password.schema import (
     NewPasswordChange,
     NewPasswordCodeAuth,
@@ -13,17 +13,17 @@ router = APIRouter()
 
 
 @router.post("/", status_code=status.HTTP_200_OK)
-async def set_new_password(request: NewPasswordChange, db: Session = Depends(get_db)):
-    ServiceNewPassword.set_new_password(
+async def set_new_password(request: NewPasswordChange, db: AsyncSession = Depends(get_repo)):
+    await ServiceNewPassword.set_new_password(
         db, request.email, request.nova_senha, request.token
     )
 
 
 @router.post("/auth", status_code=status.HTTP_200_OK)
-async def authenticate(request: NewPasswordCodeAuth, db: Session = Depends(get_db)):
-    ServiceNewPassword.authenticate(db, request.email, request.token)
+async def authenticate(request: NewPasswordCodeAuth, db: AsyncSession = Depends(get_repo)):
+    await ServiceNewPassword.authenticate(db, request.email, request.token)
 
 
 @router.post("/create_token", status_code=status.HTTP_201_CREATED)
-async def create_token(request: NewPasswordRequest, db: Session = Depends(get_db)):
-    ServiceNewPassword.create_token(db, request.email)
+async def create_token(request: NewPasswordRequest, db: AsyncSession = Depends(get_repo)):
+    await ServiceNewPassword.create_token(db, request.email)
