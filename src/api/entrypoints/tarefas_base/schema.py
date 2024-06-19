@@ -2,13 +2,15 @@ from enum import Enum
 
 from pydantic import BaseModel, PositiveInt, constr, field_validator
 
+from src.api.utils.decorators import partial_model
+
 
 class CursoEnum(str, Enum):
     M = "M"
     D = "D"
 
 
-class Tarefa_base_Base(BaseModel):
+class TarefaBaseBase(BaseModel):
     nome: constr(min_length=2, max_length=255)
     descricao: constr()
     prazo_em_meses: PositiveInt
@@ -24,7 +26,12 @@ class Tarefa_base_Base(BaseModel):
         return value
 
 
-class Tarefa_base_InDB(Tarefa_base_Base):
+@partial_model
+class TarefaBaseAtualizada(TarefaBaseBase):
+    pass
+
+
+class TarefaBaseInDB(TarefaBaseBase):
     id: int
 
     class ConfigDict:

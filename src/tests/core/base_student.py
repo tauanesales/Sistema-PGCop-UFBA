@@ -9,7 +9,7 @@ phone = "(71) 99166-3737"
 cpf = "340.308.910-04"
 course = "M"
 password = "1Password!"
-admission_date = str(datetime.now().date())
+admission_date = str(datetime.utcnow().date())
 
 lattes = "https://lattes.cnpq.br/123456789"
 advisor_id = None

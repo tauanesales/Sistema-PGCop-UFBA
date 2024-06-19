@@ -11,12 +11,14 @@ class Usuario(EntityModelBase):
         String(255), nullable=False, unique=False, index=True
     )
     email: Mapped[str] = mapped_column(
-        String(255), nullable=False, unique=True, index=True
+        String(255), nullable=False, unique=False, index=True
     )
     senha_hash: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
-    new_password_token: Mapped[str] = mapped_column(String(255), nullable=True)
+    token_nova_senha: Mapped[str] = mapped_column(String(255), nullable=True)
 
-    tipo_usuario: Mapped["TipoUsuario"] = relationship("TipoUsuario")  # noqa: F821
+    tipo_usuario: Mapped["TipoUsuario"] = relationship(  # noqa: F821
+        "TipoUsuario", lazy="joined"
+    )
     tipo_usuario_id: Mapped[int] = mapped_column(
         ForeignKey("tipo_usuario.id"), nullable=False, unique=False, index=True
     )

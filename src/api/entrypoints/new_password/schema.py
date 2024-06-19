@@ -1,15 +1,15 @@
 from pydantic import BaseModel, EmailStr, Field, constr
 
+from src.api.schemas.usuario import ValidadorDeSenhaUsuario
 
-class NewPasswordRequest(BaseModel):
+
+class NovaSenhaSolicitada(BaseModel):
     email: EmailStr = Field(..., description="Endereço de email do aluno.")
 
 
-class NewPasswordCodeAuth(NewPasswordRequest):
+class NovaSenhaCodigoAutenticacao(NovaSenhaSolicitada):
     token: constr(min_length=4) = Field(..., description="Código de autenticação.")
 
 
-class NewPasswordChange(NewPasswordCodeAuth):
-    nova_senha: constr(min_length=7) = Field(
-        ..., description="Nova senha de acesso do usuário."
-    )
+class NovaSenhaAtualizada(NovaSenhaCodigoAutenticacao, ValidadorDeSenhaUsuario):
+    pass

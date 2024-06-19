@@ -1,6 +1,5 @@
 import pytest
 from core.application import client
-
 from loguru import logger
 
 token = None
@@ -24,10 +23,10 @@ def test_login(valid_professor_data):
 
     # Log in to the account.
     login_data = {
-        "username": email, 
-        "password": password, 
+        "username": email,
+        "password": password,
         "grant_type": "password",
-        "scope": "items:read items:write users:read profile openid"
+        "scope": "items:read items:write users:read profile openid",
     }
 
     response = client.post(

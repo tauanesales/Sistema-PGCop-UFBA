@@ -7,7 +7,7 @@ task_id = 1
 name = "Title for the Task 1"
 description = "The goal is helping 70% of people around the world about how to Avast!"
 completed = 0
-deadline_date = str(datetime.now().date())
+deadline_date = str(datetime.utcnow().date())
 
 last_notified = None
 completion_date = None

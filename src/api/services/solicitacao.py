@@ -1,46 +1,46 @@
 from loguru import logger
-from sqlalchemy.orm import Session
 
+from src.api.database.models.aluno import Aluno
+from src.api.database.models.professor import Professor
 from src.api.database.models.solicitacoes import Solicitacao
 from src.api.database.repository import PGCopRepository
 from src.api.entrypoints.solicitacao.schema import SolicitacaoInDB
+from src.api.services.servico_base import ServicoBase
 from src.api.utils.enums import StatusSolicitacaoEnum
 
 
-class ServicoSolicitacao:
-    @staticmethod
-    def criar(db: Session, aluno_id, professor_id) -> SolicitacaoInDB:
-        db_solicitacao: Solicitacao = Solicitacao(
-            aluno_id=aluno_id,
-            professor_id=professor_id,
-            status=StatusSolicitacaoEnum.PENDENTE,
-        )
-        db.add(db_solicitacao)
-        db.commit()
-        logger.info(f"Solicitação para {aluno_id=} criada com sucesso.")
-        db.refresh(db_solicitacao)
-        return ServicoSolicitacao.de_solicitacao_para_solicitacao_in_db(db_solicitacao)
+class ServicoSolicitacao(ServicoBase):
+    _repo: PGCopRepository
 
-    @staticmethod
-    def listar(
-        db: Session, professor_id: int, status: StatusSolicitacaoEnum
+    async def criar(self, aluno: Aluno, professor: Professor) -> SolicitacaoInDB:
+        db_solicitacao: Solicitacao = Solicitacao(
+            status=StatusSolicitacaoEnum.PENDENTE,
+            aluno_id=aluno.id,
+            professor_id=professor.id,
+        )
+        await self._repo.criar(db_solicitacao)
+        logger.info(f"{db_solicitacao.id=} | Solicitação para criada com sucesso.")
+        return self.de_solicitacao_para_solicitacao_in_db(db_solicitacao)
+
+    async def listar(
+        self, professor_id: int, status: StatusSolicitacaoEnum
     ) -> list[SolicitacaoInDB]:
         solicitacoes: list[
             Solicitacao
-        ] = PGCopRepository.obter_lista_de_solicitacoes_de_professor(
-            db, professor_id=professor_id, status=status
+        ] = await self._repo.buscar_lista_de_solicitacoes_de_professor(
+            professor_id=professor_id, status=status
         )
         logger.info(
             f"Solicitacoes para {professor_id=} listadas \
                  com sucesso. Total: {len(solicitacoes)}."
         )
         return [
-            ServicoSolicitacao.de_solicitacao_para_solicitacao_in_db(solicitacao)
+            self.de_solicitacao_para_solicitacao_in_db(solicitacao)
             for solicitacao in solicitacoes
         ]
 
-    @staticmethod
     def de_solicitacao_para_solicitacao_in_db(
+        self,
         db_solicitacao: Solicitacao,
     ) -> SolicitacaoInDB:
         return SolicitacaoInDB(
@@ -52,17 +52,16 @@ class ServicoSolicitacao:
             status=db_solicitacao.status,
         )
 
-    def atualizar_status_solicitacao(
-        db: Session, solicitacao_id: int, status: StatusSolicitacaoEnum
+    async def atualizar_status_solicitacao(
+        self, solicitacao_id: int, status: StatusSolicitacaoEnum
     ) -> SolicitacaoInDB:
-        db_solicitacao: Solicitacao = PGCopRepository.obter_por_id(
-            db, solicitacao_id, Solicitacao
+        db_solicitacao: Solicitacao = await self._repo.buscar_por_id(
+            solicitacao_id, Solicitacao
         )
         db_solicitacao.status = status
-        db.commit()
-        db.refresh(db_solicitacao)
+        self._repo.salvar(db_solicitacao)
         logger.info(
             f"Solicitação {solicitacao_id=} atualizada com sucesso para \
                   {db_solicitacao.status}."
         )
-        return ServicoSolicitacao.de_solicitacao_para_solicitacao_in_db(db_solicitacao)
+        return self.de_solicitacao_para_solicitacao_in_db(db_solicitacao)
