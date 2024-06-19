@@ -16,7 +16,7 @@ install: ## Install Python requirements.
 
 .PHONY: test
 test: ## Run tests.
-	poetry run python -m pytest . -vv -s
+	poetry run python -m pytest ./src/tests	 -vv -s
 
 .PHONY: export-requirements
 export-requirements: ## Export requirements to requirements.txt, so it can be used by Vercel.
@@ -50,17 +50,11 @@ downgrade: ## Undo the last migration.
 	poetry run alembic downgrade -1
 
 .PHONY: db-full-clean
-db-full-clean:
+db-full-clean:  ## Drop and recreate the database.
 	docker compose exec db mysql -u ${DB_USERNAME} -p${DB_PASSWORD} -e "DROP DATABASE IF EXISTS ${DB_DATABASE}; CREATE DATABASE ${DB_DATABASE};"
 
 .PHONY: db-regenerate
-db-regenerate: db-full-clean migrate ## Regenerate the database.
-	docker compose exec db mysql -u ${DB_USERNAME} -p${DB_PASSWORD} -e "\
-		USE ${DB_DATABASE}; \
-		INSERT INTO tipo_usuario (titulo, descricao, created_at, updated_at) \
-		VALUES ('ALUNO', 'Aluno description', UTC_TIMESTAMP(), UTC_TIMESTAMP()), \
-				('PROFESSOR', 'Professor description', UTC_TIMESTAMP(), UTC_TIMESTAMP()), \
-				('COORDENADOR', 'Coordenador description', UTC_TIMESTAMP(), UTC_TIMESTAMP());"
+db-regenerate: db-full-clean migrate ## Drop, recreate and apply all migrations to the database.
 
 .PHONY: pre-commit
 pre-commit: ## Run pre-commit checks.

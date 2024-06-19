@@ -1,12 +1,13 @@
 from datetime import date
 from typing import Optional
 
-from pydantic import BaseModel, Field, HttpUrl, constr, field_validator
+from pydantic import Field, HttpUrl, constr, field_validator
 from pydantic_br import CPF
 from pydantic_extra_types.phone_numbers import PhoneNumber
 
 from src.api.exceptions.value_error_validation_exception import MatriculaNotNumericError
-from src.api.schemas.usuario import UsuarioBase, UsuarioCreate, UsuarioInDB
+from src.api.schemas.usuario import UsuarioBase, UsuarioCriacao, UsuarioInDB
+from src.api.utils.decorators import partial_model
 from src.api.utils.enums import CursoAlunoEnum, TipoUsuarioEnum
 
 PhoneNumber.phone_format = "NATIONAL"
@@ -40,11 +41,11 @@ class AlunoBase(UsuarioBase):
     tipo_usuario: TipoUsuarioEnum = TipoUsuarioEnum.ALUNO
 
     @field_validator("telefone", "matricula", "lattes", mode="before")
-    def validar_string_vazia(cls, value):
-        value = value.replace("\t", "").replace("\r", "").replace("\n", "")
-        if not value.replace(" ", ""):
+    def validar_string_vazia(cls, valor):
+        valor = valor.replace("\t", "").replace("\r", "").replace("\n", "")
+        if not valor.replace(" ", ""):
             raise ValueError("O campo não pode estar em branco")
-        return value
+        return valor
 
     @field_validator("matricula", mode="after")
     def validar_matricula(cls, matricula: str):
@@ -53,9 +54,9 @@ class AlunoBase(UsuarioBase):
         return matricula
 
     @field_validator("telefone", mode="before")
-    def validate_telefone(cls, value):
+    def validar_telefone(cls, valor):
         return (
-            value.replace(" ", "").replace("\t", "").replace("\r", "").replace("\n", "")
+            valor.replace(" ", "").replace("\t", "").replace("\r", "").replace("\n", "")
         )
 
     @field_validator("lattes")
@@ -64,7 +65,7 @@ class AlunoBase(UsuarioBase):
         return lattes
 
 
-class AlunoCreate(AlunoBase, UsuarioCreate):
+class AlunoNovo(AlunoBase, UsuarioCriacao):
     pass
 
 
@@ -72,28 +73,6 @@ class AlunoInDB(AlunoBase, UsuarioInDB):
     pass
 
 
-class AlunoUpdate(BaseModel):
-    telefone: PhoneNumber = Field(..., description="Número de telefone do aluno.")
-    lattes: Optional[constr(min_length=2, max_length=100)] = Field(
-        None, description="Link para o currículo Lattes do aluno."
-    )
-    orientador_id: Optional[int] = Field(
-        None, description="ID do orientador do aluno, se houver."
-    )
-    data_qualificacao: Optional[date] = Field(
-        None, description="Data de qualificação do aluno, se aplicável."
-    )
-    data_defesa: Optional[date] = Field(
-        None, description="Data de defesa do aluno, se aplicável."
-    )
-
-    @field_validator("telefone", mode="before")
-    def blank_string(cls, value):
-        return (
-            value.replace(" ", "").replace("\t", "").replace("\r", "").replace("\n", "")
-        )
-
-    @field_validator("lattes")
-    def validar_lattes(cls, lattes: str):
-        HttpUrl(lattes)
-        return lattes
+@partial_model
+class AlunoAtualizado(AlunoNovo):
+    pass

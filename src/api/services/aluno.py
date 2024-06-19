@@ -4,81 +4,42 @@ from typing import List
 from fastapi import Depends
 from loguru import logger
 from passlib.context import CryptContext
-from sqlalchemy import and_, not_
-from sqlalchemy.orm import Session
 
 from src.api.database.models.aluno import Aluno
 from src.api.database.models.professor import Professor
 from src.api.database.models.tarefa import Tarefa
 from src.api.database.models.usuario import Usuario
 from src.api.database.repository import PGCopRepository
-from src.api.entrypoints.alunos.errors import (
-    AlunoNaoEncontradoException,
-    CPFAlreadyRegisteredException,
-    MatriculaJaRegistradaException,
-    NumeroJaRegistradoException,
-    OrientadorNaoEncontradoException,
-)
-from src.api.entrypoints.alunos.schema import AlunoBase, AlunoCreate, AlunoInDB
-from src.api.services.auth import ServiceAuth, oauth2_scheme
+from src.api.entrypoints.alunos.schema import AlunoAtualizado, AlunoInDB, AlunoNovo
+from src.api.services.auth import ServicoAuth, oauth2_scheme
+from src.api.services.servico_base import ServicoBase
 from src.api.services.solicitacao import ServicoSolicitacao
-from src.api.services.usuario import ServiceUsuario
-from src.api.services.usuario_tipo_base import ServicoBase
+from src.api.services.usuario import ServicoUsuario
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class ServicoAluno(ServicoBase):
-    @staticmethod
-    def buscar_atual(db: Session, token: str = Depends(oauth2_scheme)) -> AlunoInDB:
+    _repo: PGCopRepository
+
+    async def buscar_atual(self, token: str = Depends(oauth2_scheme)) -> AlunoInDB:
         logger.info("Buscando aluno atual.")
-        email = ServiceAuth.verificar_token(token)
+        email = await ServicoAuth(self._repo).verificar_token(token)
         logger.info("Token verificado com sucesso.")
-        db_aluno: Aluno = ServicoAluno.obter_por_email(db, email)
-        logger.info("Aluno encontrado com sucesso.")
-        return ServicoAluno.de_aluno_para_aluno_in_db(db_aluno)
+        db_aluno: Aluno = await self.buscar_por_email(email)
+        logger.info(f"{db_aluno.id=} | Aluno encontrado com sucesso.")
+        return self.de_aluno_para_aluno_in_db(db_aluno)
 
-    @staticmethod
-    def validar_novo_aluno(db: Session, aluno: AlunoBase) -> None:
-        logger.info("Validando novo aluno.")
-        if db.query(Aluno).filter_by(cpf=aluno.cpf).first():
-            raise CPFAlreadyRegisteredException()
-        if db.query(Aluno).filter_by(telefone=aluno.telefone).first():
-            raise NumeroJaRegistradoException()
-        if (
-            not aluno.orientador_id
-            or not db.query(Professor).filter_by(id=aluno.orientador_id).first()
-        ):
-            raise OrientadorNaoEncontradoException()
-        if db.query(Aluno).filter_by(matricula=aluno.matricula).first():
-            raise MatriculaJaRegistradaException()
+    async def criar(self, novo_aluno: AlunoNovo) -> AlunoInDB:
+        logger.info("Início do processo de criação de novo aluno.")
+        await self._validador.validar_novo_aluno(novo_aluno)
 
-    @staticmethod
-    def validar_atualizar_aluno(db: Session, aluno_id: int, aluno):
-        if (
-            aluno.get("orientador_id")
-            and not db.query(Professor).filter_by(id=aluno.get("orientador_id")).first()
-        ):
-            raise OrientadorNaoEncontradoException()
-
-        if (
-            aluno.get("telefone")
-            and db.query(Aluno)
-            .filter(
-                and_(
-                    not_(Aluno.id == aluno_id), Aluno.telefone == aluno.get("telefone")
-                )
-            )
-            .one_or_none()
-        ):
-            raise NumeroJaRegistradoException()
-
-    @staticmethod
-    def criar(db: Session, novo_aluno: AlunoCreate) -> AlunoInDB:
-        ServicoAluno.validar_novo_aluno(db, novo_aluno)
-
-        db_usuario_aluno: Usuario = ServiceUsuario.criar(db, novo_aluno)
-        logger.info("Criando aluno.")
+        db_usuario_aluno: Usuario = await ServicoUsuario(self._repo).criar(novo_aluno)
+        logger.info(f"{db_usuario_aluno.id=} | Usuário criado com sucesso.")
+        db_orientador: Professor = await self._repo.buscar_por_id(
+            novo_aluno.orientador_id, Professor
+        )
+        logger.info(f"{db_orientador.id=} | Orientador encontrado com sucesso.")
         db_aluno = Aluno(
             cpf=novo_aluno.cpf,
             telefone=novo_aluno.telefone,
@@ -88,17 +49,17 @@ class ServicoAluno(ServicoBase):
             data_ingresso=novo_aluno.data_ingresso,
             data_qualificacao=novo_aluno.data_qualificacao,
             data_defesa=novo_aluno.data_defesa,
-            orientador_id=novo_aluno.orientador_id,
+            orientador_id=db_orientador.id,
+            orientador=db_orientador,
             usuario=db_usuario_aluno,
+            usuario_id=db_usuario_aluno.id,
         )
-        db.add(db_aluno)
-        db.commit()
-        db.refresh(db_aluno)
-        logger.info("Aluno criado com sucesso.")
-        ServicoSolicitacao.criar(db, db_aluno.id, db_aluno.orientador_id)
-        return ServicoAluno.de_aluno_para_aluno_in_db(db_aluno)
+        await self._repo.criar(db_aluno)
+        logger.info(f"{db_aluno.id=} {db_orientador.id=} | Aluno criado com sucesso.")
+        await ServicoSolicitacao(self._repo).criar(db_aluno, db_orientador)
+        return self.de_aluno_para_aluno_in_db(db_aluno)
 
-    def de_aluno_para_aluno_in_db(db_aluno: Aluno) -> AlunoInDB:
+    def de_aluno_para_aluno_in_db(self, db_aluno: Aluno) -> AlunoInDB:
         return AlunoInDB(
             nome=db_aluno.usuario.nome,
             email=db_aluno.usuario.email,
@@ -115,56 +76,68 @@ class ServicoAluno(ServicoBase):
             orientador_id=db_aluno.orientador_id,
         )
 
-    @staticmethod
-    def obter_aluno(db: Session, aluno_id: int) -> AlunoInDB:
-        aluno: Aluno = PGCopRepository.obter_por_id(db, aluno_id, Aluno)
-        if not aluno:
-            raise AlunoNaoEncontradoException()
-        return ServicoAluno.de_aluno_para_aluno_in_db(aluno)
+    async def buscar_aluno(self, aluno_id: int) -> AlunoInDB:
+        aluno: Aluno = await self._repo.buscar_por_id(aluno_id, Aluno)
+        self._validador.validar_aluno_existe(aluno)
+        return self.de_aluno_para_aluno_in_db(aluno)
 
-    @staticmethod
-    def atualizar_aluno(db: Session, aluno_id: int, updates) -> AlunoInDB:
-        ServicoAluno.validar_atualizar_aluno(db, aluno_id, updates)
-        db_aluno = db.query(Aluno).filter_by(id=aluno_id).one_or_none()
-        if not db_aluno:
-            raise AlunoNaoEncontradoException()
+    async def atualizar_aluno(
+        self, aluno_id: int, aluno_atualizado: AlunoAtualizado
+    ) -> AlunoInDB:
+        db_aluno: Aluno = await self._repo.buscar_por_id(aluno_id, Aluno)
+        await self._validador.validar_atualizacao_de_aluno(
+            aluno_id, aluno_atualizado, db_aluno
+        )
 
-        db_aluno = db.query(Aluno).filter_by(id=aluno_id).one_or_none()
-        if not db_aluno:
-            raise AlunoNaoEncontradoException()
-        for key, value in updates.items():
-            setattr(db_aluno, key, value)
-        db.commit()
-        db.refresh(db_aluno)
-        return AlunoInDB(**db_aluno.__dict__)
+        db_aluno.cpf = aluno_atualizado.cpf or db_aluno.cpf
+        db_aluno.telefone = aluno_atualizado.telefone or db_aluno.telefone
+        db_aluno.matricula = aluno_atualizado.matricula or db_aluno.matricula
+        db_aluno.lattes = aluno_atualizado.lattes or db_aluno.lattes
+        db_aluno.curso = aluno_atualizado.curso or db_aluno.curso
+        db_aluno.data_ingresso = (
+            aluno_atualizado.data_ingresso or db_aluno.data_ingresso
+        )
+        db_aluno.data_qualificacao = (
+            aluno_atualizado.data_qualificacao or db_aluno.data_qualificacao
+        )
+        db_aluno.data_defesa = aluno_atualizado.data_defesa or db_aluno.data_defesa
+        db_aluno.orientador_id = (
+            aluno_atualizado.orientador_id or db_aluno.orientador_id
+        )
+        db_aluno.usuario.nome = aluno_atualizado.nome or db_aluno.usuario.nome
+        db_aluno.usuario.email = aluno_atualizado.email or db_aluno.usuario.email
+        db_aluno.usuario.senha_hash = (
+            pwd_context.hash(aluno_atualizado.senha)
+            if aluno_atualizado.senha
+            else db_aluno.usuario.senha_hash
+        )
+        return self.de_aluno_para_aluno_in_db(db_aluno)
 
-    @staticmethod
-    def deletar(db: Session, aluno_id: int) -> None:
-        aluno: Aluno = PGCopRepository.obter_por_id(db, aluno_id, Aluno)
+    async def deletar(self, aluno_id: int) -> None:
+        aluno: AlunoInDB = await self.buscar_aluno(aluno_id)
         tarefas: list[Tarefa] = aluno.tarefas or []
         for tarefa in tarefas:
-            tarefa.deleted_at = datetime.now()
-        aluno.deleted_at = datetime.now()
-        aluno.usuario.deleted_at = datetime.now()
-        db.commit()
+            tarefa.deleted_at = datetime.utcnow()
+        aluno.deleted_at = datetime.utcnow()
+        aluno.usuario.deleted_at = datetime.utcnow()
 
-    @staticmethod
-    def obter_alunos_por_orientador(db: Session, orientador_id: int) -> List[AlunoInDB]:
-        alunos: List[Aluno] = PGCopRepository.obter_todos_orientandos_de_um_professor(
-            db, orientador_id
+    async def buscar_alunos_por_orientador(self, orientador_id: int) -> List[AlunoInDB]:
+        alunos: List[Aluno] = await self._repo.buscar_todos_orientandos_de_um_professor(
+            orientador_id
         )
-        return [ServicoAluno.de_aluno_para_aluno_in_db(aluno) for aluno in alunos]
+        return [self.de_aluno_para_aluno_in_db(aluno) for aluno in alunos]
 
-    @staticmethod
-    def obter_por_email(db: Session, email: str) -> Aluno:
-        db_aluno: Aluno = PGCopRepository.obter_aluno_por_email(db, email)
-        if db_aluno is None:
-            raise AlunoNaoEncontradoException()
+    async def buscar_por_email(self, email: str) -> Aluno:
+        db_aluno: Aluno = await self._repo.buscar_aluno_por_email(email)
+        self._validador.validar_aluno_existe(db_aluno)
         return db_aluno
 
-    @staticmethod
-    def obter_aluno_por_cpf(db: Session, cpf: str) -> AlunoInDB:
-        db_aluno = PGCopRepository.obter_aluno_por_cpf(db, cpf)
-        if db_aluno is None:
-            raise AlunoNaoEncontradoException()
-        return ServicoAluno.de_aluno_para_aluno_in_db(db_aluno)
+    async def buscar_aluno_por_cpf(self, cpf: str) -> AlunoInDB:
+        db_aluno = await self._repo.buscar_aluno_por_cpf(cpf)
+        self._validador.validar_aluno_existe(db_aluno)
+        return self.de_aluno_para_aluno_in_db(db_aluno)
+
+    async def buscar_aluno_por_matricula(self, matricula: str) -> AlunoInDB:
+        db_aluno = await self._repo.buscar_aluno_por_matricula(matricula)
+        self._validador.validar_aluno_existe(db_aluno)
+        return self.de_aluno_para_aluno_in_db(db_aluno)

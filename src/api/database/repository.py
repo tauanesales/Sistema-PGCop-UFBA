@@ -1,51 +1,90 @@
-from sqlalchemy import and_, or_
-from sqlalchemy.orm import Session
+from typing import Optional
+
+from loguru import logger
+from sqlalchemy import and_, or_, select, update
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.database.models.aluno import Aluno
 from src.api.database.models.entity_model_base import EntityModelBase
 from src.api.database.models.professor import Professor
 from src.api.database.models.solicitacoes import Solicitacao
+from src.api.database.models.tarefa import Tarefa
 from src.api.database.models.tipo_usuario import TipoUsuario
 from src.api.database.models.usuario import Usuario
 from src.api.utils.enums import StatusSolicitacaoEnum, TipoUsuarioEnum
 
 
 class PGCopRepository:
-    @staticmethod
-    def obter_usuario_por_email(db: Session, email: str) -> Usuario:
-        return (
-            db.query(Usuario)
-            .filter(
-                and_(
-                    Usuario.email == email,
-                    Usuario.deleted_at == None,  # noqa: E711
-                )
-            )
-            .first()
-        )
+    def __init__(self, session: AsyncSession):
+        self._session: AsyncSession = session
 
-    @staticmethod
-    def obter_aluno_por_email(db: Session, email: str) -> Aluno:
-        return (
-            db.query(Aluno)
+    async def buscar_por_id(
+        self, id: int, model: EntityModelBase
+    ) -> Optional[EntityModelBase]:
+        query = select(model).where(
+            and_(model.id == id, model.deleted_at == None)  # noqa: E711
+        )
+        result = await self._session.execute(query)
+        return result.scalar()
+
+    async def buscar_todos(self, model: EntityModelBase) -> list[EntityModelBase]:
+        query = select(model).where(model.deleted_at == None)  # noqa: E711
+        result = await self._session.execute(query)
+        return result.scalars().unique().all()
+
+    async def filtrar(self, model: EntityModelBase, **kwargs) -> list[EntityModelBase]:
+        query = select(model).filter_by(**kwargs)
+        result = await self._session.execute(query)
+        return result.scalars().unique().all()
+
+    async def criar(self, model: EntityModelBase) -> EntityModelBase:
+        self._session.add(model)
+        await self._session.flush()
+        await self._session.refresh(model)
+        return model
+
+    async def salvar(self, model: EntityModelBase = None) -> None:
+        await self._session.flush()
+        if model:
+            await self._session.refresh(model)
+
+    async def atualizar_por_id(self, id: int, model: EntityModelBase, **kwargs) -> None:
+        query = update(model).where(model.id == id).values(**kwargs)
+        await self._session.execute(query)
+        await self._session.flush()
+        logger.info(f"{model.__name__} {id=} atualizado com sucesso.")
+
+    async def buscar_usuario_por_email(self, email: str) -> Optional[Usuario]:
+        query = select(Usuario).where(
+            and_(
+                Usuario.email == email,
+                Usuario.deleted_at == None,  # noqa: E711
+            )
+        )
+        result = await self._session.execute(query)
+        return result.scalar()
+
+    async def buscar_aluno_por_email(self, email: str) -> Optional[Aluno]:
+        query = (
+            select(Aluno)
             .join(Usuario, Usuario.id == Aluno.usuario_id)
-            .filter(
+            .where(
                 and_(
                     Usuario.email == email,
-                    Usuario.deleted_at == None,  # noqa: E711
                     Aluno.deleted_at == None,  # noqa: E711
+                    Usuario.deleted_at == None,  # noqa: E711
                 )
             )
-            .first()
         )
+        result = await self._session.execute(query)
+        return result.scalar()
 
-    @staticmethod
-    def obter_professor_por_email(db: Session, email: str) -> Usuario:
-        return (
-            db.query(Professor)
-            .join(Usuario, Professor.usuario_id == Usuario.id)
+    async def buscar_professor_por_email(self, email: str) -> Optional[Usuario]:
+        query = (
+            select(Professor)
+            .join(Usuario, Usuario.id == Professor.usuario_id)
             .join(TipoUsuario, Usuario.tipo_usuario_id == TipoUsuario.id)
-            .filter(
+            .where(
                 and_(
                     Usuario.email == email,
                     or_(
@@ -56,76 +95,118 @@ class PGCopRepository:
                     Professor.deleted_at == None,  # noqa: E711
                 ),
             )
-            .first()
         )
+        result = await self._session.execute(query)
+        return result.scalar()
 
-    @staticmethod
-    def obter_usuario_por_id(db: Session, id: int) -> Usuario:
-        return (
-            db.query(Usuario)
-            .filter(and_(Usuario.id == id, Usuario.deleted_at == None))  # noqa: E711
-            .first()
+    async def buscar_usuario_por_id(self, id: int) -> Optional[Usuario]:
+        return await self.buscar_por_id(id, Usuario)
+
+    async def buscar_tipo_usuario_por_titulo(self, titulo: TipoUsuarioEnum) -> int:
+        query = select(TipoUsuario).where(
+            TipoUsuario.titulo == titulo,
+            TipoUsuario.deleted_at == None,  # noqa: E711
         )
+        result = await self._session.execute(query)
+        return result.scalar()
 
-    @staticmethod
-    def obter_id_tipo_usuario_por_titulo(db: Session, titulo: str) -> int:
-        return (
-            db.query(TipoUsuario)
-            .filter(
-                and_(
-                    TipoUsuario.titulo == titulo,
-                    TipoUsuario.deleted_at == None,  # noqa: E711
-                )
-            )
-            .first()
-            .id
-        )
-
-    @staticmethod
-    def obter_por_id(db: Session, id: int, model: EntityModelBase) -> EntityModelBase:
-        return (
-            db.query(model)
-            .filter(and_(model.id == id, model.deleted_at == None))  # noqa: E711
-            .first()
-        )
-
-    @staticmethod
-    def obter_todos(db: Session, model: EntityModelBase) -> EntityModelBase:
-        return db.query(model).filter(model.deleted_at == None).all()  # noqa: E711
-
-    @staticmethod
-    def obter_todos_orientandos_de_um_professor(
-        db: Session, orientador_id: int
+    async def buscar_todos_orientandos_de_um_professor(
+        self, orientador_id: int
     ) -> Aluno:
-        return (
-            db.query(Aluno)
-            .filter(
+        query = (
+            select(Aluno)
+            .join(Professor, Aluno.orientador_id == Professor.id)
+            .join(
+                Usuario,
+                or_(Usuario.id == Aluno.usuario_id, Usuario.id == Professor.usuario_id),
+            )
+            .where(
                 and_(
-                    Aluno.orientador_id == orientador_id,
+                    Professor.id == orientador_id,
                     Aluno.deleted_at == None,  # noqa: E711
+                    Professor.deleted_at == None,  # noqa: E711
+                    Usuario.deleted_at == None,  # noqa: E711
                 )
             )
-            .all()
         )
+        result = await self._session.execute(query)
+        return result.scalars().unique().all()
 
-    def obter_aluno_por_cpf(db: Session, cpf: str) -> Aluno:
-        return (
-            db.query(Aluno)
-            .filter(and_(Aluno.cpf == cpf, Aluno.deleted_at == None))  # noqa: E711
-            .first()
+    async def buscar_aluno_por_cpf(self, cpf: str) -> Optional[Aluno]:
+        query = select(Aluno).where(
+            and_(
+                Aluno.cpf == cpf,
+                Aluno.deleted_at == None,  # noqa: E711
+            )
         )
+        result = await self._session.execute(query)
+        return result.scalar()
 
-    def obter_lista_de_solicitacoes_de_professor(
-        db: Session, professor_id: int, status: StatusSolicitacaoEnum
+    async def buscar_lista_de_solicitacoes_de_professor(
+        self, professor_id: int, status: StatusSolicitacaoEnum
     ) -> list[Solicitacao]:
-        return (
-            db.query(Solicitacao)
-            .filter(
+        query = (
+            select(Solicitacao)
+            .join(Professor, Solicitacao.professor_id == Professor.id)
+            .join(Usuario, Usuario.id == Professor.usuario_id)
+            .where(
                 and_(
-                    Solicitacao.professor_id == professor_id,
-                    Solicitacao.deleted_at == None,  # noqa: E711 # noqa: E711
+                    Professor.id == professor_id,
                     Solicitacao.status == status,
+                    Solicitacao.deleted_at == None,  # noqa: E711
+                    Professor.deleted_at == None,  # noqa: E711
+                    Usuario.deleted_at == None,  # noqa: E711
                 )
             )
-            .all()
         )
+        result = await self._session.execute(query)
+        return result.scalars().unique().all()
+
+    async def buscar_usuario_por_email_excluindo_id(
+        self, email: str, usuario_id: int
+    ) -> Optional[Usuario]:
+        query = select(Usuario).where(
+            and_(
+                Usuario.email == email,
+                Usuario.id != usuario_id,
+                Usuario.deleted_at == None,  # noqa: E711
+            )
+        )
+        result = await self._session.execute(query)
+        return result.scalar()
+
+    async def buscar_aluno_por_telefone(self, telefone: str) -> Optional[Aluno]:
+        query = select(Aluno).where(
+            and_(
+                Aluno.telefone == telefone,
+                Aluno.deleted_at == None,  # noqa: E711
+            )
+        )
+        result = await self._session.execute(query)
+        return result.scalar()
+
+    async def buscar_aluno_por_telefone_excluindo_id(
+        self, telefone: str, id: int
+    ) -> Optional[Aluno]:
+        query = select(Aluno).where(
+            and_(
+                Aluno.telefone == telefone,
+                Aluno.id != id,
+                Aluno.deleted_at == None,  # noqa: E711
+            )
+        )
+        result = await self._session.execute(query)
+        return result.scalar()
+
+    async def buscar_aluno_por_matricula(self, matricula: str) -> Optional[Aluno]:
+        query = select(Aluno).where(
+            and_(
+                Aluno.matricula == matricula,
+                Aluno.deleted_at == None,  # noqa: E711
+            )
+        )
+        result = await self._session.execute(query)
+        return result.scalar()
+
+    async def buscar_tarefas_por_aluno_id(self, aluno_id: int) -> list[Tarefa]:
+        return await self.filtrar(Tarefa, aluno_id=aluno_id, deleted_at=None)
