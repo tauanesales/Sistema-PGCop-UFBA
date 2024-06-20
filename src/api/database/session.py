@@ -4,6 +4,7 @@ from pydantic import ValidationError
 from sqlalchemy import URL
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import AsyncAdaptedQueuePool, NullPool
 
 from src.api.config import Config
 from src.api.database.repository import PGCopRepository
@@ -17,7 +18,10 @@ engine = create_async_engine(
         port=Config.DB_CONFIG.DB_PORT,
         database=Config.DB_CONFIG.DB_DATABASE,
         query={"charset": "UTF8MB4"},
-    )
+    ),
+    poolclass=AsyncAdaptedQueuePool
+    if Config.DB_CONFIG.DB_ENABLE_CONNECTION_POOLING
+    else NullPool,
 )
 
 async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
