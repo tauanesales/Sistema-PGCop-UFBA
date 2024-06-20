@@ -26,6 +26,9 @@ class DBConfig:
     DB_HOST = os.getenv("DB_HOST", ...)
     DB_PORT: int = int(os.getenv("DB_PORT", ...))
     DB_DATABASE = os.getenv("DB_DATABASE", ...)
+    DB_ENABLE_CONNECTION_POOLING: bool = (
+        os.getenv("DB_ENABLE_CONNECTION_POOLING", "True") == "True"
+    )
 
 
 class SendGridConfig:
