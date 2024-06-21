@@ -59,12 +59,12 @@ class ServicoAuth(ServicoBase):
             payload = jwt.decode(
                 token, Config.AUTH.SECRET_KEY, algorithms=[Config.AUTH.ALGORITHM]
             )
-            username: str = payload.get("sub")
-            if username is None:
+            email: str = payload.get("sub")
+            if email is None:
                 raise CredentialsException()
         except JWTError:
             raise CredentialsException()
-        return username
+        return email
 
     async def autenticar_usuario(self, email: str, password: str) -> Usuario:
         usuario: Usuario = await ServicoUsuario(self._repo).buscar_por_email(email)
