@@ -210,6 +210,3 @@ class PGCopRepository:
 
     async def buscar_tarefas_por_aluno_id(self, aluno_id: int) -> list[Tarefa]:
         return await self.filtrar(Tarefa, aluno_id=aluno_id, deleted_at=None)
-
-    async def buscar_aluno_por_usuario_id(self, usuario_id: int) -> Optional[Aluno]:
-        return await self.filtrar(Aluno, usuario_id=usuario_id, deleted_at=None)
