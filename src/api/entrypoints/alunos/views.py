@@ -6,6 +6,8 @@ from fastapi.security import OAuth2PasswordBearer
 from src.api.database.session import get_repo
 from src.api.entrypoints.alunos.schema import AlunoAtualizado, AlunoInDB, AlunoNovo
 from src.api.services.aluno import ServicoAluno
+from src.api.services.tipo_usuario import ServicoTipoUsuario
+from src.api.utils.enums import TipoUsuarioEnum
 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -25,13 +27,26 @@ async def read_aluno_me(
 
 @router.get("/{aluno_id}", response_model=AlunoInDB)
 async def get_aluno(aluno_id: int, repository=Depends(get_repo())):
-    return await ServicoAluno(repository).buscar_aluno(aluno_id)
+    return await ServicoAluno(repository).buscar_dados_in_db_por_id(aluno_id)
 
 
-@router.delete("/{aluno_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def deletar_aluno(aluno_id: int, repository=Depends(get_repo())):
-    await ServicoAluno(repository).deletar(aluno_id)
-    return {"ok": True}
+@router.delete(
+    "/{aluno_id}", response_model=None, status_code=status.HTTP_204_NO_CONTENT
+)
+async def deletar_aluno_por_id(
+    aluno_id: int, token: str = Depends(oauth2_scheme), repository=Depends(get_repo())
+):
+    return await ServicoAluno(repository).deletar(aluno_id)
+
+
+@router.delete("/", response_model=None, status_code=status.HTTP_204_NO_CONTENT)
+async def deletar_aluno_atual(
+    token: str = Depends(oauth2_scheme), repository=Depends(get_repo())
+):
+    aluno: AlunoInDB = await ServicoTipoUsuario(repository).buscar_usuario_atual(
+        token=token, tipo_usuario=TipoUsuarioEnum.ALUNO
+    )
+    return await ServicoAluno(repository).deletar(aluno.id)
 
 
 @router.put("/{aluno_id}", response_model=AlunoInDB)

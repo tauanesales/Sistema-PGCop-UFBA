@@ -9,9 +9,9 @@ from src.api.database.models.solicitacoes import Solicitacao
 from src.api.database.models.usuario import Usuario
 from src.api.database.repository import PGCopRepository
 from src.api.entrypoints.professores.schema import (
-    ProfessorCreate,
+    ProfessorAtualizado,
     ProfessorInDB,
-    ProfessorUpdate,
+    ProfessorNovo,
 )
 from src.api.services.auth import ServicoAuth, oauth2_scheme
 from src.api.services.servico_base import ServicoBase
@@ -31,10 +31,10 @@ class ServiceProfessor(ServicoBase):
             nome=professor.usuario.nome,
             email=professor.usuario.email,
             tipo_usuario=professor.usuario.tipo_usuario.titulo,
-            user_id=professor.usuario.id,
+            usuario_id=professor.usuario.id,
         )
 
-    async def criar(self, novo_professor: ProfessorCreate) -> ProfessorInDB:
+    async def criar(self, novo_professor: ProfessorNovo) -> ProfessorInDB:
         db_usuario_professor: Usuario = await ServicoUsuario(self._repo).criar(
             novo_professor
         )
@@ -51,13 +51,20 @@ class ServiceProfessor(ServicoBase):
             nome=usuario.nome,
             email=usuario.email,
             tipo_usuario=(usuario.tipo_usuario).titulo,
-            user_id=usuario.id,
+            usuario_id=usuario.id,
         )
 
-    async def obter_professor(self, professor_id: int) -> ProfessorInDB:
-        db_professor = await self._repo.buscar_por_id(professor_id, Professor)
+    async def buscar_por_id(self, professor_id: int) -> Professor:
+        db_professor: Professor = await self._repo.buscar_por_id(
+            professor_id, Professor
+        )
         self._validador.validar_professor_existe(db_professor)
-        return self.de_professor_para_professor_in_db(db_professor)
+        return db_professor
+
+    async def buscar_dados_in_db_por_id(self, professor_id: int) -> ProfessorInDB:
+        return self.de_professor_para_professor_in_db(
+            await self.buscar_por_id(professor_id)
+        )
 
     async def obter_professores(self) -> list[ProfessorInDB]:
         db_professores: list[Professor] = await self._repo.buscar_todos(Professor)
@@ -81,7 +88,7 @@ class ServiceProfessor(ServicoBase):
         professor.usuario.deleted_at = datetime.utcnow()
 
     async def atualizar_professor(
-        self, professor_id: int, updates_professor: ProfessorUpdate
+        self, professor_id: int, updates_professor: ProfessorAtualizado
     ) -> ProfessorInDB:
         db_professor: Professor = await self._repo.buscar_por_id(
             professor_id, Professor
@@ -119,3 +126,8 @@ class ServiceProfessor(ServicoBase):
         db_professor = await self._repo.buscar_professor_por_email(email)
         self._validador.validar_professor_existe(db_professor)
         return db_professor
+
+    async def buscar_dados_in_db_por_email(self, email: str) -> ProfessorInDB:
+        return self.de_professor_para_professor_in_db(
+            await self.buscar_por_email(email)
+        )
