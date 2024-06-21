@@ -9,7 +9,7 @@ from src.api.config import Config
 from src.api.database.models.usuario import Usuario
 from src.api.database.repository import PGCopRepository
 from src.api.entrypoints.token.schema import Token
-from src.api.exceptions.credentials_exception import CredentialsException
+from src.api.exceptions.credentials_exception import CredenciaisInvalidasException
 from src.api.services.servico_base import ServicoBase
 from src.api.services.usuario import ServicoUsuario
 
@@ -61,15 +61,15 @@ class ServicoAuth(ServicoBase):
             )
             email: str = payload.get("sub")
             if email is None:
-                raise CredentialsException()
+                raise CredenciaisInvalidasException()
         except JWTError:
-            raise CredentialsException()
+            raise CredenciaisInvalidasException()
         return email
 
     async def autenticar_usuario(self, email: str, password: str) -> Usuario:
         usuario: Usuario = await ServicoUsuario(self._repo).buscar_por_email(email)
         if not self.verificar_senha(password, usuario.senha_hash):
-            raise CredentialsException()
+            raise CredenciaisInvalidasException()
         return usuario
 
     async def login_para_acessar_token(self, email: str, senha: str):

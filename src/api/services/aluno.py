@@ -115,12 +115,15 @@ class ServicoAluno(ServicoBase):
         return self.de_aluno_para_aluno_in_db(db_aluno)
 
     async def deletar(self, aluno_id: int) -> None:
+        logger.info(f"Deletando aluno {aluno_id=}")
         aluno: AlunoInDB = await self.buscar_aluno_por_id(aluno_id)
         tarefas: list[Tarefa] = aluno.tarefas or []
+        logger.info(f"{aluno.id=} | Deleteando tarefas do aluno")
         for tarefa in tarefas:
             tarefa.deleted_at = datetime.utcnow()
         aluno.deleted_at = datetime.utcnow()
         aluno.usuario.deleted_at = datetime.utcnow()
+        logger.info(f"{aluno.id=} | Aluno deletado com sucesso.")
 
     async def buscar_alunos_por_orientador(self, orientador_id: int) -> List[AlunoInDB]:
         alunos: List[Aluno] = await self._repo.buscar_todos_orientandos_de_um_professor(

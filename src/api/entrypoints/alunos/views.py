@@ -2,9 +2,13 @@ from typing import List
 
 from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordBearer
+from loguru import logger
 
+from src.api.database.models.aluno import Aluno
+from src.api.database.models.professor import Professor
 from src.api.database.session import get_repo
 from src.api.entrypoints.alunos.schema import AlunoAtualizado, AlunoInDB, AlunoNovo
+from src.api.exceptions.credentials_exception import NaoAutorizadoException
 from src.api.services.aluno import ServicoAluno
 from src.api.services.tipo_usuario import ServicoTipoUsuario
 from src.api.utils.enums import TipoUsuarioEnum
@@ -36,6 +40,16 @@ async def get_aluno(aluno_id: int, repository=Depends(get_repo())):
 async def deletar_aluno_por_id(
     aluno_id: int, token: str = Depends(oauth2_scheme), repository=Depends(get_repo())
 ):
+    logger.info(f"Solicitado deleção de {aluno_id=} | Autenticando usuário atual.")
+    coordenador: Professor = await ServicoTipoUsuario(repository).buscar_usuario_atual(
+        token=token, tipo_usuario=TipoUsuarioEnum.COORDENADOR
+    )
+    logger.info(
+        f"{aluno_id=} {coordenador.id=} | "
+        f"Tipo usuário atual é {coordenador.usuario.tipo_usuario.titulo}."
+    )
+    if coordenador.usuario.tipo_usuario.titulo != TipoUsuarioEnum.COORDENADOR:
+        raise NaoAutorizadoException()
     return await ServicoAluno(repository).deletar(aluno_id)
 
 
@@ -43,7 +57,7 @@ async def deletar_aluno_por_id(
 async def deletar_aluno_atual(
     token: str = Depends(oauth2_scheme), repository=Depends(get_repo())
 ):
-    aluno: AlunoInDB = await ServicoTipoUsuario(repository).buscar_usuario_atual(
+    aluno: Aluno = await ServicoTipoUsuario(repository).buscar_usuario_atual(
         token=token, tipo_usuario=TipoUsuarioEnum.ALUNO
     )
     return await ServicoAluno(repository).deletar(aluno.id)

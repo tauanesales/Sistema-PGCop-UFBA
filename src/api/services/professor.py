@@ -77,15 +77,12 @@ class ServiceProfessor(ServicoBase):
         professor: Professor = await self._repo.buscar_por_id(professor_id, Professor)
         self._validador.validar_professor_existe(professor)
         solicitacoes: list[Solicitacao] = professor.solicitacoes or []
-        logger.debug(
-            f"{professor_id=} {professor.usuario.id=} | Deletando professor; \
-                 Solicitacoes: \
-                    {[solicitacao.id for solicitacao in professor.solicitacoes]}"
-        )
+        logger.info(f"{professor_id=} {professor.usuario.id=} | Deletando professor;")
         for solicitacao in solicitacoes:
             solicitacao.deleted_at = datetime.utcnow()
         professor.deleted_at = datetime.utcnow()
         professor.usuario.deleted_at = datetime.utcnow()
+        logger.info(f"{professor_id=} {professor.usuario.id=} | Professor deletado.")
 
     async def atualizar_professor(
         self, professor_id: int, updates_professor: ProfessorAtualizado

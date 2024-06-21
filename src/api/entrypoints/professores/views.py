@@ -2,6 +2,7 @@ from typing import List
 
 from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordBearer
+from loguru import logger
 
 from src.api.database.models.professor import Professor
 from src.api.database.session import get_repo
@@ -10,6 +11,7 @@ from src.api.entrypoints.professores.schema import (
     ProfessorInDB,
     ProfessorNovo,
 )
+from src.api.exceptions.credentials_exception import NaoAutorizadoException
 from src.api.services.professor import ServiceProfessor
 from src.api.services.tipo_usuario import ServicoTipoUsuario
 from src.api.utils.enums import TipoUsuarioEnum
@@ -49,6 +51,17 @@ async def deletar_professor(
     token: str = Depends(oauth2_scheme),
     repository=Depends(get_repo()),
 ):
+    logger.info(f"Solicitado deleção de {professor_id=} | Autenticando usuário atual.")
+    coordenador: Professor = await ServicoTipoUsuario(repository).buscar_usuario_atual(
+        token=token, tipo_usuario=TipoUsuarioEnum.COORDENADOR
+    )
+    logger.info(
+        f"{professor_id=} {coordenador.id=} | "
+        f"Tipo usuário atual é {coordenador.usuario.tipo_usuario.titulo}."
+    )
+    if coordenador.usuario.tipo_usuario.titulo != TipoUsuarioEnum.COORDENADOR:
+        raise NaoAutorizadoException()
+
     return await ServiceProfessor(repository).deletar(professor_id)
 
 
