@@ -77,9 +77,7 @@ async def get_aluno_cpf(aluno_cpf: str, repository=Depends(get_repo())):
 
 @router.get("/email/{aluno_email}", response_model=AlunoInDB)
 async def get_aluno_email(aluno_email: str, repository=Depends(get_repo())):
-    return ServicoAluno(repository).de_aluno_para_aluno_in_db(
-        await ServicoAluno(repository).buscar_por_email(aluno_email)
-    )
+    return await ServicoAluno(repository).buscar_dados_in_db_por_email(aluno_email)
 
 
 @router.get("/orientador/{orientador_id}", response_model=List[AlunoInDB])

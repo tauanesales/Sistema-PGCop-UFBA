@@ -42,9 +42,9 @@ class ServiceProfessor(ServicoBase):
         db_professor = Professor(usuario=db_usuario_professor)
         await self._repo.criar(db_professor)
         logger.info(f"{db_professor.id=} | Professor criado com sucesso.")
-        return self.de_professor_para_professor_in_db(db_professor)
+        return self.tipo_usuario_in_db(db_professor)
 
-    def de_professor_para_professor_in_db(self, professor: Professor) -> ProfessorInDB:
+    def tipo_usuario_in_db(self, professor: Professor) -> ProfessorInDB:
         usuario: Usuario = professor.usuario
         return ProfessorInDB(
             id=professor.id,
@@ -62,16 +62,11 @@ class ServiceProfessor(ServicoBase):
         return db_professor
 
     async def buscar_dados_in_db_por_id(self, professor_id: int) -> ProfessorInDB:
-        return self.de_professor_para_professor_in_db(
-            await self.buscar_por_id(professor_id)
-        )
+        return self.tipo_usuario_in_db(await self.buscar_por_id(professor_id))
 
     async def obter_professores(self) -> list[ProfessorInDB]:
         db_professores: list[Professor] = await self._repo.buscar_todos(Professor)
-        return [
-            self.de_professor_para_professor_in_db(professor)
-            for professor in db_professores
-        ]
+        return [self.tipo_usuario_in_db(professor) for professor in db_professores]
 
     async def deletar(self, professor_id: int) -> None:
         professor: Professor = await self._repo.buscar_por_id(professor_id, Professor)
@@ -117,7 +112,7 @@ class ServiceProfessor(ServicoBase):
         self._repo._session.flush()
         self._repo._session.refresh(db_professor)
         logger.info(f"{professor_id=} | Professor atualizado com sucesso.")
-        return self.de_professor_para_professor_in_db(db_professor)
+        return self.tipo_usuario_in_db(db_professor)
 
     async def buscar_por_email(self, email: str) -> Professor:
         db_professor = await self._repo.buscar_professor_por_email(email)
@@ -125,6 +120,4 @@ class ServiceProfessor(ServicoBase):
         return db_professor
 
     async def buscar_dados_in_db_por_email(self, email: str) -> ProfessorInDB:
-        return self.de_professor_para_professor_in_db(
-            await self.buscar_por_email(email)
-        )
+        return self.tipo_usuario_in_db(await self.buscar_por_email(email))

@@ -21,3 +21,6 @@ class ServicoBase:
 
     async def buscar_por_email(self, email: str):
         pass
+
+    def tipo_usuario_in_db(self, *args, **kwargs):
+        pass

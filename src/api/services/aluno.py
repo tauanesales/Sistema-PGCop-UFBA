@@ -28,7 +28,7 @@ class ServicoAluno(ServicoBase):
         logger.info("Token verificado com sucesso.")
         db_aluno: Aluno = await self.buscar_por_email(email)
         logger.info(f"{db_aluno.id=} | Aluno encontrado com sucesso.")
-        return self.de_aluno_para_aluno_in_db(db_aluno)
+        return self.tipo_usuario_in_db(db_aluno)
 
     async def criar(self, novo_aluno: AlunoNovo) -> AlunoInDB:
         logger.info("Início do processo de criação de novo aluno.")
@@ -57,9 +57,9 @@ class ServicoAluno(ServicoBase):
         await self._repo.criar(db_aluno)
         logger.info(f"{db_aluno.id=} {db_orientador.id=} | Aluno criado com sucesso.")
         await ServicoSolicitacao(self._repo).criar(db_aluno, db_orientador)
-        return self.de_aluno_para_aluno_in_db(db_aluno)
+        return self.tipo_usuario_in_db(db_aluno)
 
-    def de_aluno_para_aluno_in_db(self, db_aluno: Aluno) -> AlunoInDB:
+    def tipo_usuario_in_db(self, db_aluno: Aluno) -> AlunoInDB:
         return AlunoInDB(
             id=db_aluno.id,
             usuario_id=db_aluno.usuario_id,
@@ -112,7 +112,7 @@ class ServicoAluno(ServicoBase):
             if aluno_atualizado.senha
             else db_aluno.usuario.senha_hash
         )
-        return self.de_aluno_para_aluno_in_db(db_aluno)
+        return self.tipo_usuario_in_db(db_aluno)
 
     async def deletar(self, aluno_id: int) -> None:
         logger.info(f"Deletando aluno {aluno_id=}")
@@ -129,7 +129,7 @@ class ServicoAluno(ServicoBase):
         alunos: List[Aluno] = await self._repo.buscar_todos_orientandos_de_um_professor(
             orientador_id
         )
-        return [self.de_aluno_para_aluno_in_db(aluno) for aluno in alunos]
+        return [self.tipo_usuario_in_db(aluno) for aluno in alunos]
 
     async def buscar_por_email(self, email: str) -> Aluno:
         db_aluno: Aluno = await self._repo.buscar_aluno_por_email(email)
@@ -139,12 +139,15 @@ class ServicoAluno(ServicoBase):
     async def buscar_aluno_por_cpf(self, cpf: str) -> AlunoInDB:
         db_aluno = await self._repo.buscar_aluno_por_cpf(cpf)
         self._validador.validar_aluno_existe(db_aluno)
-        return self.de_aluno_para_aluno_in_db(db_aluno)
+        return self.tipo_usuario_in_db(db_aluno)
 
     async def buscar_aluno_por_matricula(self, matricula: str) -> AlunoInDB:
         db_aluno = await self._repo.buscar_aluno_por_matricula(matricula)
         self._validador.validar_aluno_existe(db_aluno)
-        return self.de_aluno_para_aluno_in_db(db_aluno)
+        return self.tipo_usuario_in_db(db_aluno)
 
     async def buscar_dados_in_db_por_id(self, aluno_id: int) -> AlunoInDB:
-        return self.de_aluno_para_aluno_in_db(await self.buscar_aluno_por_id(aluno_id))
+        return self.tipo_usuario_in_db(await self.buscar_aluno_por_id(aluno_id))
+
+    async def buscar_dados_in_db_por_email(self, email: str) -> AlunoInDB:
+        return self.tipo_usuario_in_db(await self.buscar_por_email(email))
