@@ -53,8 +53,8 @@ downgrade: ## Undo the last migration.
 db-full-clean:  ## Drop and recreate the database.
 	docker compose exec db mysql -u ${DB_USERNAME} -p${DB_PASSWORD} -e "DROP DATABASE IF EXISTS ${DB_DATABASE}; CREATE DATABASE ${DB_DATABASE};"
 
-.PHONY: db-regenerate
-db-regenerate: db-full-clean migrate ## Drop, recreate and apply all migrations to the database.
+.PHONY: db-reset
+db-reset: db-full-clean migrate ## Drop, recreate and apply all migrations to the database.
 
 .PHONY: pre-commit
 pre-commit: ## Run pre-commit checks.

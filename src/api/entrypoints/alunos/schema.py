@@ -6,7 +6,7 @@ from pydantic_br import CPF
 from pydantic_extra_types.phone_numbers import PhoneNumber
 
 from src.api.exceptions.value_error_validation_exception import MatriculaNotNumericError
-from src.api.schemas.usuario import UsuarioBase, UsuarioCriacao, UsuarioInDB
+from src.api.schemas.usuario import UsuarioBase, UsuarioInDB, UsuarioNovo
 from src.api.utils.decorators import partial_model
 from src.api.utils.enums import CursoAlunoEnum, TipoUsuarioEnum
 
@@ -65,12 +65,12 @@ class AlunoBase(UsuarioBase):
         return lattes
 
 
-class AlunoNovo(AlunoBase, UsuarioCriacao):
+class AlunoNovo(AlunoBase, UsuarioNovo):
     pass
 
 
 class AlunoInDB(AlunoBase, UsuarioInDB):
-    pass
+    usuario_id: int
 
 
 @partial_model

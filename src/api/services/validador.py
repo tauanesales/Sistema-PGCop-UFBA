@@ -13,7 +13,7 @@ from src.api.entrypoints.new_password.errors import (
     EmailNotFoundException,
 )
 from src.api.entrypoints.professores.errors import ProfessorNaoEncontradoException
-from src.api.entrypoints.professores.schema import ProfessorUpdate
+from src.api.entrypoints.professores.schema import ProfessorAtualizado
 from src.api.entrypoints.tarefas.errors import ExcecaoTarefaNaoEncontrada
 from src.api.exceptions.http_service_exception import (
     AlunoNaoEncontradoException,
@@ -40,7 +40,7 @@ class ServicoValidador:
             raise ProfessorNaoEncontradoException()
 
     def validar_campos_de_atualizacao_nao_sao_nulos(
-        self, updates_professor: ProfessorUpdate
+        self, updates_professor: ProfessorAtualizado
     ):
         if not any(updates_professor.model_dump().values()):
             raise DeveSeSubmeterPeloMenosUmCampoParaAtualizarException()
@@ -62,7 +62,7 @@ class ServicoValidador:
     async def validar_atualizacao_de_professor(
         self,
         professor_id: int,
-        updates_professor: ProfessorUpdate,
+        updates_professor: ProfessorAtualizado,
         db_professor: Professor,
     ):
         self.validar_professor_existe(db_professor)

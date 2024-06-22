@@ -1,14 +1,13 @@
-from typing import Union
+from typing import Optional, Union
 
-from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from loguru import logger
 from passlib.context import CryptContext
 
+from src.api.database.models.aluno import Aluno
+from src.api.database.models.professor import Professor
 from src.api.database.models.usuario import Usuario
 from src.api.database.repository import PGCopRepository
-from src.api.entrypoints.alunos.schema import AlunoInDB
-from src.api.entrypoints.professores.schema import ProfessorInDB
 from src.api.services.aluno import ServicoAluno
 from src.api.services.auth import ServicoAuth
 from src.api.services.professor import ServiceProfessor
@@ -32,20 +31,18 @@ class ServicoTipoUsuario(ServicoBase):
         TipoUsuarioEnum.ALUNO: ServicoAluno,
     }
 
-    async def buscar_dados_por_tipo(
-        self, usuario: Usuario, token: str = Depends(oauth2_scheme)
-    ) -> Union[AlunoInDB, ProfessorInDB]:
+    async def buscar_dados_por_tipo(self, usuario: Usuario) -> Union[Aluno, Professor]:
         tipo_usuario_service: ServicoBase = self.user_service_map[
             usuario.tipo_usuario.titulo
         ]
         logger.info(
             f"Buscando dados do usuário com base no tipo {usuario.tipo_usuario.titulo}."
         )
-        return await tipo_usuario_service(self._repo).buscar_atual(token=token)
+        return await tipo_usuario_service(self._repo).buscar_por_email(usuario.email)
 
-    async def obter_usuario_atual(
-        self, token: str = Depends(oauth2_scheme)
-    ) -> Union[AlunoInDB, ProfessorInDB]:
+    async def buscar_usuario_atual(
+        self, token: str, tipo_usuario: Optional[TipoUsuarioEnum] = None
+    ) -> Union[Aluno, Professor]:
         """Obtém o usuário atual com base no token fornecido."""
         logger.info("Obtendo usuário atual com base no token fornecido.")
         email = await ServicoAuth(self._repo).verificar_token(token)
@@ -54,4 +51,8 @@ class ServicoTipoUsuario(ServicoBase):
             email=email
         )
         logger.info("Usuário encontrado com sucesso.")
-        return await self.buscar_dados_por_tipo(usuario=usuario, token=token)
+        if not tipo_usuario:
+            return await self.buscar_dados_por_tipo(usuario=usuario)
+        return await self.user_service_map[tipo_usuario](self._repo).buscar_por_email(
+            email=email
+        )

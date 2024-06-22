@@ -4,7 +4,7 @@ from passlib.context import CryptContext
 
 from src.api.database.models.usuario import Usuario
 from src.api.database.repository import PGCopRepository
-from src.api.schemas.usuario import UsuarioCriacao, UsuarioInDB
+from src.api.schemas.usuario import UsuarioInDB, UsuarioNovo
 from src.api.services.servico_base import ServicoBase
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -26,7 +26,7 @@ class ServicoUsuario(ServicoBase):
         self._validador.validar_usuario_existe(db_usuario)
         return UsuarioInDB(**db_usuario.__dict__)
 
-    async def criar(self, novo_usuario: UsuarioCriacao) -> Usuario:
+    async def criar(self, novo_usuario: UsuarioNovo) -> Usuario:
         logger.info(
             f"Início do processo de criação de usuario tipo {novo_usuario.tipo_usuario}"
         )
