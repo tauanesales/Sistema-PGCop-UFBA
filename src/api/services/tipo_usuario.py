@@ -8,6 +8,8 @@ from src.api.database.models.aluno import Aluno
 from src.api.database.models.professor import Professor
 from src.api.database.models.usuario import Usuario
 from src.api.database.repository import PGCopRepository
+from src.api.entrypoints.alunos.schema import AlunoInDB
+from src.api.entrypoints.professores.schema import ProfessorInDB
 from src.api.services.aluno import ServicoAluno
 from src.api.services.auth import ServicoAuth
 from src.api.services.professor import ServiceProfessor
@@ -25,7 +27,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 class ServicoTipoUsuario(ServicoBase):
     _repo: PGCopRepository
 
-    user_service_map = {
+    user_service_map: dict[TipoUsuarioEnum, ServicoBase] = {
         TipoUsuarioEnum.COORDENADOR: ServiceProfessor,
         TipoUsuarioEnum.PROFESSOR: ServiceProfessor,
         TipoUsuarioEnum.ALUNO: ServicoAluno,
@@ -56,3 +58,13 @@ class ServicoTipoUsuario(ServicoBase):
         return await self.user_service_map[tipo_usuario](self._repo).buscar_por_email(
             email=email
         )
+
+    async def buscar_dados_in_db_usuario_atual(
+        self, token: str, tipo_usuario: Optional[TipoUsuarioEnum] = None
+    ) -> Union[AlunoInDB, ProfessorInDB]:
+        usuario_atual: Union[Aluno, Professor] = await self.buscar_usuario_atual(
+            token=token, tipo_usuario=tipo_usuario
+        )
+        return self.user_service_map[usuario_atual.usuario.tipo_usuario.titulo](
+            self._repo
+        ).tipo_usuario_in_db(usuario_atual)
