@@ -50,12 +50,12 @@ class ValidadorDeSenhaUsuario:
         return senha
 
 
-class UsuarioCriacao(UsuarioBase, ValidadorDeSenhaUsuario):
+class UsuarioNovo(UsuarioBase, ValidadorDeSenhaUsuario):
     pass
 
 
 @partial_model
-class UsuarioAtualizado(UsuarioCriacao):
+class UsuarioAtualizado(UsuarioNovo):
     pass
 
 

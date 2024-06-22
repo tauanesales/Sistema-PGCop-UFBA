@@ -61,10 +61,11 @@ class ServicoAluno(ServicoBase):
 
     def de_aluno_para_aluno_in_db(self, db_aluno: Aluno) -> AlunoInDB:
         return AlunoInDB(
+            id=db_aluno.id,
+            usuario_id=db_aluno.usuario_id,
             nome=db_aluno.usuario.nome,
             email=db_aluno.usuario.email,
             tipo_usuario=db_aluno.usuario.tipo_usuario.titulo,
-            id=db_aluno.id,
             cpf=db_aluno.cpf,
             telefone=db_aluno.telefone,
             matricula=db_aluno.matricula,
@@ -76,10 +77,10 @@ class ServicoAluno(ServicoBase):
             orientador_id=db_aluno.orientador_id,
         )
 
-    async def buscar_aluno(self, aluno_id: int) -> AlunoInDB:
-        aluno: Aluno = await self._repo.buscar_por_id(aluno_id, Aluno)
-        self._validador.validar_aluno_existe(aluno)
-        return self.de_aluno_para_aluno_in_db(aluno)
+    async def buscar_aluno_por_id(self, aluno_id: int) -> Aluno:
+        db_aluno: Aluno = await self._repo.buscar_por_id(aluno_id, Aluno)
+        self._validador.validar_aluno_existe(db_aluno)
+        return db_aluno
 
     async def atualizar_aluno(
         self, aluno_id: int, aluno_atualizado: AlunoAtualizado
@@ -114,12 +115,15 @@ class ServicoAluno(ServicoBase):
         return self.de_aluno_para_aluno_in_db(db_aluno)
 
     async def deletar(self, aluno_id: int) -> None:
-        aluno: AlunoInDB = await self.buscar_aluno(aluno_id)
+        logger.info(f"Deletando aluno {aluno_id=}")
+        aluno: AlunoInDB = await self.buscar_aluno_por_id(aluno_id)
         tarefas: list[Tarefa] = aluno.tarefas or []
+        logger.info(f"{aluno.id=} | Deleteando tarefas do aluno")
         for tarefa in tarefas:
             tarefa.deleted_at = datetime.utcnow()
         aluno.deleted_at = datetime.utcnow()
         aluno.usuario.deleted_at = datetime.utcnow()
+        logger.info(f"{aluno.id=} | Aluno deletado com sucesso.")
 
     async def buscar_alunos_por_orientador(self, orientador_id: int) -> List[AlunoInDB]:
         alunos: List[Aluno] = await self._repo.buscar_todos_orientandos_de_um_professor(
@@ -141,3 +145,6 @@ class ServicoAluno(ServicoBase):
         db_aluno = await self._repo.buscar_aluno_por_matricula(matricula)
         self._validador.validar_aluno_existe(db_aluno)
         return self.de_aluno_para_aluno_in_db(db_aluno)
+
+    async def buscar_dados_in_db_por_id(self, aluno_id: int) -> AlunoInDB:
+        return self.de_aluno_para_aluno_in_db(await self.buscar_aluno_por_id(aluno_id))

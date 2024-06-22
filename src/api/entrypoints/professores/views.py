@@ -2,14 +2,19 @@ from typing import List
 
 from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordBearer
+from loguru import logger
 
+from src.api.database.models.professor import Professor
 from src.api.database.session import get_repo
 from src.api.entrypoints.professores.schema import (
-    ProfessorCreate,
+    ProfessorAtualizado,
     ProfessorInDB,
-    ProfessorUpdate,
+    ProfessorNovo,
 )
+from src.api.exceptions.credentials_exception import NaoAutorizadoException
 from src.api.services.professor import ServiceProfessor
+from src.api.services.tipo_usuario import ServicoTipoUsuario
+from src.api.utils.enums import TipoUsuarioEnum
 
 router = APIRouter()
 
@@ -17,7 +22,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 @router.post("/", response_model=ProfessorInDB, status_code=status.HTTP_201_CREATED)
-async def criar_professor(professor: ProfessorCreate, repository=Depends(get_repo())):
+async def criar_professor(professor: ProfessorNovo, repository=Depends(get_repo())):
     return await ServiceProfessor(repository).criar(novo_professor=professor)
 
 
@@ -34,19 +39,45 @@ async def obter_todos_professores(repository=Depends(get_repo())):
 
 
 @router.get("/{professor_id}", response_model=ProfessorInDB)
-async def ler_professor(professor_id: int, repository=Depends(get_repo())):
-    return await ServiceProfessor(repository).obter_professor(professor_id=professor_id)
+async def buscar_professor_por_id(professor_id: int, repository=Depends(get_repo())):
+    return await ServiceProfessor(repository).buscar_dados_in_db_por_id(
+        professor_id=professor_id
+    )
 
 
 @router.delete("/{professor_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def deletar_professor(professor_id: int, repository=Depends(get_repo())):
-    await ServiceProfessor(repository).deletar(professor_id)
-    return {"ok": True}
+async def deletar_professor(
+    professor_id: int,
+    token: str = Depends(oauth2_scheme),
+    repository=Depends(get_repo()),
+):
+    logger.info(f"Solicitado deleção de {professor_id=} | Autenticando usuário atual.")
+    coordenador: Professor = await ServicoTipoUsuario(repository).buscar_usuario_atual(
+        token=token, tipo_usuario=TipoUsuarioEnum.COORDENADOR
+    )
+    logger.info(
+        f"{professor_id=} {coordenador.id=} | "
+        f"Tipo usuário atual é {coordenador.usuario.tipo_usuario.titulo}."
+    )
+    if coordenador.usuario.tipo_usuario.titulo != TipoUsuarioEnum.COORDENADOR:
+        raise NaoAutorizadoException()
+
+    return await ServiceProfessor(repository).deletar(professor_id)
+
+
+@router.delete("/", status_code=status.HTTP_204_NO_CONTENT)
+async def deletar_professor_atual(
+    token: str = Depends(oauth2_scheme), repository=Depends(get_repo())
+):
+    professor: Professor = await ServicoTipoUsuario(repository).buscar_usuario_atual(
+        token=token, tipo_usuario=TipoUsuarioEnum.PROFESSOR
+    )
+    return await ServiceProfessor(repository).deletar(professor.id)
 
 
 @router.put("/{professor_id}", response_model=ProfessorInDB)
 async def atualizar_professor(
-    professor_id: int, professor: ProfessorUpdate, repository=Depends(get_repo())
+    professor_id: int, professor: ProfessorAtualizado, repository=Depends(get_repo())
 ):
     return await ServiceProfessor(repository).atualizar_professor(
         professor_id, professor
@@ -55,6 +86,4 @@ async def atualizar_professor(
 
 @router.get("/email/{email}", response_model=ProfessorInDB)
 async def obter_professor_por_email(email: str, repository=Depends(get_repo())):
-    return ServiceProfessor(repository).de_professor_para_professor_in_db(
-        await ServiceProfessor(repository).buscar_por_email(email)
-    )
+    return await ServiceProfessor(repository).buscar_dados_in_db_por_email(email=email)

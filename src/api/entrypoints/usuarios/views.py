@@ -16,4 +16,4 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 async def get_current_user_from_token(
     token: str = Depends(oauth2_scheme), repository=Depends(get_repo())
 ):
-    return await ServicoTipoUsuario(repository).obter_usuario_atual(token=token)
+    return await ServicoTipoUsuario(repository).buscar_usuario_atual(token=token)

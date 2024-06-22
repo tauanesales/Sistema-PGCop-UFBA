@@ -1,4 +1,4 @@
-from src.api.schemas.usuario import UsuarioBase, UsuarioCriacao, UsuarioInDB
+from src.api.schemas.usuario import UsuarioBase, UsuarioInDB, UsuarioNovo
 from src.api.utils.decorators import partial_model
 
 
@@ -6,14 +6,14 @@ class ProfessorBase(UsuarioBase):
     pass
 
 
-class ProfessorCreate(UsuarioCriacao):
-    pass
-
-
-@partial_model
-class ProfessorUpdate(ProfessorCreate):
+class ProfessorNovo(ProfessorBase, UsuarioNovo):
     pass
 
 
 class ProfessorInDB(UsuarioInDB):
-    user_id: int
+    usuario_id: int
+
+
+@partial_model
+class ProfessorAtualizado(ProfessorNovo):
+    pass

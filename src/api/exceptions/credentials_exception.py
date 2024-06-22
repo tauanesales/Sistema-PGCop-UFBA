@@ -1,15 +1,27 @@
 from fastapi import HTTPException, status
 
 
-class CredentialsException(HTTPException):
+class CredenciaisInvalidasException(HTTPException):
     """
-    Use this exception when trying to create
-    a new student with an existing CPF.
+    Exceção para credenciais inválidas.
     """
 
     def __init__(self):
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Credenciais inválidas",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+class NaoAutorizadoException(HTTPException):
+    """
+    Exceção para nível de acesso inválido.
+    """
+
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Não autorizado.",
             headers={"WWW-Authenticate": "Bearer"},
         )

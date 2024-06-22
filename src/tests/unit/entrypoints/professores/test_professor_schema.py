@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from src.api.entrypoints.professores.schema import ProfessorCreate
+from src.api.entrypoints.professores.schema import ProfessorNovo
 from src.api.exceptions.value_error_validation_exception import (
     PasswordWithoutLowercaseError,
     PasswordWithoutNumberError,
@@ -12,7 +12,7 @@ from src.api.exceptions.value_error_validation_exception import (
 
 
 def test_professor_create_valid(valid_professor_data: dict):
-    professor = ProfessorCreate(**valid_professor_data)
+    professor = ProfessorNovo(**valid_professor_data)
     assert professor.nome == valid_professor_data.get("nome")
     assert professor.email == valid_professor_data.get("email")
     assert professor.tipo_usuario == valid_professor_data.get("tipo_usuario")
@@ -34,7 +34,7 @@ def test_professor_create_valid(valid_professor_data: dict):
 def test_professor_create_password_with_spaces_error(valid_professor_data, password):
     valid_professor_data["senha"] = password
     with pytest.raises(ValidationError) as exc:
-        ProfessorCreate(**valid_professor_data)
+        ProfessorNovo(**valid_professor_data)
 
     assert str(PasswordWithSpacesError()) in exc.value.errors()[0].get("msg")
 
@@ -52,7 +52,7 @@ def test_professor_create_password_with_spaces_error(valid_professor_data, passw
 def test_professor_create_password_without_number_error(valid_professor_data, password):
     valid_professor_data["senha"] = password
     with pytest.raises(ValidationError) as exc:
-        ProfessorCreate(**valid_professor_data)
+        ProfessorNovo(**valid_professor_data)
 
     assert str(PasswordWithoutNumberError()) in exc.value.errors()[0].get("msg")
 
@@ -70,7 +70,7 @@ def test_professor_create_password_without_uppercase_error(
 ):
     valid_professor_data["senha"] = password
     with pytest.raises(ValidationError) as exc:
-        ProfessorCreate(**valid_professor_data)
+        ProfessorNovo(**valid_professor_data)
 
     assert str(PasswordWithoutUppercaseError()) in exc.value.errors()[0].get("msg")
 
@@ -88,7 +88,7 @@ def test_professor_create_password_without_lowercase_error(
 ):
     valid_professor_data["senha"] = password
     with pytest.raises(ValidationError) as exc:
-        ProfessorCreate(**valid_professor_data)
+        ProfessorNovo(**valid_professor_data)
 
     assert str(PasswordWithoutLowercaseError()) in exc.value.errors()[0].get("msg")
 
@@ -106,7 +106,7 @@ def test_professor_create_password_without_special_character_error(
 ):
     valid_professor_data["senha"] = password
     with pytest.raises(ValidationError) as exc:
-        ProfessorCreate(**valid_professor_data)
+        ProfessorNovo(**valid_professor_data)
 
     assert str(PasswordWithoutSpecialCharacterError()) in exc.value.errors()[0].get(
         "msg"
@@ -125,7 +125,7 @@ def test_professor_create_password_without_special_character_error(
 def test_professor_create_short_password_error(valid_professor_data, password):
     valid_professor_data["senha"] = password
     with pytest.raises(ValidationError) as exc:
-        ProfessorCreate(**valid_professor_data)
+        ProfessorNovo(**valid_professor_data)
 
     assert "String should have at least 8 characters" in exc.value.errors()[0].get(
         "msg"
@@ -142,5 +142,5 @@ def test_professor_create_short_password_error(valid_professor_data, password):
 )
 def test_professor_create_valid_password(valid_professor_data, password):
     valid_professor_data["senha"] = password
-    student = ProfessorCreate(**valid_professor_data)
+    student = ProfessorNovo(**valid_professor_data)
     assert student.senha == password
