@@ -10,6 +10,7 @@ from src.api.entrypoints.professores.schema import (
     ProfessorAtualizado,
     ProfessorInDB,
     ProfessorNovo,
+    ProfessorResponse,
 )
 from src.api.exceptions.credentials_exception import NaoAutorizadoException
 from src.api.services.professor import ServiceProfessor
@@ -26,7 +27,7 @@ async def criar_professor(professor: ProfessorNovo, repository=Depends(get_repo(
     return await ServiceProfessor(repository).criar(novo_professor=professor)
 
 
-@router.get("/todos", response_model=List[ProfessorInDB])
+@router.get("/todos", response_model=List[ProfessorResponse])
 async def obter_todos_professores(repository=Depends(get_repo())):
     return await ServiceProfessor(repository).obter_professores()
 

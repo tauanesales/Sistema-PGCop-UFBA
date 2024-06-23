@@ -65,6 +65,10 @@ class AlunoBase(UsuarioBase):
         HttpUrl(lattes)
         return lattes
 
+    @field_validator("cpf", mode="after")
+    def validar_cpf(cls, valor):
+        return valor.replace(".", "").replace("-", "")
+
 
 class AlunoNovo(AlunoBase, UsuarioNovo):
     pass
