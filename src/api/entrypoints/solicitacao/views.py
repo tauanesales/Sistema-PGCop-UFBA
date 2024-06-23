@@ -29,7 +29,7 @@ async def listar_solicitacoes(professor_id: int, status: StatusSolicitacaoEnum, 
         f"{professor_id=} {professor.id=} | "
         f"Tipo usuário atual é {professor.usuario.tipo_usuario.titulo}."
     )
-    if (professor.usuario.tipo_usuario.titulo not in [TipoUsuarioEnum.COORDENADOR, TipoUsuarioEnum.PROFESSOR]:
+    if professor.usuario.tipo_usuario.titulo not in [TipoUsuarioEnum.COORDENADOR, TipoUsuarioEnum.PROFESSOR]:
         raise NaoAutorizadoException()
     return await ServicoSolicitacao(repository).listar(
         professor_id=professor_id, status=status
