@@ -2,14 +2,15 @@ from loguru import logger
 from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordBearer
 
-from src.api.exceptions.credentials_exception import NaoAutorizadoException
 from src.api.database.models.professor import Professor
 from src.api.database.session import get_repo
 from src.api.entrypoints.solicitacao.schema import SolicitacaoInDB
+from src.api.exceptions.credentials_exception import NaoAutorizadoException
 from src.api.services.solicitacao import ServicoSolicitacao
 from src.api.services.tipo_usuario import ServicoTipoUsuario
 from src.api.utils.enums import StatusSolicitacaoEnum
 from src.api.utils.enums import TipoUsuarioEnum
+
 
 router = APIRouter()
 
@@ -21,12 +22,20 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
     response_model=list[SolicitacaoInDB],
     status_code=status.HTTP_200_OK,
 )
-async def listar_solicitacoes(
-    professor_id: int, status: StatusSolicitacaoEnum, repository=Depends(get_repo())
-):
+async def listar_solicitacoes(professor_id: int, status: StatusSolicitacaoEnum, token: str = Depends(oauth2_scheme), repository=Depends(get_repo())):  
+    logger.info(f"Solicitada listagem de solicitações pelo professor com id {professor_id} | Autenticando usuário atual.")
+    professor: Professor = await ServicoTipoUsuario(repository).buscar_usuario_atual(token=token)
+    logger.info(
+        f"{professor_id=} {professor.id=} | "
+        f"Tipo usuário atual é {professor.usuario.tipo_usuario.titulo}."
+    )
+    if professor.usuario.tipo_usuario.titulo not in [TipoUsuarioEnum.COORDENADOR, TipoUsuarioEnum.PROFESSOR]:
+        raise NaoAutorizadoException()
     return await ServicoSolicitacao(repository).listar(
         professor_id=professor_id, status=status
     )
+
+
 
 
 @router.put(
