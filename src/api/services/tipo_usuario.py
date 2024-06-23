@@ -65,6 +65,7 @@ class ServicoTipoUsuario(ServicoBase):
         usuario_atual: Union[Aluno, Professor] = await self.buscar_usuario_atual(
             token=token, tipo_usuario=tipo_usuario
         )
+
         return self.user_service_map[usuario_atual.usuario.tipo_usuario.titulo](
             self._repo
         ).tipo_usuario_in_db(usuario_atual)
