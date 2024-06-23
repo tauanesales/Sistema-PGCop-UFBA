@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordBearer
@@ -10,6 +10,7 @@ from src.api.entrypoints.professores.schema import (
     ProfessorAtualizado,
     ProfessorInDB,
     ProfessorNovo,
+    ProfessorResponse,
 )
 from src.api.exceptions.credentials_exception import NaoAutorizadoException
 from src.api.services.professor import ServiceProfessor
@@ -33,9 +34,12 @@ async def read_professor_me(
     return await ServiceProfessor(repository).buscar_atual(token)
 
 
-@router.get("/todos", response_model=List[ProfessorInDB])
+@router.get("/todos", response_model=List[ProfessorResponse])
 async def obter_todos_professores(repository=Depends(get_repo())):
-    return await ServiceProfessor(repository).obter_professores()
+    lista_professores = await ServiceProfessor(repository).obter_professores()
+    print([{"id": professor.id, "nome": professor.nome} for professor in lista_professores])
+    return [{"id": professor.id, "nome": professor.nome} for professor in lista_professores]
+
 
 
 @router.get("/{professor_id}", response_model=ProfessorInDB)
