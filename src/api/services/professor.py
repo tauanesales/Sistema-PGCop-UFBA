@@ -12,6 +12,7 @@ from src.api.entrypoints.professores.schema import (
     ProfessorAtualizado,
     ProfessorInDB,
     ProfessorNovo,
+    ProfessorResponse,
 )
 from src.api.services.auth import ServicoAuth, oauth2_scheme
 from src.api.services.servico_base import ServicoBase
@@ -64,9 +65,16 @@ class ServiceProfessor(ServicoBase):
     async def buscar_dados_in_db_por_id(self, professor_id: int) -> ProfessorInDB:
         return self.tipo_usuario_in_db(await self.buscar_por_id(professor_id))
 
-    async def obter_professores(self) -> list[ProfessorInDB]:
+    async def obter_professores(self) -> list[ProfessorResponse]:
+        logger.info("Buscando todos os professores.")
         db_professores: list[Professor] = await self._repo.buscar_todos(Professor)
-        return [self.tipo_usuario_in_db(professor) for professor in db_professores]
+        logger.info(
+            f"Encontrados {len(db_professores)} professores. Retornando lista..."
+        )
+        return [
+            ProfessorResponse(id=professor.id, nome=professor.usuario.nome)
+            for professor in db_professores
+        ]
 
     async def deletar(self, professor_id: int) -> None:
         professor: Professor = await self._repo.buscar_por_id(professor_id, Professor)

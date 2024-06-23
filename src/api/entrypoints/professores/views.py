@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List
 
 from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordBearer
@@ -29,9 +29,7 @@ async def criar_professor(professor: ProfessorNovo, repository=Depends(get_repo(
 
 @router.get("/todos", response_model=List[ProfessorResponse])
 async def obter_todos_professores(repository=Depends(get_repo())):
-    lista_professores = await ServiceProfessor(repository).obter_professores()
-    print([{"id": professor.id, "nome": professor.nome} for professor in lista_professores])
-    return [{"id": professor.id, "nome": professor.nome} for professor in lista_professores]
+    return await ServiceProfessor(repository).obter_professores()
 
 
 @router.get("/{professor_id}", response_model=ProfessorInDB)
