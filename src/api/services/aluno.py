@@ -2,7 +2,6 @@ from datetime import datetime
 from typing import List
 
 from fastapi import Depends
-from sqlalchemy import null
 from loguru import logger
 from passlib.context import CryptContext
 
