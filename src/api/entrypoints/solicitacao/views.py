@@ -24,12 +24,12 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 )
 async def listar_solicitacoes(professor_id: int, status: StatusSolicitacaoEnum, token: str = Depends(oauth2_scheme), repository=Depends(get_repo())):  
     logger.info(f"Solicitada listagem de solicitações pelo professor com id {professor_id} | Autenticando usuário atual.")
-    coordenador: Professor = await ServicoTipoUsuario(repository).buscar_usuario_atual(token=token)
+    professor: Professor = await ServicoTipoUsuario(repository).buscar_usuario_atual(token=token)
     logger.info(
-        f"{professor_id=} {coordenador.id=} | "
-        f"Tipo usuário atual é {coordenador.usuario.tipo_usuario.titulo}."
+        f"{professor_id=} {professor.id=} | "
+        f"Tipo usuário atual é {professor.usuario.tipo_usuario.titulo}."
     )
-    if (coordenador.usuario.tipo_usuario.titulo != TipoUsuarioEnum.COORDENADOR) and (coordenador.usuario.tipo_usuario.titulo != TipoUsuarioEnum.PROFESSOR):
+    if (professor.usuario.tipo_usuario.titulo not in [TipoUsuarioEnum.COORDENADOR, TipoUsuarioEnum.PROFESSOR]:
         raise NaoAutorizadoException()
     return await ServicoSolicitacao(repository).listar(
         professor_id=professor_id, status=status
