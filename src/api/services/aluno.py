@@ -11,6 +11,7 @@ from src.api.database.models.tarefa import Tarefa
 from src.api.database.models.usuario import Usuario
 from src.api.database.repository import PGCopRepository
 from src.api.entrypoints.alunos.schema import AlunoAtualizado, AlunoInDB, AlunoNovo
+from src.api.entrypoints.professores.schema import ProfessorInDB
 from src.api.services.auth import ServicoAuth, oauth2_scheme
 from src.api.services.servico_base import ServicoBase
 from src.api.services.solicitacao import ServicoSolicitacao
@@ -74,7 +75,13 @@ class ServicoAluno(ServicoBase):
             data_ingresso=db_aluno.data_ingresso,
             data_qualificacao=db_aluno.data_qualificacao,
             data_defesa=db_aluno.data_defesa,
-            orientador_id=db_aluno.orientador_id,
+            orientador=ProfessorInDB(
+                usuario_id=db_aluno.orientador.usuario_id,
+                nome=db_aluno.orientador.usuario.nome,
+                email=db_aluno.orientador.usuario.email,
+                tipo_usuario=db_aluno.orientador.usuario.tipo_usuario.titulo,
+                id=db_aluno.orientador.usuario.id,
+            ),
         )
 
     async def buscar_aluno_por_id(self, aluno_id: int) -> Aluno:
@@ -151,7 +158,7 @@ class ServicoAluno(ServicoBase):
 
     async def buscar_dados_in_db_por_email(self, email: str) -> AlunoInDB:
         return self.tipo_usuario_in_db(await self.buscar_por_email(email))
-    
+
     async def remover_orientador(self, aluno_id: int) -> AlunoInDB:
         db_aluno: Aluno = await self._repo.buscar_por_id(aluno_id, Aluno)
         db_aluno.orientador_id = 1
