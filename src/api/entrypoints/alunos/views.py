@@ -69,7 +69,6 @@ async def atualizar_aluno(
 ):
     return await ServicoAluno(repository).atualizar_aluno(aluno_id, aluno)
 
-
 @router.get("/cpf/{aluno_cpf}", response_model=AlunoInDB)
 async def get_aluno_cpf(aluno_cpf: str, repository=Depends(get_repo())):
     return await ServicoAluno(repository).buscar_aluno_por_cpf(aluno_cpf)
@@ -83,3 +82,17 @@ async def get_aluno_email(aluno_email: str, repository=Depends(get_repo())):
 @router.get("/orientador/{orientador_id}", response_model=List[AlunoInDB])
 async def get_alunos_por_orientador(orientador_id: int, repository=Depends(get_repo())):
     return await ServicoAluno(repository).buscar_alunos_por_orientador(orientador_id)
+
+@router.put("/{aluno_id}/remover-orientador/", response_model=AlunoInDB)
+async def remover_orientador_aluno(aluno_id: int,token: str = Depends(oauth2_scheme), repository=Depends(get_repo())):
+    logger.info(f"Solicitado remoção do orientador do {aluno_id=} | Autenticando usuário atual.")
+    coordenador_ou_professor: Professor = await ServicoTipoUsuario(repository).buscar_usuario_atual(
+        token=token)
+    logger.info(
+        f"{aluno_id=} {coordenador_ou_professor.id=} | "
+        f"Tipo usuário atual é {coordenador_ou_professor.usuario.tipo_usuario.titulo}."
+    )
+    if (coordenador_ou_professor.usuario.tipo_usuario.titulo != TipoUsuarioEnum.COORDENADOR) and (coordenador_ou_professor.usuario.tipo_usuario.titulo != TipoUsuarioEnum.PROFESSOR):
+        raise NaoAutorizadoException()
+    
+    return await ServicoAluno(repository).remover_orientador(aluno_id)
