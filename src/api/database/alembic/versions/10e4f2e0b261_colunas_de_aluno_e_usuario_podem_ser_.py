@@ -67,23 +67,12 @@ def upgrade() -> None:
         Usuario.__table__,
         [
             {
-                "nome": "Prof Fred Durão",
-                "email": "fred_professor@ufba.br",
-                "senha_hash": "$2b$12$jagLVP7tdNJQ0y/V97yTGe5I7gcVFn8tb79LgBMShlfbYGZZ0qyBq",  # noqa
+                "nome": "Sem Orientador",
+                "email": "sem_orientador@ufba.br",
+                "senha_hash": "$2b$12$qx8sUyzH7L0/P3slZg6maOW1g11/G09YT89zxP2/cukl2aznAwCfW",  # noqa
                 "new_password_token": None,
                 "tipo_usuario_id": 2,
                 "id": 1,
-                "created_at": "2024-06-17 00:00:00",
-                "updated_at": "2024-06-17 00:00:00",
-                "deleted_at": None,
-            },
-            {
-                "nome": "Aluno Fred Durão",
-                "email": "fred_aluno@ufba.br",
-                "senha_hash": "$2b$12$UkAuRH33KQCtXszd93ujhO994KdVA8BOAyvtaO4zDxlys54g.ruai",  # noqa
-                "new_password_token": None,
-                "tipo_usuario_id": 3,
-                "id": 2,
                 "created_at": "2024-06-17 00:00:00",
                 "updated_at": "2024-06-17 00:00:00",
                 "deleted_at": None,
@@ -94,7 +83,29 @@ def upgrade() -> None:
                 "senha_hash": "$2b$12$WGZL3R1KnQaZUMBs27Cw.e/YXYHgcEQ0iFQI59EaddLd./DRJkTlm",  # noqa
                 "new_password_token": None,
                 "tipo_usuario_id": 1,
+                "id": 2,
+                "created_at": "2024-06-17 00:00:00",
+                "updated_at": "2024-06-17 00:00:00",
+                "deleted_at": None,
+            },
+            {
+                "nome": "Prof Fred Durão",
+                "email": "fred_professor@ufba.br",
+                "senha_hash": "$2b$12$jagLVP7tdNJQ0y/V97yTGe5I7gcVFn8tb79LgBMShlfbYGZZ0qyBq",  # noqa
+                "new_password_token": None,
+                "tipo_usuario_id": 2,
                 "id": 3,
+                "created_at": "2024-06-17 00:00:00",
+                "updated_at": "2024-06-17 00:00:00",
+                "deleted_at": None,
+            },
+            {
+                "nome": "Aluno Fred Durão",
+                "email": "fred_aluno@ufba.br",
+                "senha_hash": "$2b$12$UkAuRH33KQCtXszd93ujhO994KdVA8BOAyvtaO4zDxlys54g.ruai",  # noqa
+                "new_password_token": None,
+                "tipo_usuario_id": 3,
+                "id": 4,
                 "created_at": "2024-06-17 00:00:00",
                 "updated_at": "2024-06-17 00:00:00",
                 "deleted_at": None,
@@ -112,8 +123,15 @@ def upgrade() -> None:
                 "deleted_at": None,
             },
             {
-                "usuario_id": 3,
+                "usuario_id": 2,
                 "id": 2,
+                "created_at": "2024-06-17 00:00:00",
+                "updated_at": "2024-06-17 00:00:00",
+                "deleted_at": None,
+            },
+            {
+                "usuario_id": 3,
+                "id": 3,
                 "created_at": "2024-06-17 00:00:00",
                 "updated_at": "2024-06-17 00:00:00",
                 "deleted_at": None,
@@ -132,8 +150,8 @@ def upgrade() -> None:
                 "data_ingresso": "2024-06-17 00:00:00",
                 "data_qualificacao": "2025-06-17",
                 "data_defesa": "2026-06-17",
-                "orientador_id": 1,
-                "usuario_id": 2,
+                "orientador_id": 3,
+                "usuario_id": 4,
                 "id": 1,
                 "created_at": "2024-06-17 00:00:00",
                 "updated_at": "2024-06-17 00:00:00",
@@ -146,7 +164,7 @@ def upgrade() -> None:
         [
             {
                 "aluno_id": 1,
-                "professor_id": 1,
+                "professor_id": 3,
                 "status": "PENDENTE",
                 "id": 1,
                 "created_at": "2024-06-17 00:00:00",
