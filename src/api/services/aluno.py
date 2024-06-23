@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import List
 
 from fastapi import Depends
+from sqlalchemy import null
 from loguru import logger
 from passlib.context import CryptContext
 
@@ -151,3 +152,9 @@ class ServicoAluno(ServicoBase):
 
     async def buscar_dados_in_db_por_email(self, email: str) -> AlunoInDB:
         return self.tipo_usuario_in_db(await self.buscar_por_email(email))
+    
+    async def remover_orientador(self, aluno_id: int) -> AlunoInDB:
+        db_aluno: Aluno = await self._repo.buscar_por_id(aluno_id, Aluno)
+        db_aluno.orientador_id = 1
+
+        return self.tipo_usuario_in_db(db_aluno)
