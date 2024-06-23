@@ -1,5 +1,7 @@
+import email
 from typing import Optional, Union
 
+from annotated_types import UpperCase
 from fastapi.security import OAuth2PasswordBearer
 from loguru import logger
 from passlib.context import CryptContext
@@ -8,8 +10,9 @@ from src.api.database.models.aluno import Aluno
 from src.api.database.models.professor import Professor
 from src.api.database.models.usuario import Usuario
 from src.api.database.repository import PGCopRepository
-from src.api.entrypoints.alunos.schema import AlunoInDB
+from src.api.entrypoints.alunos.schema import AlunoInDB, AlunoInDBProfDict
 from src.api.entrypoints.professores.schema import ProfessorInDB
+from src.api.schemas.usuario import UsuarioAtualizado
 from src.api.services.aluno import ServicoAluno
 from src.api.services.auth import ServicoAuth
 from src.api.services.professor import ServiceProfessor
@@ -65,6 +68,37 @@ class ServicoTipoUsuario(ServicoBase):
         usuario_atual: Union[Aluno, Professor] = await self.buscar_usuario_atual(
             token=token, tipo_usuario=tipo_usuario
         )
+
+        if isinstance(usuario_atual, Aluno):
+            professor_service = ServiceProfessor(self._repo)
+            professor = await professor_service.buscar_por_id(usuario_atual.orientador_id)
+
+            aluno_indb = AlunoInDBProfDict(
+                id=usuario_atual.id,
+                usuario_id=usuario_atual.usuario_id,
+                nome=usuario_atual.usuario.nome,
+                cpf=usuario_atual.cpf,
+                curso=usuario_atual.curso,
+                data_defesa=usuario_atual.data_defesa,
+                data_ingresso=usuario_atual.data_ingresso,
+                data_qualificacao=usuario_atual.data_qualificacao,
+                email=usuario_atual.usuario.email,
+                lattes=usuario_atual.lattes,
+                matricula=usuario_atual.matricula,
+                orientador_id=ProfessorInDB(
+                    usuario_id=professor.usuario_id,
+                    nome=professor.usuario.nome,
+                    email=professor.usuario.email,
+                    tipo_usuario= professor.usuario.tipo_usuario.titulo,
+                    id=professor.usuario.id,
+                ),
+                telefone=usuario_atual.telefone,
+                tipo_usuario=usuario_atual.usuario.tipo_usuario.titulo
+            )
+
+            return aluno_indb
+    
+
         return self.user_service_map[usuario_atual.usuario.tipo_usuario.titulo](
             self._repo
         ).tipo_usuario_in_db(usuario_atual)

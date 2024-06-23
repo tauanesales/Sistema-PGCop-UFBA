@@ -5,6 +5,7 @@ from pydantic import Field, HttpUrl, constr, field_validator
 from pydantic_br import CPF
 from pydantic_extra_types.phone_numbers import PhoneNumber
 
+from src.api.entrypoints.professores.schema import ProfessorInDB
 from src.api.exceptions.value_error_validation_exception import MatriculaNotNumericError
 from src.api.schemas.usuario import UsuarioBase, UsuarioInDB, UsuarioNovo
 from src.api.utils.decorators import partial_model
@@ -72,6 +73,19 @@ class AlunoNovo(AlunoBase, UsuarioNovo):
 class AlunoInDB(AlunoBase, UsuarioInDB):
     usuario_id: int
 
+class AlunoInDBProfDict(AlunoInDB):
+    orientador_id: Optional[ProfessorInDB] = None
+
+    def __init__(self, id: int, usuario_id: int, nome: str, email: str, tipo_usuario: str, cpf: str,
+                 telefone: str, matricula: str, lattes: str, curso: str, data_ingresso: date,
+                 data_qualificacao: Optional[date] = None, data_defesa: Optional[date] = None,
+                 orientador_id: Optional[ProfessorInDB] = None):
+        super().__init__(
+            id=id, usuario_id=usuario_id, nome=nome, email=email, tipo_usuario=tipo_usuario,
+            cpf=cpf, telefone=telefone, matricula=matricula, lattes=lattes, curso=curso,
+            data_ingresso=data_ingresso, data_qualificacao=data_qualificacao, data_defesa=data_defesa,
+            orientador_id=orientador_id
+        )
 
 @partial_model
 class AlunoAtualizado(AlunoNovo):
