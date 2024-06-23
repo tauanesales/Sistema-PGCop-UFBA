@@ -26,13 +26,6 @@ async def criar_professor(professor: ProfessorNovo, repository=Depends(get_repo(
     return await ServiceProfessor(repository).criar(novo_professor=professor)
 
 
-@router.get("/me", response_model=ProfessorInDB)
-async def read_professor_me(
-    token: str = Depends(oauth2_scheme), repository=Depends(get_repo())
-):
-    return await ServiceProfessor(repository).buscar_atual(token)
-
-
 @router.get("/todos", response_model=List[ProfessorInDB])
 async def obter_todos_professores(repository=Depends(get_repo())):
     return await ServiceProfessor(repository).obter_professores()

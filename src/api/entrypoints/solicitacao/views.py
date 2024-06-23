@@ -42,8 +42,19 @@ async def listar_solicitacoes(professor_id: int, status: StatusSolicitacaoEnum, 
     "/{solicitacao_id}", response_model=SolicitacaoInDB, status_code=status.HTTP_200_OK
 )
 async def atualizar_status_solicitacao(
-    solicitacao_id: int, status: StatusSolicitacaoEnum, repository=Depends(get_repo())
+    solicitacao_id: int, 
+    status: StatusSolicitacaoEnum, 
+    repository=Depends(get_repo()),
+    token: str = Depends(oauth2_scheme)
 ):
+    logger.info(f"Atualização da solicitação de id {solicitacao_id} | Autenticando usuário atual.")
+    coordenador: Professor = await ServicoTipoUsuario(repository).buscar_usuario_atual(token=token)
+    logger.info(
+        f"{solicitacao_id=} {coordenador.id=} | "
+        f"Tipo usuário atual é {coordenador.usuario.tipo_usuario.titulo}."
+    )
+    if (coordenador.usuario.tipo_usuario.titulo != TipoUsuarioEnum.COORDENADOR) and (coordenador.usuario.tipo_usuario.titulo != TipoUsuarioEnum.PROFESSOR):
+        raise NaoAutorizadoException()
     return await ServicoSolicitacao(repository).atualizar_status_solicitacao(
         solicitacao_id=solicitacao_id, status=status
     )
