@@ -1,6 +1,6 @@
 from src.api.schemas.usuario import UsuarioBase, UsuarioInDB, UsuarioNovo
 from src.api.utils.decorators import partial_model
-
+from pydantic import BaseModel
 
 class ProfessorBase(UsuarioBase):
     pass
@@ -17,3 +17,7 @@ class ProfessorInDB(UsuarioInDB):
 @partial_model
 class ProfessorAtualizado(ProfessorNovo):
     pass
+
+class ProfessorResponse(BaseModel):
+    id: int
+    nome: str
