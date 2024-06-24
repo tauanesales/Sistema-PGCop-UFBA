@@ -14,8 +14,8 @@ from src.api.entrypoints.professores.schema import (
     ProfessorResponse,
 )
 from src.api.exceptions.credentials_exception import NaoAutorizadoException
-from src.api.services.professor import ServiceProfessor
 from src.api.services.aluno import ServicoAluno
+from src.api.services.professor import ServiceProfessor
 from src.api.services.tipo_usuario import ServicoTipoUsuario
 from src.api.utils.enums import TipoUsuarioEnum
 
@@ -65,8 +65,13 @@ async def deletar_professor(
 async def deletar_professor_atual(
     token: str = Depends(oauth2_scheme), repository=Depends(get_repo())
 ):
+    logger.info("Solicitado deleção por token | Autenticando usuário atual.")
     professor: Professor = await ServicoTipoUsuario(repository).buscar_usuario_atual(
         token=token, tipo_usuario=TipoUsuarioEnum.PROFESSOR
+    )
+    logger.info(
+        f"{professor.id=} | "
+        f"Tipo usuário atual é {professor.usuario.tipo_usuario.titulo}."
     )
     return await ServiceProfessor(repository).deletar(professor.id)
 
@@ -86,5 +91,39 @@ async def obter_professor_por_email(email: str, repository=Depends(get_repo())):
 
 
 @router.get("/orientandos/{professor_id}", response_model=List[AlunoInDB])
-async def get_alunos_por_professor(professor_id: int, repository=Depends(get_repo())):
+async def get_orientandos_por_professor_id(
+    professor_id: int,
+    token: str = Depends(oauth2_scheme),
+    repository=Depends(get_repo()),
+):
+    logger.info(
+        f"Solicitado lista de orientandos do {professor_id=}"
+        f" | Autenticando usuário atual."
+    )
+    coordenador: Professor = await ServicoTipoUsuario(repository).buscar_usuario_atual(
+        token=token, tipo_usuario=TipoUsuarioEnum.COORDENADOR
+    )
+    logger.info(
+        f"{professor_id=} {coordenador.id=} | "
+        f"Tipo usuário atual é {coordenador.usuario.tipo_usuario.titulo}."
+    )
+    if coordenador.usuario.tipo_usuario.titulo != TipoUsuarioEnum.COORDENADOR:
+        raise NaoAutorizadoException()
     return await ServicoAluno(repository).buscar_alunos_por_orientador(professor_id)
+
+
+@router.get("/orientandos/", response_model=List[AlunoInDB])
+async def get_orientandos_por_token(
+    token: str = Depends(oauth2_scheme), repository=Depends(get_repo())
+):
+    logger.info(
+        "Solicitado lista de orientandos por token | Autenticando usuário atual."
+    )
+    professor: Professor = await ServicoTipoUsuario(repository).buscar_usuario_atual(
+        token=token, tipo_usuario=TipoUsuarioEnum.PROFESSOR
+    )
+    logger.info(
+        f"{professor.id=} | "
+        f"Tipo usuário atual é {professor.usuario.tipo_usuario.titulo}."
+    )
+    return await ServicoAluno(repository).buscar_alunos_por_orientador(professor.id)
