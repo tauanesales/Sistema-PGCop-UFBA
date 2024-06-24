@@ -73,11 +73,6 @@ async def get_aluno_email(aluno_email: str, repository=Depends(get_repo())):
     return await ServicoAluno(repository).buscar_dados_in_db_por_email(aluno_email)
 
 
-@router.get("/orientador/{orientador_id}", response_model=List[AlunoInDB])
-async def get_alunos_por_orientador(orientador_id: int, repository=Depends(get_repo())):
-    return await ServicoAluno(repository).buscar_alunos_por_orientador(orientador_id)
-
-
 @router.put("/{aluno_id}/remover-orientador/", response_model=AlunoInDB)
 async def remover_orientador_aluno(
     aluno_id: int, token: str = Depends(oauth2_scheme), repository=Depends(get_repo())

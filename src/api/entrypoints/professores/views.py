@@ -6,6 +6,7 @@ from loguru import logger
 
 from src.api.database.models.professor import Professor
 from src.api.database.session import get_repo
+from src.api.entrypoints.alunos.schema import AlunoInDB
 from src.api.entrypoints.professores.schema import (
     ProfessorAtualizado,
     ProfessorInDB,
@@ -14,6 +15,7 @@ from src.api.entrypoints.professores.schema import (
 )
 from src.api.exceptions.credentials_exception import NaoAutorizadoException
 from src.api.services.professor import ServiceProfessor
+from src.api.services.aluno import ServicoAluno
 from src.api.services.tipo_usuario import ServicoTipoUsuario
 from src.api.utils.enums import TipoUsuarioEnum
 
@@ -81,3 +83,8 @@ async def atualizar_professor(
 @router.get("/email/{email}", response_model=ProfessorInDB)
 async def obter_professor_por_email(email: str, repository=Depends(get_repo())):
     return await ServiceProfessor(repository).buscar_dados_in_db_por_email(email=email)
+
+
+@router.get("/orientandos/{professor_id}", response_model=List[AlunoInDB])
+async def get_alunos_por_professor(professor_id: int, repository=Depends(get_repo())):
+    return await ServicoAluno(repository).buscar_alunos_por_orientador(professor_id)
