@@ -7,7 +7,7 @@ from src.api.database.session import get_repo
 from src.api.entrypoints.solicitacao.schema import SolicitacaoInDB
 from src.api.exceptions.credentials_exception import NaoAutorizadoException
 from src.api.services.solicitacao import ServicoSolicitacao
-from src.api.services.tipo_usuario import ServicoTipoUsuario
+from src.api.services.tipo_usuario import ServicoTipoUsuarioGenerico
 from src.api.utils.enums import StatusSolicitacaoEnum, TipoUsuarioEnum
 
 router = APIRouter()
@@ -30,9 +30,9 @@ async def listar_solicitacoes(
         f"Solicitada listagem de solicitações pelo professor com id {professor_id}"
         f" | Autenticando usuário atual."
     )
-    professor: Professor = await ServicoTipoUsuario(repository).buscar_usuario_atual(
-        token=token
-    )
+    professor: Professor = await ServicoTipoUsuarioGenerico(
+        repository
+    ).buscar_usuario_atual(token=token)
     logger.info(
         f"{professor_id=} {professor.id=} | "
         f"Tipo usuário atual é {professor.usuario.tipo_usuario.titulo}."
@@ -60,9 +60,9 @@ async def atualizar_status_solicitacao(
         f"Atualização da solicitação de id {solicitacao_id}"
         f" | Autenticando usuário atual."
     )
-    professor: Professor = await ServicoTipoUsuario(repository).buscar_usuario_atual(
-        token=token
-    )
+    professor: Professor = await ServicoTipoUsuarioGenerico(
+        repository
+    ).buscar_usuario_atual(token=token)
     logger.info(
         f"{solicitacao_id=} {professor.id=} | "
         f"Tipo usuário atual é {professor.usuario.tipo_usuario.titulo}."
