@@ -4,6 +4,7 @@ from src.api.database.models.aluno import Aluno
 from src.api.database.models.professor import Professor
 from src.api.database.models.solicitacoes import Solicitacao
 from src.api.database.repository import PGCopRepository
+from src.api.entrypoints.alunos.schema import AlunoInDB
 from src.api.entrypoints.solicitacao.schema import SolicitacaoInDB
 from src.api.services.servico_base import ServicoBase
 from src.api.utils.enums import StatusSolicitacaoEnum
@@ -64,4 +65,22 @@ class ServicoSolicitacao(ServicoBase):
             f"Solicitação {solicitacao_id=} atualizada com sucesso para \
                   {db_solicitacao.status}."
         )
+
+        if status == "aceita":
+            db_aluno: Aluno = await self.atualizar_orientador_aluno(
+                db_solicitacao.aluno_id, db_solicitacao.professor_id
+            )
+
+        logger.info
+        (f"Atribuição de orientador para a matricula {db_aluno.matricula}.")
+
         return self.de_solicitacao_para_solicitacao_in_db(db_solicitacao)
+
+    async def atualizar_orientador_aluno(
+        self, aluno_id: int, orientador_id: int
+    ) -> AlunoInDB:
+        db_aluno: Aluno = await self._repo.buscar_por_id(aluno_id, Aluno)
+
+        db_aluno.orientador_id = orientador_id
+
+        return self.tipo_usuario_in_db(db_aluno)
