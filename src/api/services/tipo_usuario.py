@@ -8,8 +8,8 @@ from src.api.database.models.aluno import Aluno
 from src.api.database.models.professor import Professor
 from src.api.database.models.usuario import Usuario
 from src.api.database.repository import PGCopRepository
-from src.api.entrypoints.alunos.schema import AlunoInDB
-from src.api.entrypoints.professores.schema import ProfessorInDB
+from src.api.entrypoints.alunos.schema import AlunoAtualizado, AlunoInDB
+from src.api.entrypoints.professores.schema import ProfessorAtualizado, ProfessorInDB
 from src.api.services.aluno import ServicoAluno
 from src.api.services.auth import ServicoAuth
 from src.api.services.professor import ServiceProfessor
@@ -24,7 +24,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-class ServicoTipoUsuario(ServicoBase):
+class ServicoTipoUsuarioGenerico(ServicoBase):
     _repo: PGCopRepository
 
     user_service_map: dict[TipoUsuarioEnum, ServicoBase] = {
@@ -69,3 +69,20 @@ class ServicoTipoUsuario(ServicoBase):
         return self.user_service_map[usuario_atual.usuario.tipo_usuario.titulo](
             self._repo
         ).tipo_usuario_in_db(usuario_atual)
+
+    async def atualizar(
+        self,
+        usuario_tipo_generico: Union[AlunoAtualizado, ProfessorAtualizado],
+        token,
+        tipo_usuario=None,
+    ):
+        usuario_atual: Union[Aluno, Professor] = await self.buscar_usuario_atual(
+            token=token, tipo_usuario=tipo_usuario
+        )
+        logger.info(
+            "Atualizando usuário com base no tipo "
+            f"{usuario_atual.usuario.tipo_usuario.titulo}."
+        )
+        return await self.user_service_map[usuario_atual.usuario.tipo_usuario.titulo](
+            self._repo
+        ).atualizar(usuario_atual.id, usuario_tipo_generico)

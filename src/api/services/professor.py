@@ -32,7 +32,6 @@ class ServiceProfessor(ServicoBase):
             nome=professor.usuario.nome,
             email=professor.usuario.email,
             tipo_usuario=professor.usuario.tipo_usuario.titulo,
-            usuario_id=professor.usuario.id,
         )
 
     async def criar(self, novo_professor: ProfessorNovo) -> ProfessorInDB:
@@ -52,7 +51,6 @@ class ServiceProfessor(ServicoBase):
             nome=usuario.nome,
             email=usuario.email,
             tipo_usuario=(usuario.tipo_usuario).titulo,
-            usuario_id=usuario.id,
         )
 
     async def buscar_por_id(self, professor_id: int) -> Professor:
@@ -87,7 +85,7 @@ class ServiceProfessor(ServicoBase):
         professor.usuario.deleted_at = datetime.utcnow()
         logger.info(f"{professor_id=} {professor.usuario.id=} | Professor deletado.")
 
-    async def atualizar_professor(
+    async def atualizar(
         self, professor_id: int, updates_professor: ProfessorAtualizado
     ) -> ProfessorInDB:
         db_professor: Professor = await self._repo.buscar_por_id(
@@ -104,7 +102,7 @@ class ServiceProfessor(ServicoBase):
         db_professor.usuario.email = (
             updates_professor.email or db_professor.usuario.email
         )
-        db_professor.usuario.tipo_usuario = (
+        db_professor.usuario.tipo_usuario_id = (
             await self._repo.buscar_tipo_usuario_por_titulo(
                 updates_professor.tipo_usuario
             )
