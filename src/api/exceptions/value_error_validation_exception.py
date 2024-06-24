@@ -26,3 +26,8 @@ class PasswordWithoutSpecialCharacterError(ValueError):
 class MatriculaNotNumericError(ValueError):
     def __init__(self):
         super().__init__("A matrícula deve conter apenas números.")
+
+
+class InvalidLattesError(ValueError):
+    def __init__(self) -> None:
+        super().__init__("Currículo lattes inválido.")
