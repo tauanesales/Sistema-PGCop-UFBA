@@ -79,11 +79,10 @@ class ServicoAluno(ServicoBase):
             data_qualificacao=db_aluno.data_qualificacao,
             data_defesa=db_aluno.data_defesa,
             orientador=ProfessorInDB(
-                usuario_id=db_aluno.orientador.usuario_id,
                 nome=db_aluno.orientador.usuario.nome,
                 email=db_aluno.orientador.usuario.email,
                 tipo_usuario=db_aluno.orientador.usuario.tipo_usuario.titulo,
-                id=db_aluno.orientador.usuario.id,
+                id=db_aluno.orientador.id,
             ),
         )
 
@@ -92,7 +91,7 @@ class ServicoAluno(ServicoBase):
         self._validador.validar_aluno_existe(db_aluno)
         return db_aluno
 
-    async def atualizar_aluno(
+    async def atualizar(
         self, aluno_id: int, aluno_atualizado: AlunoAtualizado
     ) -> AlunoInDB:
         db_aluno: Aluno = await self._repo.buscar_por_id(aluno_id, Aluno)

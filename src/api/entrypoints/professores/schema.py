@@ -13,7 +13,7 @@ class ProfessorNovo(ProfessorBase, UsuarioNovo):
 
 
 class ProfessorInDB(UsuarioInDB):
-    usuario_id: int
+    pass
 
 
 @partial_model

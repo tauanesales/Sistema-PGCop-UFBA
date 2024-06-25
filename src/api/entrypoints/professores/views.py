@@ -8,7 +8,6 @@ from src.api.database.models.professor import Professor
 from src.api.database.session import get_repo
 from src.api.entrypoints.alunos.schema import AlunoInDB
 from src.api.entrypoints.professores.schema import (
-    ProfessorAtualizado,
     ProfessorInDB,
     ProfessorNovo,
     ProfessorResponse,
@@ -16,7 +15,7 @@ from src.api.entrypoints.professores.schema import (
 from src.api.exceptions.credentials_exception import NaoAutorizadoException
 from src.api.services.aluno import ServicoAluno
 from src.api.services.professor import ServiceProfessor
-from src.api.services.tipo_usuario import ServicoTipoUsuario
+from src.api.services.tipo_usuario import ServicoTipoUsuarioGenerico
 from src.api.utils.enums import TipoUsuarioEnum
 
 router = APIRouter()
@@ -48,9 +47,9 @@ async def deletar_professor(
     repository=Depends(get_repo()),
 ):
     logger.info(f"Solicitado deleção de {professor_id=} | Autenticando usuário atual.")
-    coordenador: Professor = await ServicoTipoUsuario(repository).buscar_usuario_atual(
-        token=token, tipo_usuario=TipoUsuarioEnum.COORDENADOR
-    )
+    coordenador: Professor = await ServicoTipoUsuarioGenerico(
+        repository
+    ).buscar_usuario_atual(token=token, tipo_usuario=TipoUsuarioEnum.COORDENADOR)
     logger.info(
         f"{professor_id=} {coordenador.id=} | "
         f"Tipo usuário atual é {coordenador.usuario.tipo_usuario.titulo}."
@@ -66,23 +65,14 @@ async def deletar_professor_atual(
     token: str = Depends(oauth2_scheme), repository=Depends(get_repo())
 ):
     logger.info("Solicitado deleção por token | Autenticando usuário atual.")
-    professor: Professor = await ServicoTipoUsuario(repository).buscar_usuario_atual(
-        token=token, tipo_usuario=TipoUsuarioEnum.PROFESSOR
-    )
+    professor: Professor = await ServicoTipoUsuarioGenerico(
+        repository
+    ).buscar_usuario_atual(token=token, tipo_usuario=TipoUsuarioEnum.PROFESSOR)
     logger.info(
         f"{professor.id=} | "
         f"Tipo usuário atual é {professor.usuario.tipo_usuario.titulo}."
     )
     return await ServiceProfessor(repository).deletar(professor.id)
-
-
-@router.put("/{professor_id}", response_model=ProfessorInDB)
-async def atualizar_professor(
-    professor_id: int, professor: ProfessorAtualizado, repository=Depends(get_repo())
-):
-    return await ServiceProfessor(repository).atualizar_professor(
-        professor_id, professor
-    )
 
 
 @router.get("/email/{email}", response_model=ProfessorInDB)
@@ -100,9 +90,9 @@ async def get_orientandos_por_professor_id(
         f"Solicitado lista de orientandos do {professor_id=}"
         f" | Autenticando usuário atual."
     )
-    coordenador: Professor = await ServicoTipoUsuario(repository).buscar_usuario_atual(
-        token=token, tipo_usuario=TipoUsuarioEnum.COORDENADOR
-    )
+    coordenador: Professor = await ServicoTipoUsuarioGenerico(
+        repository
+    ).buscar_usuario_atual(token=token, tipo_usuario=TipoUsuarioEnum.COORDENADOR)
     logger.info(
         f"{professor_id=} {coordenador.id=} | "
         f"Tipo usuário atual é {coordenador.usuario.tipo_usuario.titulo}."
@@ -119,9 +109,9 @@ async def get_orientandos_por_token(
     logger.info(
         "Solicitado lista de orientandos por token | Autenticando usuário atual."
     )
-    professor: Professor = await ServicoTipoUsuario(repository).buscar_usuario_atual(
-        token=token, tipo_usuario=TipoUsuarioEnum.PROFESSOR
-    )
+    professor: Professor = await ServicoTipoUsuarioGenerico(
+        repository
+    ).buscar_usuario_atual(token=token, tipo_usuario=TipoUsuarioEnum.PROFESSOR)
     logger.info(
         f"{professor.id=} | "
         f"Tipo usuário atual é {professor.usuario.tipo_usuario.titulo}."
