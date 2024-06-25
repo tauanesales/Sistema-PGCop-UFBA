@@ -78,7 +78,7 @@ class ServicoSolicitacao(ServicoBase):
 
     async def atualizar_orientador_aluno(
         self, aluno_id: int, orientador_id: int
-    ) -> AlunoInDB:
+    ) -> None:
         db_aluno: Aluno = await self._repo.buscar_por_id(aluno_id, Aluno)
 
         db_aluno.orientador_id = orientador_id
