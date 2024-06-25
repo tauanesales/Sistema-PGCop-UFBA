@@ -71,15 +71,11 @@ class ServicoSolicitacao(ServicoBase):
                 db_solicitacao.aluno_id, db_solicitacao.professor_id
             )
 
-        logger.info
-        (f"Atribuição de orientador para a matricula {db_aluno.matricula}.")
-
         return self.de_solicitacao_para_solicitacao_in_db(db_solicitacao)
 
     async def atualizar_orientador_aluno(
         self, aluno_id: int, orientador_id: int
     ) -> None:
         db_aluno: Aluno = await self._repo.buscar_por_id(aluno_id, Aluno)
-
         db_aluno.orientador_id = orientador_id
-
+        logger.info(f"Atribuição de orientador para {db_aluno.id=}.")
