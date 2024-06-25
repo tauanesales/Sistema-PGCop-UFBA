@@ -83,4 +83,3 @@ class ServicoSolicitacao(ServicoBase):
 
         db_aluno.orientador_id = orientador_id
 
-        return self.tipo_usuario_in_db(db_aluno)
