@@ -139,6 +139,10 @@ class ServicoValidador:
             raise CPFJaRegistradoException()
         if await self._repo.buscar_aluno_por_telefone(aluno.telefone):
             raise NumeroJaRegistradoException()
+        if not aluno.orientador_id:
+            raise OrientadorDeveSerInformadoException()
+        if not await self._repo.buscar_por_id(aluno.orientador_id, Professor):
+            raise OrientadorNaoEncontradoException()
         if not await self._repo.buscar_por_id(constantes.SEM_ORIENTADOR, Professor):
             raise CadastroSemOrientadorNaoEncontradoException()
         if await self._repo.buscar_aluno_por_matricula(aluno.matricula):
