@@ -60,7 +60,7 @@ class ServicoAluno(ServicoBase):
         )
         await self._repo.criar(db_aluno)
         logger.info(f"{db_aluno.id=} {db_orientador.id=} | Aluno criado com sucesso.")
-        await ServicoSolicitacao(self._repo).criar(db_aluno, db_orientador)
+        await ServicoSolicitacao(self._repo).criar(db_aluno, novo_aluno.orientador_id)
         return self.tipo_usuario_in_db(db_aluno)
 
     def tipo_usuario_in_db(self, db_aluno: Aluno) -> AlunoInDB:
