@@ -79,7 +79,7 @@ class OrientadorDeveSerInformadoException(HTTPException):
         )
 
 
-class CadastroSemOrientadorException(HTTPException):
+class CadastroSemOrientadorNaoEncontradoException(HTTPException):
     def __init__(self):
         super().__init__(
             status_code=400,
