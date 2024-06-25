@@ -13,11 +13,11 @@ from src.api.utils.enums import StatusSolicitacaoEnum
 class ServicoSolicitacao(ServicoBase):
     _repo: PGCopRepository
 
-    async def criar(self, aluno: Aluno, professor: Professor) -> SolicitacaoInDB:
+    async def criar(self, aluno: Aluno, professor_id: int) -> SolicitacaoInDB:
         db_solicitacao: Solicitacao = Solicitacao(
             status=StatusSolicitacaoEnum.PENDENTE,
             aluno_id=aluno.id,
-            professor_id=professor.id,
+            professor_id=professor_id,
         )
         await self._repo.criar(db_solicitacao)
         logger.info(f"{db_solicitacao.id=} | Solicitação para criada com sucesso.")
