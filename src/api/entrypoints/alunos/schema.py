@@ -1,15 +1,18 @@
 from datetime import date
 from typing import Optional
 
-from pydantic import Field, HttpUrl, constr, field_validator
+from pydantic import Field, constr, field_validator
 from pydantic_br import CPF
 from pydantic_extra_types.phone_numbers import PhoneNumber
 
 from src.api.entrypoints.professores.schema import ProfessorInDB
-from src.api.exceptions.value_error_validation_exception import MatriculaNotNumericError
+from src.api.exceptions.value_error_validation_exception import MatriculaNotNumericError, InvalidLattesError
 from src.api.schemas.usuario import UsuarioBase, UsuarioInDB, UsuarioNovo
 from src.api.utils.decorators import partial_model
 from src.api.utils.enums import CursoAlunoEnum, TipoUsuarioEnum
+
+import httpx
+import re
 
 PhoneNumber.phone_format = "NATIONAL"
 PhoneNumber.default_region_code = "BR"
@@ -60,9 +63,19 @@ class AlunoBase(UsuarioBase):
             valor.replace(" ", "").replace("\t", "").replace("\r", "").replace("\n", "")
         )
 
-    @field_validator("lattes")
+    @field_validator("lattes", mode='after')
     def validar_lattes(cls, lattes: str):
-        HttpUrl(lattes)
+        match = re.match(r"http(s?):\/\/lattes\.cnpq\.br\/(.+)", lattes)
+
+        if match is None:
+            raise InvalidLattesError()
+
+        lattes_id = match.groups()[1]
+        resp = httpx.head(f"http://buscatextual.cnpq.br/buscatextual/cv?id={lattes_id}", headers={"User-Agent": "Chrome/126.0.0.0"})
+
+        if (resp.headers.get("Location") == "http://buscatextual.cnpq.br/buscatextual/erro.jsp"):
+            raise InvalidLattesError()
+        
         return lattes
 
     @field_validator("cpf", mode="after")
