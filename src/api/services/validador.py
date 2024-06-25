@@ -23,6 +23,8 @@ from src.api.exceptions.http_service_exception import (
     EmailJaRegistradoException,
     MatriculaJaRegistradaException,
     NumeroJaRegistradoException,
+    OrientadorDeveSerInformadoException,
+    OrientadorNaoEncontradoException,
     TipoUsuarioInvalidoException,
     UsuarioNaoEncontradoException,
 )
