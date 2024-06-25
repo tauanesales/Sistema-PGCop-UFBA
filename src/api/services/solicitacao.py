@@ -66,7 +66,7 @@ class ServicoSolicitacao(ServicoBase):
                   {db_solicitacao.status}."
         )
 
-        if status == "aceita":
+        if status == StatusSolicitacaoEnum.ACEITA:
             db_aluno: Aluno = await self.atualizar_orientador_aluno(
                 db_solicitacao.aluno_id, db_solicitacao.professor_id
             )
