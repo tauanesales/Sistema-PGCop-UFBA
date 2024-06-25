@@ -16,6 +16,7 @@ from src.api.services.auth import ServicoAuth, oauth2_scheme
 from src.api.services.servico_base import ServicoBase
 from src.api.services.solicitacao import ServicoSolicitacao
 from src.api.services.usuario import ServicoUsuario
+from src.api.utils import constantes
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -38,9 +39,11 @@ class ServicoAluno(ServicoBase):
         db_usuario_aluno: Usuario = await ServicoUsuario(self._repo).criar(novo_aluno)
         logger.info(f"{db_usuario_aluno.id=} | Usuário criado com sucesso.")
         db_orientador: Professor = await self._repo.buscar_por_id(
-            novo_aluno.orientador_id, Professor
+            constantes.SEM_ORIENTADOR, Professor
         )
-        logger.info(f"{db_orientador.id=} | Orientador encontrado com sucesso.")
+
+        logger.info(f"{db_orientador.id=} | Atribuição sem orientador realizada.")
+
         db_aluno = Aluno(
             cpf=novo_aluno.cpf,
             telefone=novo_aluno.telefone,
@@ -57,7 +60,7 @@ class ServicoAluno(ServicoBase):
         )
         await self._repo.criar(db_aluno)
         logger.info(f"{db_aluno.id=} {db_orientador.id=} | Aluno criado com sucesso.")
-        await ServicoSolicitacao(self._repo).criar(db_aluno, db_orientador)
+        await ServicoSolicitacao(self._repo).criar(db_aluno, novo_aluno.orientador_id)
         return self.tipo_usuario_in_db(db_aluno)
 
     def tipo_usuario_in_db(self, db_aluno: Aluno) -> AlunoInDB:

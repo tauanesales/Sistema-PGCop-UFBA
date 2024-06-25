@@ -4,6 +4,7 @@ from src.api.database.models.aluno import Aluno
 from src.api.database.models.professor import Professor
 from src.api.database.models.solicitacoes import Solicitacao
 from src.api.database.repository import PGCopRepository
+from src.api.entrypoints.alunos.schema import AlunoInDB
 from src.api.entrypoints.solicitacao.schema import SolicitacaoInDB
 from src.api.services.servico_base import ServicoBase
 from src.api.utils.enums import StatusSolicitacaoEnum
@@ -12,11 +13,11 @@ from src.api.utils.enums import StatusSolicitacaoEnum
 class ServicoSolicitacao(ServicoBase):
     _repo: PGCopRepository
 
-    async def criar(self, aluno: Aluno, professor: Professor) -> SolicitacaoInDB:
+    async def criar(self, aluno: Aluno, professor_id: int) -> SolicitacaoInDB:
         db_solicitacao: Solicitacao = Solicitacao(
             status=StatusSolicitacaoEnum.PENDENTE,
             aluno_id=aluno.id,
-            professor_id=professor.id,
+            professor_id=professor_id,
         )
         await self._repo.criar(db_solicitacao)
         logger.info(f"{db_solicitacao.id=} | Solicitação para criada com sucesso.")
@@ -64,4 +65,17 @@ class ServicoSolicitacao(ServicoBase):
             f"Solicitação {solicitacao_id=} atualizada com sucesso para \
                   {db_solicitacao.status}."
         )
+
+        if status == StatusSolicitacaoEnum.ACEITA:
+            await self.atualizar_orientador_aluno(
+                db_solicitacao.aluno_id, db_solicitacao.professor_id
+            )
+
         return self.de_solicitacao_para_solicitacao_in_db(db_solicitacao)
+
+    async def atualizar_orientador_aluno(
+        self, aluno_id: int, orientador_id: int
+    ) -> None:
+        db_aluno: Aluno = await self._repo.buscar_por_id(aluno_id, Aluno)
+        db_aluno.orientador_id = orientador_id
+        logger.info(f"Atribuição de orientador para {db_aluno.id=}.")

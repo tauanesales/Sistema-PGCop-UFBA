@@ -79,6 +79,14 @@ class OrientadorDeveSerInformadoException(HTTPException):
         )
 
 
+class CadastroSemOrientadorNaoEncontradoException(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=400,
+            detail="Erro ao adicionar aluno: orientador padrão não encontrado.",
+        )
+
+
 class ExcecaoGenerica(HTTPException):
     def __init__(self):
         super().__init__(
