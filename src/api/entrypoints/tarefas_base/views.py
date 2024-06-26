@@ -2,7 +2,9 @@ from typing import List
 
 from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordBearer
+from loguru import logger
 
+from src.api.database.models.professor import Professor
 from src.api.database.session import get_repo
 from src.api.entrypoints.tarefas_base.schema import (
     CursoEnum,
@@ -10,7 +12,10 @@ from src.api.entrypoints.tarefas_base.schema import (
     TarefaBaseBase,
     TarefaBaseInDB,
 )
+from src.api.exceptions.credentials_exception import NaoAutorizadoException
 from src.api.services.tarefa_base import ServiceTarefaBase
+from src.api.services.tipo_usuario import ServicoTipoUsuarioGenerico
+from src.api.utils.enums import TipoUsuarioEnum
 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -44,6 +49,22 @@ async def buscar_tarefa_base(tarefa_id: int, repository=Depends(get_repo())):
 
 @router.get("/curso/{curso}", response_model=List[TarefaBaseInDB])
 async def buscar_tarefa_por_curso_base(
-    curso: CursoEnum, repository=Depends(get_repo())
+    curso: CursoEnum,
+    token: str = Depends(oauth2_scheme),
+    repository=Depends(get_repo()),
 ):
+    logger.info(
+        f"Solicitado lista de tarefas base por curso {curso.name}"
+        f" | Autenticando usuário atual."
+    )
+
+    pessoa: Professor = await ServicoTipoUsuarioGenerico(
+        repository
+    ).buscar_usuario_atual(token=token)
+    logger.info(
+        f"{pessoa.id=} | " f"Tipo usuário atual é {pessoa.usuario.tipo_usuario.titulo}."
+    )
+
+    if pessoa.usuario.tipo_usuario.titulo == TipoUsuarioEnum.ALUNO:
+        raise NaoAutorizadoException()
     return await ServiceTarefaBase(repository).buscar_tarefas_base_por_curso(curso)
