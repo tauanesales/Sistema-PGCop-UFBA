@@ -31,3 +31,8 @@ class MatriculaNotNumericError(ValueError):
 class InvalidLattesError(ValueError):
     def __init__(self) -> None:
         super().__init__("Currículo lattes inválido.")
+
+
+class InvalidOrientadorError(ValueError):
+    def __init__(self) -> None:
+        super().__init__("Orientador deve ser válido.")
