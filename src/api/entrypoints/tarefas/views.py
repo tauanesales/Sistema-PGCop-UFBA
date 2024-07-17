@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordBearer
-
+from src.api.database.models.professor import Professor
 from src.api.database.session import get_repo
 from src.api.entrypoints.tarefas.schema import TarefaAtualizada, TarefaBase, TarefaInDB
+from src.api.exceptions.credentials_exception import NaoAutorizadoException
 from src.api.services.tarefa import ServiceTarefa
+from src.api.services.tipo_usuario import ServicoTipoUsuarioGenerico
+from src.api.utils.enums import TipoUsuarioEnum
 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -16,8 +19,18 @@ async def criar_tarefa(tarefa: TarefaBase, repository=Depends(get_repo())):
 
 @router.put("/{tarefa_id}", response_model=None, status_code=status.HTTP_204_NO_CONTENT)
 async def atualizar_tarefa(
-    tarefa_id: int, tarefa: TarefaAtualizada, repository=Depends(get_repo())
+    tarefa_id: int, tarefa: TarefaAtualizada,token: str = Depends(oauth2_scheme), repository=Depends(get_repo())
 ):
+    professor: Professor = await ServicoTipoUsuarioGenerico(
+        repository
+    ).buscar_usuario_atual(token=token)
+
+    if professor.usuario.tipo_usuario.titulo not in [
+        TipoUsuarioEnum.COORDENADOR,
+        TipoUsuarioEnum.PROFESSOR,
+    ]:
+        raise NaoAutorizadoException()
+    
     return await ServiceTarefa(repository).atualizar_tarefa(tarefa_id, tarefa)
 
 
