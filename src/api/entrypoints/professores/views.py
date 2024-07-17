@@ -1,8 +1,11 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from loguru import logger
+from jose import JWTError, jwt
+from pydantic import BaseModel
+from typing import Optional
 
 from src.api.database.models.professor import Professor
 from src.api.database.session import get_repo
@@ -22,23 +25,47 @@ router = APIRouter()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+SECRET_KEY = "your_secret_key"
+ALGORITHM = "HS256"
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
+    tipo_usuario: Optional[str] = None
+
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        tipo_usuario: str = payload.get("tipo_usuario")
+        if username is None or tipo_usuario is None:
+            raise credentials_exception
+        token_data = TokenData(username=username, tipo_usuario=tipo_usuario)
+    except JWTError:
+        raise credentials_exception
+    return token_data
 
 @router.post("/", response_model=ProfessorInDB, status_code=status.HTTP_201_CREATED)
 async def criar_professor(professor: ProfessorNovo, repository=Depends(get_repo())):
     return await ServiceProfessor(repository).criar(novo_professor=professor)
 
-
 @router.get("/todos", response_model=List[ProfessorResponse])
 async def obter_todos_professores(repository=Depends(get_repo())):
     return await ServiceProfessor(repository).obter_professores()
 
-
 @router.get("/{professor_id}", response_model=ProfessorInDB)
-async def buscar_professor_por_id(professor_id: int, repository=Depends(get_repo())):
-    return await ServiceProfessor(repository).buscar_dados_in_db_por_id(
-        professor_id=professor_id
-    )
+async def buscar_professor_por_id(professor_id: int, current_user: TokenData = Depends(get_current_user), repository=Depends(get_repo())):
+    if current_user.tipo_usuario not in [TipoUsuarioEnum.PROFESSOR, TipoUsuarioEnum.COORDENADOR]:
+        raise NaoAutorizadoException()
 
+    professor = await ServiceProfessor(repository).buscar_dados_in_db_por_id(professor_id=professor_id)
+    if not professor:
+        raise HTTPException(status_code=404, detail="Professor not found")
+    return professor
 
 @router.delete("/{professor_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def deletar_professor(
@@ -59,7 +86,6 @@ async def deletar_professor(
 
     return await ServiceProfessor(repository).deletar(professor_id)
 
-
 @router.delete("/", status_code=status.HTTP_204_NO_CONTENT)
 async def deletar_professor_atual(
     token: str = Depends(oauth2_scheme), repository=Depends(get_repo())
@@ -74,11 +100,9 @@ async def deletar_professor_atual(
     )
     return await ServiceProfessor(repository).deletar(professor.id)
 
-
 @router.get("/email/{email}", response_model=ProfessorInDB)
 async def obter_professor_por_email(email: str, repository=Depends(get_repo())):
     return await ServiceProfessor(repository).buscar_dados_in_db_por_email(email=email)
-
 
 @router.get("/orientandos/{professor_id}", response_model=List[AlunoInDB])
 async def get_orientandos_por_professor_id(
@@ -100,7 +124,6 @@ async def get_orientandos_por_professor_id(
     if coordenador.usuario.tipo_usuario.titulo != TipoUsuarioEnum.COORDENADOR:
         raise NaoAutorizadoException()
     return await ServicoAluno(repository).buscar_alunos_por_orientador(professor_id)
-
 
 @router.get("/orientandos/", response_model=List[AlunoInDB])
 async def get_orientandos_por_token(
