@@ -29,8 +29,19 @@ async def criar_tarefa_base(tarefa: TarefaBaseBase, repository=Depends(get_repo(
 async def atualizar_tarefa_base(
     tarefa_id: int,
     tarefa_base_atualizada: TarefaBaseAtualizada,
+    token: str = Depends(oauth2_scheme),
     repository=Depends(get_repo()),
 ):
+    professor: Professor = await ServicoTipoUsuarioGenerico(
+        repository
+    ).buscar_usuario_atual(token=token)
+
+    if professor.usuario.tipo_usuario.titulo not in [
+        TipoUsuarioEnum.COORDENADOR,
+        TipoUsuarioEnum.PROFESSOR,
+    ]:
+        raise NaoAutorizadoException()
+    
     return await ServiceTarefaBase(repository).atualizar_tarefa_base(
         tarefa_id, tarefa_base_atualizada
     )

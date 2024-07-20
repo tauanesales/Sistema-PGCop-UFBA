@@ -21,8 +21,18 @@ async def criar_tarefa(tarefa: TarefaBase, repository=Depends(get_repo())):
 
 @router.put("/{tarefa_id}", response_model=None, status_code=status.HTTP_204_NO_CONTENT)
 async def atualizar_tarefa(
-    tarefa_id: int, tarefa: TarefaAtualizada, repository=Depends(get_repo())
+    tarefa_id: int, tarefa: TarefaAtualizada,token: str = Depends(oauth2_scheme), repository=Depends(get_repo())
 ):
+    professor: Professor = await ServicoTipoUsuarioGenerico(
+        repository
+    ).buscar_usuario_atual(token=token)
+
+    if professor.usuario.tipo_usuario.titulo not in [
+        TipoUsuarioEnum.COORDENADOR,
+        TipoUsuarioEnum.PROFESSOR,
+    ]:
+        raise NaoAutorizadoException()
+    
     return await ServiceTarefa(repository).atualizar_tarefa(tarefa_id, tarefa)
 
 
