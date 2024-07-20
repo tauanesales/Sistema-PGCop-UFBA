@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordBearer
+from loguru import logger
+
 from src.api.database.models.professor import Professor
 from src.api.database.session import get_repo
 from src.api.entrypoints.tarefas.schema import TarefaAtualizada, TarefaBase, TarefaInDB
@@ -45,5 +47,21 @@ async def buscar_tarefa(tarefa_id: int,token: str = Depends(oauth2_scheme), repo
 
 
 @router.get("/aluno/{aluno_id}", response_model=list[TarefaInDB])
-async def buscar_tarefas_por_aluno(aluno_id: int, repository=Depends(get_repo())):
+async def buscar_tarefas_por_aluno(
+    aluno_id: int, token: str = Depends(oauth2_scheme), repository=Depends(get_repo())
+):
+    logger.info(
+        f"Solicitado lista de tarefas do aluno {aluno_id=}"
+        f" | Autenticando usuário atual."
+    )
+
+    pessoa: Professor = await ServicoTipoUsuarioGenerico(
+        repository
+    ).buscar_usuario_atual(token=token)
+    logger.info(
+        f"{pessoa.id=} | " f"Tipo usuário atual é {pessoa.usuario.tipo_usuario.titulo}."
+    )
+
+    if pessoa.usuario.tipo_usuario.titulo == TipoUsuarioEnum.ALUNO:
+        raise NaoAutorizadoException()
     return await ServiceTarefa(repository).buscar_tarefas_por_aluno(aluno_id)
