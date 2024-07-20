@@ -15,7 +15,18 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 @router.post("/", response_model=TarefaInDB, status_code=status.HTTP_201_CREATED)
-async def criar_tarefa(tarefa: TarefaBase, repository=Depends(get_repo())):
+async def criar_tarefa(tarefa: TarefaBase,token: str = Depends(oauth2_scheme), repository=Depends(get_repo())):
+    
+    professor: Professor = await ServicoTipoUsuarioGenerico(
+        repository
+    ).buscar_usuario_atual(token=token)
+
+    if professor.usuario.tipo_usuario.titulo not in [
+        TipoUsuarioEnum.COORDENADOR,
+        TipoUsuarioEnum.PROFESSOR,
+    ]:
+        raise NaoAutorizadoException()
+    
     return await ServiceTarefa(repository).criar_tarefa(tarefa)
 
 
