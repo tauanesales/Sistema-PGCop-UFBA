@@ -1,5 +1,4 @@
 from typing import List
-
 from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordBearer
 from loguru import logger
@@ -43,7 +42,16 @@ async def deletar_tarefa_base(tarefa_id: int, repository=Depends(get_repo())):
 
 
 @router.get("/{tarefa_id}", response_model=TarefaBaseInDB)
-async def buscar_tarefa_base(tarefa_id: int, repository=Depends(get_repo())):
+async def buscar_tarefa_base(tarefa_id: int,token: str = Depends(oauth2_scheme), repository=Depends(get_repo())):
+    professor: Professor = await ServicoTipoUsuarioGenerico(
+        repository
+    ).buscar_usuario_atual(token=token)
+
+    if professor.usuario.tipo_usuario.titulo not in [
+        TipoUsuarioEnum.COORDENADOR,
+        TipoUsuarioEnum.PROFESSOR,
+    ]:
+        raise NaoAutorizadoException()
     return await ServiceTarefaBase(repository).buscar_tarefa_base(tarefa_id)
 
 
