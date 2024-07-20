@@ -1,11 +1,13 @@
-from typing import List
+import os
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from loguru import logger
 from jose import JWTError, jwt
 from pydantic import BaseModel
-from typing import Optional
+from sqlalchemy.future import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.database.models.professor import Professor
 from src.api.database.session import get_repo
@@ -25,28 +27,33 @@ router = APIRouter()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-SECRET_KEY = "your_secret_key"
-ALGORITHM = "HS256"
+
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM")
 
 class TokenData(BaseModel):
     username: Optional[str] = None
     tipo_usuario: Optional[str] = None
 
-def get_current_user(token: str = Depends(oauth2_scheme)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+async def get_current_user(token: str = Depends(oauth2_scheme), session: AsyncSession = Depends(get_repo)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
-        tipo_usuario: str = payload.get("tipo_usuario")
-        if username is None or tipo_usuario is None:
-            raise credentials_exception
-        token_data = TokenData(username=username, tipo_usuario=tipo_usuario)
+        if username is None:
+            raise NaoAutorizadoException()
+        token_data = TokenData(username=username)
     except JWTError:
-        raise credentials_exception
+        raise NaoAutorizadoException()
+
+   
+    result = await session.execute(
+        select(Professor).where(Professor.email == token_data.username)
+    )
+    usuario = result.scalars().first()
+    if not usuario:
+        raise NaoAutorizadoException()
+    
+    token_data.tipo_usuario = usuario.usuario.tipo_usuario.titulo
     return token_data
 
 @router.post("/", response_model=ProfessorInDB, status_code=status.HTTP_201_CREATED)
