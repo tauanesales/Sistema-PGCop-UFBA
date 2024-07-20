@@ -48,9 +48,20 @@ async def atualizar_tarefa_base(
 
 
 @router.delete("/{tarefa_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def deletar_tarefa_base(tarefa_id: int, repository=Depends(get_repo())):
-    return await ServiceTarefaBase(repository).deletar_tarefa_base(tarefa_id)
+async def deletar_tarefa_base(tarefa_id: int, token: str = Depends(oauth2_scheme), repository=Depends(get_repo())):
+    
+    professor: Professor = await ServicoTipoUsuarioGenerico(
+        repository
+    ).buscar_usuario_atual(token=token)
 
+    if professor.usuario.tipo_usuario.titulo not in [
+        TipoUsuarioEnum.COORDENADOR,
+        TipoUsuarioEnum.PROFESSOR,
+    ]:
+        raise NaoAutorizadoException()
+    
+    await ServiceTarefaBase(repository).deletar_tarefa_base(tarefa_id)
+    return {"ok":True}
 
 @router.get("/{tarefa_id}", response_model=TarefaBaseInDB)
 async def buscar_tarefa_base(tarefa_id: int,token: str = Depends(oauth2_scheme), repository=Depends(get_repo())):

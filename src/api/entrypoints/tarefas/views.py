@@ -37,7 +37,18 @@ async def atualizar_tarefa(
 
 
 @router.delete("/{tarefa_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def deletar_tarefa(tarefa_id: int, repository=Depends(get_repo())):
+async def deletar_tarefa(tarefa_id: int, token: str = Depends(oauth2_scheme), repository=Depends(get_repo())):
+    
+    professor: Professor = await ServicoTipoUsuarioGenerico(
+        repository
+    ).buscar_usuario_atual(token=token)
+
+    if professor.usuario.tipo_usuario.titulo not in [
+        TipoUsuarioEnum.COORDENADOR,
+        TipoUsuarioEnum.PROFESSOR,
+    ]:
+        raise NaoAutorizadoException()
+    
     await ServiceTarefa(repository).deletar_tarefa(tarefa_id)
     return {"ok": True}
 
