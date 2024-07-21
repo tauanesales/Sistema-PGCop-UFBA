@@ -24,3 +24,8 @@ class ProfessorAtualizado(ProfessorNovo):
 class ProfessorResponse(BaseModel):
     id: int
     nome: str
+
+# Adicionando TokenData
+class TokenData(BaseModel):
+    username: Optional[str] = None
+    tipo_usuario: Optional[str] = None
