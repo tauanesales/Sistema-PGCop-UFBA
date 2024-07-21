@@ -66,8 +66,18 @@ async def deletar_aluno_atual(
 
 
 @router.get("/cpf/{aluno_cpf}", response_model=AlunoInDB)
-async def get_aluno_cpf(aluno_cpf: str, repository=Depends(get_repo())):
-    return await ServicoAluno(repository).buscar_aluno_por_cpf(aluno_cpf)
+async def get_aluno_cpf(aluno_cpf: str, repository=Depends(get_repo()),token: str = Depends(oauth2_scheme)):
+    professor: Professor = await ServicoTipoUsuarioGenerico(
+        repository
+    ).buscar_usuario_atual(token=token)
+
+    if professor.usuario.tipo_usuario.titulo not in [
+        TipoUsuarioEnum.COORDENADOR,
+        TipoUsuarioEnum.PROFESSOR,
+    ]:
+        raise NaoAutorizadoException()
+    else:
+        return await ServicoAluno(repository).buscar_aluno_por_cpf(aluno_cpf)
 
 
 @router.get("/email/{aluno_email}", response_model=AlunoInDB)
