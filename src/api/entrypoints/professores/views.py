@@ -149,7 +149,6 @@ async def get_orientandos_por_token(
     return await ServicoAluno(repository).buscar_alunos_por_orientador(professor.id)
 
 
-
 # from typing import List
 
 # from fastapi import APIRouter, Depends, status
