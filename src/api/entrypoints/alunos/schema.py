@@ -97,3 +97,7 @@ class AlunoInDB(AlunoBase, UsuarioInDB):
 @partial_model
 class AlunoAtualizado(AlunoNovo):
     pass
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
+    tipo_usuario: Optional[str] = None
