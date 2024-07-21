@@ -27,18 +27,20 @@ class ServiceTarefa(ServicoBase):
         await self._repo.criar(db_tarefa)
         return self.de_tarefa_para_tarefa_in_db(db_tarefa)
 
-    async def atualizar_tarefa(self, tarefa_id: int, tarefa: TarefaAtualizada):
+    async def atualizar_tarefa(
+        self, tarefa_id: int, tarefa_atualizada: TarefaAtualizada
+    ):
         logger.info(
-            f"{tarefa_id=} {tarefa.aluno_id=} | Iniciando processo de atualização de \
-                tarefa. Validando informações. {tarefa.model_dump()=}"
+            f"{tarefa_id=} {tarefa_atualizada.aluno_id=} | Iniciando atualização \
+            de tarefa  Validando informações. {tarefa_atualizada.model_dump()=}"
         )
-        await self._validador.buscar_e_validar_aluno_existe(tarefa.aluno_id)
-        await self.buscar_tarefa(tarefa_id)
-        to_update = tarefa.model_dump()
+        db_tarefa: Tarefa = await self.buscar_tarefa(tarefa_id)
+        to_update = tarefa_atualizada.model_dump()
         for key, value in list(to_update.items())[::-1]:
             if value is None:
                 to_update.pop(key)
-        return await self._repo.atualizar_por_id(tarefa_id, Tarefa, **to_update)
+        await self._repo.atualizar_por_id(tarefa_id, Tarefa, **to_update)
+        return self.de_tarefa_para_tarefa_in_db(db_tarefa)
 
     async def deletar_tarefa(self, id: int) -> None:
         tarefa: Tarefa = await self.buscar_tarefa(id)

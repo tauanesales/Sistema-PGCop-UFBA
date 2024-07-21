@@ -30,7 +30,7 @@ async def criar_tarefa(tarefa: TarefaBase,token: str = Depends(oauth2_scheme), r
     return await ServiceTarefa(repository).criar_tarefa(tarefa)
 
 
-@router.put("/{tarefa_id}", response_model=None, status_code=status.HTTP_204_NO_CONTENT)
+@router.put("/{tarefa_id}", response_model=None)
 async def atualizar_tarefa(
     tarefa_id: int, tarefa: TarefaAtualizada,token: str = Depends(oauth2_scheme), repository=Depends(get_repo())
 ):
