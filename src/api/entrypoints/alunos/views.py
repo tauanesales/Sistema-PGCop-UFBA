@@ -1,37 +1,26 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from loguru import logger
-from sqlalchemy.future import select
-from jose import JWTError, jwt
-from pydantic import BaseModel
-from typing import List, Optional
-import os
+from typing import List
 
 from src.api.database.models.aluno import Aluno
 from src.api.database.models.professor import Professor
 from src.api.database.session import get_repo
-from src.api.entrypoints.alunos.schema import AlunoInDB, AlunoNovo
-from src.api.entrypoints.tarefas.schema import TarefaInDB
+from src.api.entrypoints.alunos.schema import AlunoInDB, AlunoNovo, TarefaInDB, TokenData
 from src.api.exceptions.credentials_exception import NaoAutorizadoException
 from src.api.services.aluno import ServicoAluno
 from src.api.services.tarefa import ServiceTarefa
 from src.api.services.tipo_usuario import ServicoTipoUsuarioGenerico
 from src.api.utils.enums import TipoUsuarioEnum
+from src.api.config import AuthConfig
 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-# Buscar valores das variáveis de ambiente
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM")
-
-class TokenData(BaseModel):
-    username: Optional[str] = None
-    tipo_usuario: Optional[str] = None
-
-async def get_current_user(token: str = Depends(oauth2_scheme), session=Depends(get_repo)):
+# Função de autenticação utilizando o serviço de usuário
+async def get_current_user(token: str = Depends(oauth2_scheme), repository=Depends(get_repo)):
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, AuthConfig.SECRET_KEY, algorithms=[AuthConfig.ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
             raise NaoAutorizadoException()
@@ -39,11 +28,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme), session=Depends(
     except JWTError:
         raise NaoAutorizadoException()
 
-    # Buscar o usuário no banco de dados
-    result = await session.execute(
-        select(Aluno).where(Aluno.email == token_data.username)
-    )
-    usuario = result.scalars().first()
+    # Utilizar serviço de usuário para buscar o usuário
+    usuario = await ServicoTipoUsuarioGenerico(repository).buscar_usuario_por_email(token_data.username)
     if not usuario:
         raise NaoAutorizadoException()
     
@@ -55,21 +41,16 @@ async def criar_aluno(aluno: AlunoNovo, repository=Depends(get_repo())):
     return await ServicoAluno(repository).criar(aluno)
 
 @router.get("/{aluno_id}", response_model=AlunoInDB)
-async def get_aluno(aluno_id: int, token: str = Depends(oauth2_scheme), repository=Depends(get_repo())):
-    # Autenticar e autorizar usuário
-    current_user: TokenData = await get_current_user(token, repository)
+async def get_aluno(aluno_id: int, current_user: TokenData = Depends(get_current_user), repository=Depends(get_repo())):
     if current_user.tipo_usuario not in [TipoUsuarioEnum.PROFESSOR, TipoUsuarioEnum.COORDENADOR]:
         raise NaoAutorizadoException()
 
-    # Buscar aluno por ID
     aluno = await ServicoAluno(repository).buscar_dados_in_db_por_id(aluno_id)
     if not aluno:
         raise HTTPException(status_code=404, detail="Aluno not found")
     return aluno
 
-@router.delete(
-    "/{aluno_id}", response_model=None, status_code=status.HTTP_204_NO_CONTENT
-)
+@router.delete("/{aluno_id}", response_model=None, status_code=status.HTTP_204_NO_CONTENT)
 async def deletar_aluno_por_id(
     aluno_id: int, token: str = Depends(oauth2_scheme), repository=Depends(get_repo())
 ):
