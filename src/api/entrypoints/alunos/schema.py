@@ -1,5 +1,6 @@
 from datetime import date
-from typing import Optional
+from typing import Optional, List
+from pydantic import BaseModel
 
 from pydantic import Field, constr, field_validator
 from pydantic_br import CPF
@@ -97,6 +98,11 @@ class AlunoInDB(AlunoBase, UsuarioInDB):
 @partial_model
 class AlunoAtualizado(AlunoNovo):
     pass
+
+class TarefaInDB(BaseModel):
+    id: int
+    titulo: str
+    descricao: str
 
 class TokenData(BaseModel):
     username: Optional[str] = None
