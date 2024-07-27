@@ -4,6 +4,7 @@ from loguru import logger
 
 from src.api.database.models.aluno import Aluno
 from src.api.database.models.professor import Professor
+from src.api.database.models.solicitacoes import Solicitacao
 from src.api.database.models.tarefa import Tarefa
 from src.api.database.models.usuario import Usuario
 from src.api.database.repository import PGCopRepository
@@ -16,6 +17,7 @@ from src.api.entrypoints.professores.errors import ProfessorNaoEncontradoExcepti
 from src.api.entrypoints.professores.schema import ProfessorAtualizado
 from src.api.entrypoints.tarefas.errors import ExcecaoTarefaNaoEncontrada
 from src.api.exceptions.http_service_exception import (
+    AlteracaoStatusSolicitacaoException,
     AlunoNaoEncontradoException,
     CadastroSemOrientadorNaoEncontradoException,
     CPFJaRegistradoException,
@@ -30,7 +32,7 @@ from src.api.exceptions.http_service_exception import (
 )
 from src.api.schemas.usuario import UsuarioBase
 from src.api.utils import constantes
-from src.api.utils.enums import TipoUsuarioEnum
+from src.api.utils.enums import StatusSolicitacaoEnum, TipoUsuarioEnum
 
 
 class ServicoValidador:
@@ -171,3 +173,7 @@ class ServicoValidador:
     def validar_usuari_autenticado_por_token(self, db_usuario: Usuario, token: str):
         if db_usuario.token_nova_senha != token:
             raise AuthenticationException()
+
+    async def buscar_e_validar_alteracao_status_solicitacao(self, db_solicitacao: Solicitacao):
+        if db_solicitacao.status != StatusSolicitacaoEnum.PENDENTE:
+            raise AlteracaoStatusSolicitacaoException()
