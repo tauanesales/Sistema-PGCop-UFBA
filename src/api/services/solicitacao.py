@@ -60,7 +60,7 @@ class ServicoSolicitacao(ServicoBase):
 
         logger.info("Validando se o status da solicitacao pode ser alterado.")
         await self._validador.buscar_e_validar_alteracao_status_solicitacao(
-            solicitacao_id
+            db_solicitacao
         )
 
         db_solicitacao.status = status
