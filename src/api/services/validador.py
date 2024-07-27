@@ -174,7 +174,6 @@ class ServicoValidador:
         if db_usuario.token_nova_senha != token:
             raise AuthenticationException()
 
-    async def buscar_e_validar_alteracao_status_solicitacao(self, solicitacao_id: int):
-        db_solicitacao = await self._repo.buscar_por_id(solicitacao_id, Solicitacao)
+    async def buscar_e_validar_alteracao_status_solicitacao(self, db_solicitacao: Solicitacao):
         if db_solicitacao.status != StatusSolicitacaoEnum.PENDENTE:
             raise AlteracaoStatusSolicitacaoException()
