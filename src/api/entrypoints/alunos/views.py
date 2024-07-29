@@ -128,3 +128,5 @@ async def obter_tarefas_do_aluno(current_user: TokenData = Depends(get_current_u
         token=current_user.username, tipo_usuario=TipoUsuarioEnum.ALUNO
     )
     return await ServiceTarefa(repository).buscar_tarefas_por_aluno(aluno.id)
+
+# Código Finalizado e Revisado para produção!
