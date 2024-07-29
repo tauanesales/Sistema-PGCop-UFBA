@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-
+from typing import Optional
 from src.api.schemas.usuario import UsuarioBase, UsuarioInDB, UsuarioNovo
 from src.api.utils.decorators import partial_model
 
@@ -24,3 +24,7 @@ class ProfessorAtualizado(ProfessorNovo):
 class ProfessorResponse(BaseModel):
     id: int
     nome: str
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
+    tipo_usuario: Optional[str] = None
