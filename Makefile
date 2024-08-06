@@ -13,10 +13,10 @@ else
 	endif
 endif
 
-run_: 
+run-only: 
 	${INSTALL_SCRIPT} run
 
-run: start-docker up-db run_ down
+run: start-docker up-db run-only down
 
 test:
 	${INSTALL_SCRIPT} test

@@ -63,6 +63,13 @@ if ($Args[0] -eq "install") {
         }
 
         "up-db" {
+            docker ps 2>&1 | Out-Null
+
+            while ($LASTEXITCODE -gt 0) {
+                docker ps 2>&1 | Out-Null
+                Start-Sleep -Seconds 0.5
+            }
+
             docker compose -f docker-compose.yml up -d db
             Break
         }
@@ -78,7 +85,7 @@ if ($Args[0] -eq "install") {
         }
 
         "start-docker" {
-            sudo service docker start
+            Start-Process -FilePath "C:\Program Files\Docker\Docker\Docker Desktop.exe"
             Break
         }
             
