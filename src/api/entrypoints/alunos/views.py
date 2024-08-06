@@ -6,9 +6,11 @@ from src.api.database.models.aluno import Aluno
 from src.api.database.models.professor import Professor
 from src.api.database.session import get_repo
 from src.api.entrypoints.alunos.schema import AlunoInDB, AlunoNovo
+from src.api.entrypoints.tarefas.schema import TarefaInDB
 from src.api.exceptions.credentials_exception import NaoAutorizadoException
 from src.api.services.aluno import ServicoAluno
 from src.api.services.tipo_usuario import ServicoTipoUsuarioGenerico
+from src.api.services.tarefa import ServiceTarefa
 from src.api.utils.enums import TipoUsuarioEnum
 
 router = APIRouter()
@@ -98,3 +100,11 @@ async def remover_orientador_aluno(
         raise NaoAutorizadoException()
 
     return await ServicoAluno(repository).remover_orientador(aluno_id)
+
+
+@router.get("/tarefas", response_model=list[TarefaInDB])
+async def get_tarefas_por_id(token: str = Depends(oauth2_scheme), repository=Depends(get_repo())):
+    aluno: Aluno = await ServicoTipoUsuarioGenerico(repository).buscar_usuario_atual(
+        token=token, tipo_usuario=TipoUsuarioEnum.ALUNO
+    )
+    return await ServiceTarefa(repository).buscar_tarefas_por_aluno(aluno.id)
