@@ -46,15 +46,15 @@ else
             ;;
         
         "up-db")
-            docker compose -f docker-compose.yml up -d db
+            sudo docker compose -f docker-compose.yml up -d db
             ;;
 
         "down")
-            docker compose -f docker-compose.yml down
+            sudo docker compose -f docker-compose.yml down
             ;;
         
         "rm-containers")
-            docker rm -f "$(docker ps -aq)"
+            sudo docker rm -f "$(docker ps -aq)"
             ;;
 
         "start-docker")
