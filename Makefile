@@ -16,7 +16,7 @@ endif
 run-only: 
 	${INSTALL_SCRIPT} run
 
-run: start-docker up-db run-only down
+run: start-docker up-db run-only
 
 test:
 	${INSTALL_SCRIPT} test

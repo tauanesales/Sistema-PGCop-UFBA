@@ -20,27 +20,13 @@ if ($Args[0] -eq "install") {
     & ".\Scripts\activate"
 
     pip install poetry
-	poetry lock
+	poetry lock --no-update
 	poetry install --no-root
 
     deactivate
 
 } else {
     & ".\Scripts\activate"
-
-    # if ($Args[0] -eq "run") {
-    #     poetry run python -m src.api
-
-    # } elseif ($Args[0] -eq "test") {
-    #     poetry run pytest ./src/api/tests -vv -s
-
-    # } elseif ($Args[0] -eq "export-requirements") {
-    #     poetry export -f requirements.txt --output requirements.txt --without-hashes --without dev
-
-    # } elseif ($Args[0] -eq "add-dependency") {
-    #     poetry add $Args[1]
-
-    # }
 
     switch ($Args[0]) {
         "run" {

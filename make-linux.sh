@@ -20,7 +20,7 @@ if [ "$1" == "install" ]; then
 
     pyenv install -s
     pip install poetry
-    poetry lock
+    poetry lock --no-update
     poetry install --no-root
 
 else
