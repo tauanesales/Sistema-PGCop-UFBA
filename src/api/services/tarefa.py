@@ -68,6 +68,7 @@ class ServiceTarefa(ServicoBase):
             nome=tarefa.nome,
             data_ultima_notificacao=tarefa.data_ultima_notificacao,
             data_conclusao=tarefa.data_conclusao,
+            concluida=tarefa.concluida,
             descricao=tarefa.descricao,
             data_prazo=tarefa.data_prazo,
         )
