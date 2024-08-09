@@ -11,7 +11,7 @@ course = "M"
 password = "1Password!"
 admission_date = str(datetime.utcnow().date())
 
-lattes = "https://lattes.cnpq.br/123456789"
+lattes = "http://lattes.cnpq.br/9209213384969517"
 advisor_id = None
 qualification_date = None
 defense_date = None

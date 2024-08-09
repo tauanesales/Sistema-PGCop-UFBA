@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordBearer
+from fastapi.exceptions import RequestValidationError
 from loguru import logger
 
 from src.api.database.models.aluno import Aluno
@@ -7,6 +8,7 @@ from src.api.database.models.professor import Professor
 from src.api.database.session import get_repo
 from src.api.entrypoints.alunos.schema import AlunoInDB, AlunoNovo
 from src.api.exceptions.credentials_exception import NaoAutorizadoException
+from src.api.exceptions.value_error_validation_exception import InvalidLattesError
 from src.api.services.aluno import ServicoAluno
 from src.api.services.tipo_usuario import ServicoTipoUsuarioGenerico
 from src.api.utils.enums import TipoUsuarioEnum
@@ -17,7 +19,16 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 @router.post("/", response_model=AlunoInDB, status_code=status.HTTP_201_CREATED)
 async def criar_aluno(aluno: AlunoNovo, repository=Depends(get_repo())):
-    return await ServicoAluno(repository).criar(aluno)
+    try:
+        return await ServicoAluno(repository).criar(aluno)
+    except InvalidLattesError as err:
+        raise RequestValidationError([{
+            "detail": [{
+                "type": "value_error",
+                "loc": ("body", "lattes"),
+                "msg": err.args[0]
+            }]
+        }])
 
 
 @router.get("/{aluno_id}", response_model=AlunoInDB)

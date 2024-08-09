@@ -63,28 +63,31 @@ class AlunoBase(UsuarioBase):
             valor.replace(" ", "").replace("\t", "").replace("\r", "").replace("\n", "")
         )
 
-    @field_validator("lattes", mode='after')
-    def validar_lattes(cls, lattes: str):
-        match = re.match(r"http(s?):\/\/lattes\.cnpq\.br\/(.+)", lattes)
-
-        if match is None:
-            raise InvalidLattesError()
-
-        lattes_id = match.groups()[1]
-        resp = httpx.head(f"http://buscatextual.cnpq.br/buscatextual/cv?id={lattes_id}", headers={"User-Agent": "Chrome/126.0.0.0"})
-
-        if (resp.headers.get("Location") == "http://buscatextual.cnpq.br/buscatextual/erro.jsp"):
-            raise InvalidLattesError()
-        
-        return lattes
-
     @field_validator("cpf", mode="after")
     def validar_cpf(cls, valor):
         return valor.replace(".", "").replace("-", "")
 
 
 class AlunoNovo(AlunoBase, UsuarioNovo):
-    pass
+    @field_validator("lattes", mode='after')
+    async def validar_lattes(cls, lattes: str):
+        match = re.match(r"http(s?):\/\/lattes\.cnpq\.br\/(.+)", lattes)
+
+        if match is None:
+            raise InvalidLattesError()
+
+        lattes_id = match.groups()[1]
+
+        async with httpx.AsyncClient() as client:
+            resp = await client.head(
+                f"http://buscatextual.cnpq.br/buscatextual/cv?id={lattes_id}",
+                headers={"User-Agent": "Chrome/126.0.0.0"}
+            )
+
+        if (resp.headers.get("Location") == "http://buscatextual.cnpq.br/buscatextual/erro.jsp"):
+            raise InvalidLattesError()
+        
+        return lattes
 
 
 class AlunoInDB(AlunoBase, UsuarioInDB):

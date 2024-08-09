@@ -173,7 +173,7 @@ def test_update_student():
         # "email": alternative_email.split("@")[0] + "foo" + "@ufmg.br",
         # "curso": alternative_course,
         "telefone": "(11) 99874-6543",
-        "lattes": "https://lattes.cnpq.br/1234567890123456789",
+        "lattes": "http://lattes.cnpq.br/6271096128174325",
     }
 
     response = client.put(url, json=new_data)
