@@ -10,6 +10,7 @@ class TarefaBase(BaseModel):
     descricao: constr(max_length=100)
     data_prazo: date
     aluno_id: int
+    concluida: bool
 
     @field_validator("nome", mode="before")
     def blank_string(cls, value):

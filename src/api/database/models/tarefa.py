@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from typing import Optional
 
-from sqlalchemy import Date, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Date, DateTime, ForeignKey, Integer, String, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.api.database.models.entity_model_base import EntityModelBase
@@ -16,6 +16,7 @@ class Tarefa(EntityModelBase):
         DateTime(), nullable=False, default=datetime.utcnow()
     )
     data_prazo: Mapped[date] = mapped_column(Date(), nullable=False)
+    concluida: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=False)
     data_conclusao: Mapped[Optional[date]] = mapped_column(Date(), nullable=True)
 
     aluno_id: Mapped[int] = mapped_column(
