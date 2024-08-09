@@ -99,3 +99,11 @@ class ExcecaoGenerica(HTTPException):
 class NumeroJaRegistradoException(HTTPException):
     def __init__(self):
         super().__init__(status_code=400, detail="Telefone já cadastrado")
+
+
+class OrientadorInvalidoInformadoException(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=400,
+            detail="Erro ao adicionar aluno: orientador deve ser válido.",
+        )

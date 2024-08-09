@@ -16,7 +16,6 @@ from src.api.services.auth import ServicoAuth, oauth2_scheme
 from src.api.services.servico_base import ServicoBase
 from src.api.services.solicitacao import ServicoSolicitacao
 from src.api.services.usuario import ServicoUsuario
-from src.api.utils import constantes
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -39,10 +38,10 @@ class ServicoAluno(ServicoBase):
         db_usuario_aluno: Usuario = await ServicoUsuario(self._repo).criar(novo_aluno)
         logger.info(f"{db_usuario_aluno.id=} | Usuário criado com sucesso.")
         db_orientador: Professor = await self._repo.buscar_por_id(
-            constantes.SEM_ORIENTADOR, Professor
+            novo_aluno.orientador_id, Professor
         )
 
-        logger.info(f"{db_orientador.id=} | Atribuição sem orientador realizada.")
+        # logger.info(f"{db_orientador.id=} | Atribuição sem orientador realizada.")
 
         db_aluno = Aluno(
             cpf=novo_aluno.cpf,

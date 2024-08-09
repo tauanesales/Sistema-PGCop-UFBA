@@ -6,8 +6,12 @@ from src.api.database.models.professor import Professor
 from src.api.database.session import get_repo
 from src.api.entrypoints.solicitacao.schema import SolicitacaoInDB
 from src.api.exceptions.credentials_exception import NaoAutorizadoException
+from src.api.exceptions.http_service_exception import (
+    OrientadorInvalidoInformadoException,
+)
 from src.api.services.solicitacao import ServicoSolicitacao
 from src.api.services.tipo_usuario import ServicoTipoUsuarioGenerico
+from src.api.utils.constantes import SEM_ORIENTADOR
 from src.api.utils.enums import StatusSolicitacaoEnum, TipoUsuarioEnum
 
 router = APIRouter()
@@ -67,6 +71,10 @@ async def atualizar_status_solicitacao(
         f"{solicitacao_id=} {professor.id=} | "
         f"Tipo usuário atual é {professor.usuario.tipo_usuario.titulo}."
     )
+
+    if professor.id == SEM_ORIENTADOR:
+        raise OrientadorInvalidoInformadoException()
+
     if professor.usuario.tipo_usuario.titulo not in [
         TipoUsuarioEnum.COORDENADOR,
         TipoUsuarioEnum.PROFESSOR,

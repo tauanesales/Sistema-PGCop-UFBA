@@ -17,13 +17,13 @@ from src.api.entrypoints.professores.schema import ProfessorAtualizado
 from src.api.entrypoints.tarefas.errors import ExcecaoTarefaNaoEncontrada
 from src.api.exceptions.http_service_exception import (
     AlunoNaoEncontradoException,
-    CadastroSemOrientadorNaoEncontradoException,
     CPFJaRegistradoException,
     DeveSeSubmeterPeloMenosUmCampoParaAtualizarException,
     EmailJaRegistradoException,
     MatriculaJaRegistradaException,
     NumeroJaRegistradoException,
     OrientadorDeveSerInformadoException,
+    OrientadorInvalidoInformadoException,
     OrientadorNaoEncontradoException,
     TipoUsuarioInvalidoException,
     UsuarioNaoEncontradoException,
@@ -143,10 +143,12 @@ class ServicoValidador:
             raise NumeroJaRegistradoException()
         if not aluno.orientador_id:
             raise OrientadorDeveSerInformadoException()
+        if aluno.orientador_id == constantes.SEM_ORIENTADOR:
+            raise OrientadorInvalidoInformadoException()
         if not await self._repo.buscar_por_id(aluno.orientador_id, Professor):
             raise OrientadorNaoEncontradoException()
-        if not await self._repo.buscar_por_id(constantes.SEM_ORIENTADOR, Professor):
-            raise CadastroSemOrientadorNaoEncontradoException()
+        # if not await self._repo.buscar_por_id(constantes.SEM_ORIENTADOR, Professor):
+        #   raise CadastroSemOrientadorNaoEncontradoException()
         if await self._repo.buscar_aluno_por_matricula(aluno.matricula):
             raise MatriculaJaRegistradaException()
 

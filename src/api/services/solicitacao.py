@@ -1,12 +1,12 @@
 from loguru import logger
 
 from src.api.database.models.aluno import Aluno
-from src.api.database.models.professor import Professor
 from src.api.database.models.solicitacoes import Solicitacao
 from src.api.database.repository import PGCopRepository
-from src.api.entrypoints.alunos.schema import AlunoInDB
 from src.api.entrypoints.solicitacao.schema import SolicitacaoInDB
+from src.api.exceptions.value_error_validation_exception import InvalidOrientadorError
 from src.api.services.servico_base import ServicoBase
+from src.api.utils.constantes import SEM_ORIENTADOR
 from src.api.utils.enums import StatusSolicitacaoEnum
 
 
@@ -19,6 +19,10 @@ class ServicoSolicitacao(ServicoBase):
             aluno_id=aluno.id,
             professor_id=professor_id,
         )
+
+        if professor_id == SEM_ORIENTADOR:
+            raise InvalidOrientadorError()
+
         await self._repo.criar(db_solicitacao)
         logger.info(f"{db_solicitacao.id=} | Solicitação para criada com sucesso.")
         return self.de_solicitacao_para_solicitacao_in_db(db_solicitacao)
@@ -59,6 +63,10 @@ class ServicoSolicitacao(ServicoBase):
         db_solicitacao: Solicitacao = await self._repo.buscar_por_id(
             solicitacao_id, Solicitacao
         )
+
+        if db_solicitacao.professor_id == SEM_ORIENTADOR:
+            raise InvalidOrientadorError()
+
         db_solicitacao.status = status
         self._repo.salvar(db_solicitacao)
         logger.info(
