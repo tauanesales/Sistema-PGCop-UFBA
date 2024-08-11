@@ -60,7 +60,7 @@ else
             ;;
             
         "revision")
-            poetry run alembic revision --autogenerate -m "$(MESSAGE)"
+            poetry run alembic revision --autogenerate -m "$2"
             ;;
 
         "migrate")
@@ -72,11 +72,7 @@ else
             ;;
 
         "db-full-clean")
-            db-full-clean
-            ;;
-
-        "db-reset")
-            db-full-clean migrate
+            sudo docker compose exec db mysql -u "$2" -p"$3" -e "DROP DATABASE IF EXISTS $4; CREATE DATABASE $4;"
             ;;
 
         "pre-commit")
@@ -96,6 +92,6 @@ else
 	        find . -name '*.pyc' -exec rm -f {} +
 	        find . -name '*.log' -exec rm -f {} +
             ;;
-
+            
     esac
 fi
