@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordBearer
 from loguru import logger
+from fastapi import HTTPException
 
 from src.api.database.models.professor import Professor
 from src.api.database.session import get_repo
@@ -77,7 +78,7 @@ async def buscar_tarefa(tarefa_id: int,token: str = Depends(oauth2_scheme), repo
         raise NaoAutorizadoException()
     return await ServiceTarefa(repository).buscar_tarefa(tarefa_id)
 
-
+#####
 @router.get("/aluno/{aluno_id}", response_model=list[TarefaInDB])
 async def buscar_tarefas_por_aluno(
     aluno_id: int, token: str = Depends(oauth2_scheme), repository=Depends(get_repo())
@@ -91,9 +92,14 @@ async def buscar_tarefas_por_aluno(
         repository
     ).buscar_usuario_atual(token=token)
     logger.info(
-        f"{pessoa.id=} | " f"Tipo usuário atual é {pessoa.usuario.tipo_usuario.titulo}."
+        f"{pessoa.id=} | Tipo usuário atual é {pessoa.usuario.tipo_usuario.titulo}."
     )
 
+    # Permitir que alunos acessem apenas suas próprias tarefas.
     if pessoa.usuario.tipo_usuario.titulo == TipoUsuarioEnum.ALUNO:
-        raise NaoAutorizadoException()
+        if pessoa.id != aluno_id:
+            raise NaoAutorizadoException(detail="Acesso negado. Alunos só podem acessar suas próprias tarefas.")
+    elif pessoa.usuario.tipo_usuario.titulo not in [TipoUsuarioEnum.COORDENADOR, TipoUsuarioEnum.PROFESSOR]:
+        raise NaoAutorizadoException()  # Usará a mensagem padrão "Não autorizado."
+
     return await ServiceTarefa(repository).buscar_tarefas_por_aluno(aluno_id)
