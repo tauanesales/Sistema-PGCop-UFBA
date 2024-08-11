@@ -7,17 +7,23 @@ function prepare_shell () {
 }
 
 if [ "$1" == "install" ]; then
-    if [ ! -d "$HOME/.pyenv" ]; then
-        curl https://pyenv.run | bash
-    fi
-
-    prepare_shell
     dpkg -s libffi-dev > /dev/null 2> /dev/null
 
     if [ ! $? ]; then
         sudo apt install libffi-dev
     fi
 
+    dpkg -s libssl-dev > /dev/null 2> /dev/null
+
+    if [ ! $? ]; then
+        sudo apt install libssl-dev
+    fi
+
+    if [ ! -d "$HOME/.pyenv" ]; then
+        curl https://pyenv.run | bash
+    fi
+
+    prepare_shell
     pyenv install -s
     pip install poetry
     poetry lock --no-update
