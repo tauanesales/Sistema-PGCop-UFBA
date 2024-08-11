@@ -7,15 +7,11 @@ function prepare_shell () {
 }
 
 if [ "$1" == "install" ]; then
-    dpkg -s libffi-dev > /dev/null 2> /dev/null
-
-    if [ ! $? ]; then
+    if [ "$(dpkg -s libffi-dev 2> /dev/null)" == "" ]; then
         sudo apt install libffi-dev
     fi
 
-    dpkg -s libssl-dev > /dev/null 2> /dev/null
-
-    if [ ! $? ]; then
+    if [ "$(dpkg -s libssl-dev 2> /dev/null)" == "" ]; then
         sudo apt install libssl-dev
     fi
 
