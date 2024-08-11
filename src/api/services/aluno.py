@@ -48,7 +48,7 @@ class ServicoAluno(ServicoBase):
             cpf=novo_aluno.cpf,
             telefone=novo_aluno.telefone,
             matricula=novo_aluno.matricula,
-            lattes=novo_aluno.lattes,
+            lattes=await novo_aluno.lattes,
             curso=novo_aluno.curso,
             data_ingresso=novo_aluno.data_ingresso,
             data_qualificacao=novo_aluno.data_qualificacao,
@@ -102,7 +102,7 @@ class ServicoAluno(ServicoBase):
         db_aluno.cpf = aluno_atualizado.cpf or db_aluno.cpf
         db_aluno.telefone = aluno_atualizado.telefone or db_aluno.telefone
         db_aluno.matricula = aluno_atualizado.matricula or db_aluno.matricula
-        db_aluno.lattes = aluno_atualizado.lattes or db_aluno.lattes
+        db_aluno.lattes = await aluno_atualizado.lattes or db_aluno.lattes
         db_aluno.curso = aluno_atualizado.curso or db_aluno.curso
         db_aluno.data_ingresso = (
             aluno_atualizado.data_ingresso or db_aluno.data_ingresso
