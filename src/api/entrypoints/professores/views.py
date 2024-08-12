@@ -34,11 +34,25 @@ async def obter_todos_professores(repository=Depends(get_repo())):
 
 
 @router.get("/{professor_id}", response_model=ProfessorInDB)
-async def buscar_professor_por_id(professor_id: int, repository=Depends(get_repo())):
-    return await ServiceProfessor(repository).buscar_dados_in_db_por_id(
-        professor_id=professor_id
+async def buscar_professor_por_id(
+    professor_id: int,
+    token: str = Depends(oauth2_scheme),
+    repository=Depends(get_repo())
+):
+    logger.info(f"Solicitada busca de {professor_id=} | Autenticando usuário atual.")
+    usuario_atual: Professor = await ServicoTipoUsuarioGenerico(
+        repository
+    ).buscar_usuario_atual(token=token)
+    logger.info(
+        f"{professor_id=} {usuario_atual.id=} | "
+        f"Tipo usuário atual é {usuario_atual.usuario.tipo_usuario.titulo}."
     )
+    
+    # Verifica se o usuário é professor ou coordenador utilizando a exceção personalizada
+    if usuario_atual.usuario.tipo_usuario.titulo not in [TipoUsuarioEnum.PROFESSOR, TipoUsuarioEnum.COORDENADOR]:
+        raise NaoAutorizadoException()
 
+    return await ServiceProfessor(repository).buscar_dados_in_db_por_id(professor_id)
 
 @router.delete("/{professor_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def deletar_professor(
@@ -117,3 +131,5 @@ async def get_orientandos_por_token(
         f"Tipo usuário atual é {professor.usuario.tipo_usuario.titulo}."
     )
     return await ServicoAluno(repository).buscar_alunos_por_orientador(professor.id)
+
+
