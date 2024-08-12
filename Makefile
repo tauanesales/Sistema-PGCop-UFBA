@@ -6,65 +6,76 @@ endif
 ifeq ($(OS),Windows_NT)
 	INSTALL_SCRIPT=powershell -ExecutionPolicy bypass .\make-windows.ps1
 else
-	ifdef GITHUB_ACTIONS
-		INSTALL_SCRIPT=bash make-github-workflow.sh
-	else
-		INSTALL_SCRIPT=bash make-linux.sh
-	endif
+#	ifdef GITHUB_ACTIONS
+#		INSTALL_SCRIPT=bash make-github-workflow.sh
+#	else
+#		INSTALL_SCRIPT=bash make-linux.sh
+#	endif
+	INSTALL_SCRIPT=bash make-linux.sh
 endif
 
-run-only: 
+.SILENT: run run-only test install add-dependency export-requirements up-db down rm-containers clean
+.SILENT: start-docker revision migrate downgrade db-full-clean db-reset pre-commit patch minor
+
+run: start-docker up-db run-only ## Run the project.
+
+run-only: ## Only run the project, without start the docker and the database. Use if docker and database already started.
 	${INSTALL_SCRIPT} run
 
-run: start-docker up-db run-only
-
-test:
+test: ## Run tests.
 	${INSTALL_SCRIPT} test
 
-install:
+install: ## Install the project.
 	${INSTALL_SCRIPT} install
 
-add-dependency:
+add-dependency: ## Add a new dependency to the project. Use DEPNAME="dependency_name" to specify the dependency.
 	${INSTALL_SCRIPT} add-dependency ${DEPNAME}
 
-export-requirements:
+export-requirements: ## Export requirements to requirements.txt, so it can be used by Vercel.
 	${INSTALL_SCRIPT} export-requirements
 
-up-db:
+up-db: ## Start local MySQL database using docker.
 	${INSTALL_SCRIPT} up-db
 
-down:
+down: ## Stop all docker services from this project.
 	${INSTALL_SCRIPT} down
 
-rm-containers:
+rm-containers: ## Remove all docker containers.
 	${INSTALL_SCRIPT} rm-containers
 
-start-docker:
+start-docker: ## Start the docker. WSL needs to manually start docker.
 	${INSTALL_SCRIPT} start-docker
 
-revision:
-	${INSTALL_SCRIPT} revision
+revision: ## Create a new revision of the database using alembic. Use MESSAGE="your message" to add a message.
+	${INSTALL_SCRIPT} revision ${MESSAGE}
 
-migrate:
+migrate: ## Apply the migrations to the database.
 	${INSTALL_SCRIPT} migrate
 
-downgrade:
+downgrade: ## Undo the last migration.
 	${INSTALL_SCRIPT} downgrade
 
-db-full-clean: 
-	${INSTALL_SCRIPT} db-full-clean
+db-full-clean: ## Drop and recreate the database.
+	${INSTALL_SCRIPT} db-full-clean ${DB_USERNAME} ${DB_PASSWORD} ${DB_DATABASE}
 
-db-reset:
-	${INSTALL_SCRIPT} db-reset
+db-reset: db-full-clean migrate ## Drop, recreate and apply all migrations to the database.
 
-pre-commit:
+pre-commit: ## Run pre-commit checks.
 	${INSTALL_SCRIPT} pre-commit
 
-patch:
+patch: ## Bump project version to next patch (bugfix release/chores).
 	${INSTALL_SCRIPT} patch
 
-minor:
+minor: ## Bump project version to next minor (feature release).
 	${INSTALL_SCRIPT} minor
 
-clean:
+clean: ## Clean project's temporary files.
 	${INSTALL_SCRIPT} clean
+
+.DEFAULT_GOAL := help
+help:
+ifeq ($(OS),Windows_NT)
+	@${INSTALL_SCRIPT} help
+else
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' "Makefile" | sed 's/Makefile://g' | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+endif

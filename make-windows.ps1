@@ -25,6 +25,13 @@ if ($Args[0] -eq "install") {
 
     deactivate
 
+} elseif ($Args[0] -eq "help") {
+    foreach ($ln in (Get-Content -Path .\Makefile)) {
+        if ($ln -match '(.+):(.*) ## (.+)') {
+            Write-Host ("{0,-31}" -f $Matches[1]) -NoNewline -ForegroundColor DarkCyan
+            Write-Host $Matches[3]
+        }
+    }
 } else {
     & ".\Scripts\activate"
 
@@ -66,7 +73,8 @@ if ($Args[0] -eq "install") {
         }
         
         "rm-containers" {
-            docker rm -f "$(docker ps -aq)"
+            $psaq = docker ps -aq
+            docker rm -f "$psaq"
             Break
         }
 
@@ -76,7 +84,7 @@ if ($Args[0] -eq "install") {
         }
             
         "revision" {
-            poetry run alembic revision --autogenerate -m "$(MESSAGE)"
+            poetry run alembic revision --autogenerate -m $Args[1]
             Break
         }
 
@@ -91,12 +99,8 @@ if ($Args[0] -eq "install") {
         }
 
         "db-full-clean" {
-            db-full-clean
-            Break
-        }
-
-        "db-reset" {
-            db-full-clean migrate
+            $database = $Args[3]
+            docker compose exec db mysql -u $Args[1] -p$Args[2] -e "DROP DATABASE IF EXISTS $database; CREATE DATABASE $database;"
             Break
         }
 
@@ -116,9 +120,9 @@ if ($Args[0] -eq "install") {
         }
 
         "clean" {
-            find . -name '__pycache__' -exec rm -rf {} +
-	        find . -name '*.pyc' -exec rm -f {} +
-	        find . -name '*.log' -exec rm -f {} +
+            foreach ($item in ("pycache", "*.pyc", "*.log")) {
+                Get-ChildItem -Recurse -Name -Include $item | Remove-Item -Recurse -Confirm:$false -Force
+            }
             Break
         }
     }
