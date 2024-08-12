@@ -3,77 +3,79 @@ ifneq ("$(wildcard .env)","")
 	export
 endif
 
-.PHONY: run
-run: ## Run the project.
-	poetry run python -m src.api
+ifeq ($(OS),Windows_NT)
+	INSTALL_SCRIPT=powershell -ExecutionPolicy bypass .\make-windows.ps1
+else
+#	ifdef GITHUB_ACTIONS
+#		INSTALL_SCRIPT=bash make-github-workflow.sh
+#	else
+#		INSTALL_SCRIPT=bash make-linux.sh
+#	endif
+	INSTALL_SCRIPT=bash make-linux.sh
+endif
 
-.PHONY: install
-install: ## Install Python requirements.
-	python -m pip install --upgrade pip setuptools wheel poetry
-	poetry lock
-	poetry install --no-root
-	poetry run pre-commit install
+.SILENT: run run-only test install add-dependency export-requirements up-db down rm-containers clean
+.SILENT: start-docker revision migrate downgrade db-full-clean db-reset pre-commit patch minor
 
-.PHONY: test
+run: start-docker up-db run-only ## Run the project.
+
+run-only: ## Only run the project, without start the docker and the database. Use if docker and database already started.
+	${INSTALL_SCRIPT} run
+
 test: ## Run tests.
-	poetry run python -m pytest ./src/tests	 -vv -s
+	${INSTALL_SCRIPT} test
 
-.PHONY: export-requirements
+install: ## Install the project.
+	${INSTALL_SCRIPT} install
+
+add-dependency: ## Add a new dependency to the project. Use DEPNAME="dependency_name" to specify the dependency.
+	${INSTALL_SCRIPT} add-dependency ${DEPNAME}
+
 export-requirements: ## Export requirements to requirements.txt, so it can be used by Vercel.
-	poetry export -f requirements.txt --output requirements.txt --without-hashes --without dev
+	${INSTALL_SCRIPT} export-requirements
 
-.PHONY: up-db
 up-db: ## Start local MySQL database using docker.
-	docker compose -f docker-compose.yml up -d db
+	${INSTALL_SCRIPT} up-db
 
-.PHONY: down
 down: ## Stop all docker services from this project.
-	docker compose -f docker-compose.yml down
+	${INSTALL_SCRIPT} down
 
 rm-containers: ## Remove all docker containers.
-	docker rm -f $$(docker ps -aq)
+	${INSTALL_SCRIPT} rm-containers
 
-.PHONY: start-docker
-start-docker: ## WSL needs to manually start docker.
-	sudo service docker start
+start-docker: ## Start the docker. WSL needs to manually start docker.
+	${INSTALL_SCRIPT} start-docker
 
-.PHONY: revision
 revision: ## Create a new revision of the database using alembic. Use MESSAGE="your message" to add a message.
-	poetry run alembic revision --autogenerate -m "$(MESSAGE)"
+	${INSTALL_SCRIPT} revision ${MESSAGE}
 
-.PHONY: migrate
 migrate: ## Apply the migrations to the database.
-	poetry run alembic upgrade head
+	${INSTALL_SCRIPT} migrate
 
-.PHONY: downgrade
 downgrade: ## Undo the last migration.
-	poetry run alembic downgrade -1
+	${INSTALL_SCRIPT} downgrade
 
-.PHONY: db-full-clean
-db-full-clean:  ## Drop and recreate the database.
-	docker compose exec db mysql -u ${DB_USERNAME} -p${DB_PASSWORD} -e "DROP DATABASE IF EXISTS ${DB_DATABASE}; CREATE DATABASE ${DB_DATABASE};"
+db-full-clean: ## Drop and recreate the database.
+	${INSTALL_SCRIPT} db-full-clean ${DB_USERNAME} ${DB_PASSWORD} ${DB_DATABASE}
 
-.PHONY: db-reset
 db-reset: db-full-clean migrate ## Drop, recreate and apply all migrations to the database.
 
-.PHONY: pre-commit
 pre-commit: ## Run pre-commit checks.
-	poetry run pre-commit run --config ./.pre-commit-config.yaml --all-files
+	${INSTALL_SCRIPT} pre-commit
 
-.PHONY: patch
 patch: ## Bump project version to next patch (bugfix release/chores).
-	poetry version patch
+	${INSTALL_SCRIPT} patch
 
-.PHONY: minor
 minor: ## Bump project version to next minor (feature release).
-	poetry version minor
+	${INSTALL_SCRIPT} minor
 
-.PHONY: clean
 clean: ## Clean project's temporary files.
-	find . -name '__pycache__' -exec rm -rf {} +
-	find . -name '*.pyc' -exec rm -f {} +
-	find . -name '*.log' -exec rm -f {} +
+	${INSTALL_SCRIPT} clean
 
 .DEFAULT_GOAL := help
 help:
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sed 's/Makefile://g' | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+ifeq ($(OS),Windows_NT)
+	@${INSTALL_SCRIPT} help
+else
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' "Makefile" | sed 's/Makefile://g' | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+endif
