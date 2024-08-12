@@ -33,6 +33,9 @@ strenum = "^0.4.15"
 async-asgi-testclient = "^1.4.11"
 asyncmy = "^0.2.9"
 cryptography = "^42.0.8"
+psycopg2-binary = "^2.9.9"
+aiohttp = "^3.10.3"
+asyncpg = "^0.29.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1.1"
