@@ -7,17 +7,19 @@ function prepare_shell () {
 }
 
 if [ "$1" == "install" ]; then
+    if [ "$(dpkg -s libffi-dev 2> /dev/null)" == "" ]; then
+        sudo apt install libffi-dev
+    fi
+
+    if [ "$(dpkg -s libssl-dev 2> /dev/null)" == "" ]; then
+        sudo apt install libssl-dev
+    fi
+
     if [ ! -d "$HOME/.pyenv" ]; then
         curl https://pyenv.run | bash
     fi
 
     prepare_shell
-    dpkg -s libffi-dev > /dev/null 2> /dev/null
-
-    if [ ! $? ]; then
-        sudo apt install libffi-dev
-    fi
-
     pyenv install -s
     pip install poetry
     poetry lock --no-update
@@ -60,7 +62,7 @@ else
             ;;
             
         "revision")
-            poetry run alembic revision --autogenerate -m "$(MESSAGE)"
+            poetry run alembic revision --autogenerate -m "$2"
             ;;
 
         "migrate")
@@ -72,11 +74,7 @@ else
             ;;
 
         "db-full-clean")
-            db-full-clean
-            ;;
-
-        "db-reset")
-            db-full-clean migrate
+            sudo docker compose exec db mysql -u "$2" -p"$3" -e "DROP DATABASE IF EXISTS $4; CREATE DATABASE $4;"
             ;;
 
         "pre-commit")
@@ -96,6 +94,6 @@ else
 	        find . -name '*.pyc' -exec rm -f {} +
 	        find . -name '*.log' -exec rm -f {} +
             ;;
-
+            
     esac
 fi
