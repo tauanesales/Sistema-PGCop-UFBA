@@ -47,7 +47,7 @@ async def atualizar_tarefa(
     
     return await ServiceTarefa(repository).atualizar_tarefa(tarefa_id, tarefa)
 
-@router.put("/concluir/{tarefa_id}", response_model=None, status_code=status.HTTP_204_NO_CONTENT)
+@router.put("/concluir/{tarefa_id}", response_model=None)
 async def concluir_tarefa(
     tarefa_id: int, 
     tarefa_update: TarefaUpdate, 
@@ -85,7 +85,7 @@ async def concluir_tarefa(
         data_conclusao=tarefa_update.data_conclusao
     )
 
-    return await ServiceTarefa(repository).atualizar_tarefa(tarefa_id, tarefa)
+    return await ServiceTarefa(repository).atualizar_tarefa(tarefa_id, tarefa_atualizada)
 
 
 
