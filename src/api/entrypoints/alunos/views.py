@@ -21,9 +21,27 @@ async def criar_aluno(aluno: AlunoNovo, repository=Depends(get_repo())):
 
 
 @router.get("/{aluno_id}", response_model=AlunoInDB)
-async def get_aluno(aluno_id: int, repository=Depends(get_repo())):
-    return await ServicoAluno(repository).buscar_dados_in_db_por_id(aluno_id)
+async def get_aluno(
+    aluno_id: int, 
+    token: str = Depends(oauth2_scheme), 
+    repository=Depends(get_repo())
+):
+    logger.info(f"Solicitada busca de {aluno_id=} | Autenticando usuário atual.")
+    
+    usuario_atual: Professor = await ServicoTipoUsuarioGenerico(
+        repository
+    ).buscar_usuario_atual(token=token)
+    
+    logger.info(
+        f"{aluno_id=} {usuario_atual.id=} | "
+        f"Tipo usuário atual é {usuario_atual.usuario.tipo_usuario.titulo}."
+    )
+    
+    # Verifica se o usuário é professor ou coordenador
+    if usuario_atual.usuario.tipo_usuario.titulo not in [TipoUsuarioEnum.PROFESSOR, TipoUsuarioEnum.COORDENADOR]:
+        raise NaoAutorizadoException()
 
+    return await ServicoAluno(repository).buscar_dados_in_db_por_id(aluno_id)
 
 @router.delete(
     "/{aluno_id}", response_model=None, status_code=status.HTTP_204_NO_CONTENT
