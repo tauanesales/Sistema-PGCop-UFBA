@@ -1,10 +1,8 @@
 from loguru import logger
 
 from src.api.database.models.aluno import Aluno
-from src.api.database.models.professor import Professor
 from src.api.database.models.solicitacoes import Solicitacao
 from src.api.database.repository import PGCopRepository
-from src.api.entrypoints.alunos.schema import AlunoInDB
 from src.api.entrypoints.solicitacao.schema import SolicitacaoInDB
 from src.api.services.servico_base import ServicoBase
 from src.api.utils.enums import StatusSolicitacaoEnum
@@ -59,6 +57,12 @@ class ServicoSolicitacao(ServicoBase):
         db_solicitacao: Solicitacao = await self._repo.buscar_por_id(
             solicitacao_id, Solicitacao
         )
+
+        logger.info("Validando se o status da solicitacao pode ser alterado.")
+        await self._validador.buscar_e_validar_alteracao_status_solicitacao(
+            db_solicitacao
+        )
+
         db_solicitacao.status = status
         self._repo.salvar(db_solicitacao)
         logger.info(

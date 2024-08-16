@@ -99,3 +99,19 @@ class ExcecaoGenerica(HTTPException):
 class NumeroJaRegistradoException(HTTPException):
     def __init__(self):
         super().__init__(status_code=400, detail="Telefone já cadastrado")
+
+
+class AlteracaoStatusSolicitacaoException(HTTPException):
+    """Exceção lançada quando ocorre a tentativa de alterar o status
+    de uma solicitação que não esteja mais pendente.
+    (406 Not Acceptable - Esta resposta é enviada quando o servidor
+    web, após realizar negociação de conteúdo
+    orientada pelo servidor, não encontra nenhum conteúdo que esteja
+    em conformidade com os critérios fornecidos.
+    """
+
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=406,
+            detail="Não é possivel alterar o status de uma solicitação não pendente.",
+        )
