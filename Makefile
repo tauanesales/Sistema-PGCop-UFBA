@@ -34,15 +34,9 @@ add-dependency: ## Add a new dependency to the project. Use DEPNAME="dependency_
 export-requirements: ## Export requirements to requirements.txt, so it can be used by Vercel.
 	${INSTALL_SCRIPT} export-requirements
 
-.PHONY: up-mysql
-up-mysql: ## Start local MySQL database using docker.
-	docker compose -f docker-compose.yml up -d db
+up-db: ## Start local MySQL database using docker.
+	${INSTALL_SCRIPT} up-db
 
-.PHONY: up-postgres
-up-postgres: ## Start database container.
-	docker compose up -d postgres --force-recreate
-
-.PHONY: down
 down: ## Stop all docker services from this project.
 	${INSTALL_SCRIPT} down
 
