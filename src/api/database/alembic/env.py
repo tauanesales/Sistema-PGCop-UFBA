@@ -6,16 +6,11 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from src.api.config import Config
 from src.api.database.models.entity_model_base import EntityModelBase
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-config.set_main_option(
-    "sqlalchemy.url",
-    f"{Config.DB_CONFIG.DB_DRIVERNAME}://{Config.DB_CONFIG.DB_USERNAME}:{Config.DB_CONFIG.DB_PASSWORD}@{Config.DB_CONFIG.DB_HOST}:{Config.DB_CONFIG.DB_PORT}/{Config.DB_CONFIG.DB_DATABASE}",
-)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

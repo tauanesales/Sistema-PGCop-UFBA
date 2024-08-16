@@ -17,8 +17,7 @@ engine = create_async_engine(
         host=Config.DB_CONFIG.DB_HOST,
         port=Config.DB_CONFIG.DB_PORT,
         database=Config.DB_CONFIG.DB_DATABASE,
-        # query={"charset": "UTF8MB4"},
-        query={},
+        query={"charset": "UTF8MB4"},
     ),
     poolclass=AsyncAdaptedQueuePool
     if Config.DB_CONFIG.DB_ENABLE_CONNECTION_POOLING
