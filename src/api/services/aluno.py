@@ -15,6 +15,7 @@ from src.api.entrypoints.professores.schema import ProfessorInDB
 from src.api.services.auth import ServicoAuth, oauth2_scheme
 from src.api.services.servico_base import ServicoBase
 from src.api.services.solicitacao import ServicoSolicitacao
+from src.api.services.tarefa import ServiceTarefa
 from src.api.services.usuario import ServicoUsuario
 from src.api.utils import constantes
 
@@ -58,6 +59,8 @@ class ServicoAluno(ServicoBase):
             usuario_id=db_usuario_aluno.id,
         )
         await self._repo.criar(db_aluno)
+        await ServiceTarefa(self._repo).criar_tarefas_para_novo_aluno(db_aluno)
+
         logger.info(f"{db_aluno.id=} {db_orientador.id=} | Aluno criado com sucesso.")
         await ServicoSolicitacao(self._repo).criar(db_aluno, novo_aluno.orientador_id)
         return self.tipo_usuario_in_db(db_aluno)
