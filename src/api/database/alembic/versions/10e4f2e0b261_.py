@@ -33,24 +33,18 @@ def upgrade() -> None:
                 "titulo": "COORDENADOR",
                 "descricao": "Coordenador description",
                 "id": 1,
-                # "created_at": "2024-06-17 00:00:00",
-                # "updated_at": "2024-06-17 00:00:00",
                 "deleted_at": None,
             },
             {
                 "titulo": "PROFESSOR",
                 "descricao": "Professor description",
                 "id": 2,
-                # "created_at": "2024-06-17 00:00:00",
-                # "updated_at": "2024-06-17 00:00:00",
                 "deleted_at": None,
             },
             {
                 "titulo": "ALUNO",
                 "descricao": "Aluno description",
                 "id": 3,
-                # "created_at": "2024-06-17 00:00:00",
-                # "updated_at": "2024-06-17 00:00:00",
                 "deleted_at": None,
             },
         ],
@@ -65,8 +59,6 @@ def upgrade() -> None:
                 "new_password_token": None,
                 "tipo_usuario_id": 2,
                 "id": 1,
-                # "created_at": "2024-06-17 00:00:00",
-                # "updated_at": "2024-06-17 00:00:00",
                 "deleted_at": None,
             },
             {
@@ -76,8 +68,6 @@ def upgrade() -> None:
                 "new_password_token": None,
                 "tipo_usuario_id": 1,
                 "id": 2,
-                # "created_at": "2024-06-17 00:00:00",
-                # "updated_at": "2024-06-17 00:00:00",
                 "deleted_at": None,
             },
             {
@@ -87,8 +77,6 @@ def upgrade() -> None:
                 "new_password_token": None,
                 "tipo_usuario_id": 2,
                 "id": 3,
-                # "created_at": "2024-06-17 00:00:00",
-                # "updated_at": "2024-06-17 00:00:00",
                 "deleted_at": None,
             },
             {
@@ -98,8 +86,6 @@ def upgrade() -> None:
                 "new_password_token": None,
                 "tipo_usuario_id": 3,
                 "id": 4,
-                # "created_at": "2024-06-17 00:00:00",
-                # "updated_at": "2024-06-17 00:00:00",
                 "deleted_at": None,
             },
         ],
@@ -110,22 +96,16 @@ def upgrade() -> None:
             {
                 "usuario_id": 1,
                 "id": 1,
-                # "created_at": "2024-06-17 00:00:00",
-                # "updated_at": "2024-06-17 00:00:00",
                 "deleted_at": None,
             },
             {
                 "usuario_id": 2,
                 "id": 2,
-                # "created_at": "2024-06-17 00:00:00",
-                # "updated_at": "2024-06-17 00:00:00",
                 "deleted_at": None,
             },
             {
                 "usuario_id": 3,
                 "id": 3,
-                # "created_at": "2024-06-17 00:00:00",
-                # "updated_at": "2024-06-17 00:00:00",
                 "deleted_at": None,
             },
         ],
@@ -145,8 +125,6 @@ def upgrade() -> None:
                 "orientador_id": 3,
                 "usuario_id": 4,
                 "id": 1,
-                # "created_at": "2024-06-17 00:00:00",
-                # "updated_at": "2024-06-17 00:00:00",
                 "deleted_at": None,
             }
         ],
@@ -159,8 +137,6 @@ def upgrade() -> None:
                 "professor_id": 3,
                 "status": "PENDENTE",
                 "id": 1,
-                # "created_at": "2024-06-17 00:00:00",
-                # "updated_at": "2024-06-17 00:00:00",
                 "deleted_at": None,
             }
         ],
@@ -170,46 +146,38 @@ def upgrade() -> None:
         [
             {
                 "nome": "Qualificacao de Mestrado",
-                "descricao": "Atividade referente à qualificacao de mestrado, \
-                  que deve ocorrer em até 12 meses.",
+                "descricao": "Atividade referente à qualificacao de mestrado, "
+                "que deve ocorrer em até 12 meses.",
                 "prazo_em_meses": 12,
                 "curso": "MESTRADO",
                 "id": 1,
-                # "created_at": "2024-06-18 00:00:00",
-                # "updated_at": "2024-06-18 00:00:00",
                 "deleted_at": None,
             },
             {
                 "nome": "Defesa de Mestrado",
-                "descricao": "Atividade referente à defesa de mestrado, que deve \
-                    ocorrer em até 24 meses.",
+                "descricao": "Atividade referente à defesa de mestrado, "
+                "que deve ocorrer em até 24 meses.",
                 "prazo_em_meses": 24,
                 "curso": "MESTRADO",
                 "id": 2,
-                # "created_at": "2024-06-18 00:00:00",
-                # "updated_at": "2024-06-18 00:00:00",
                 "deleted_at": None,
             },
             {
                 "nome": "Qualificacao Doutorado",
-                "descricao": "Atividade referente à qualificacao de doutorado, \
-                    que deve ocorrer em até 24 meses.",
+                "descricao": "Atividade referente à qualificacao de doutorado, "
+                "que deve ocorrer em até 24 meses.",
                 "prazo_em_meses": 24,
                 "curso": "DOUTORADO",
                 "id": 3,
-                # "created_at": "2024-06-18 00:00:00",
-                # "updated_at": "2024-06-18 00:00:00",
                 "deleted_at": None,
             },
             {
                 "nome": "Defesa Doutorado",
-                "descricao": "Atividade referente à defesa de doutorado, que deve \
-                    ocorrer em até 48 meses.",
+                "descricao": "Atividade referente à defesa de doutorado, "
+                "que deve ocorrer em até 48 meses.",
                 "prazo_em_meses": 48,
                 "curso": "DOUTORADO",
                 "id": 4,
-                # "created_at": "2024-06-18 00:00:00",
-                # "updated_at": "2024-06-18 00:00:00",
                 "deleted_at": None,
             },
         ],
