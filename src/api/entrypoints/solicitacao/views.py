@@ -3,6 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from loguru import logger
 
 from src.api.database.models.professor import Professor
+from src.api.database.models.solicitacoes import Solicitacao
 from src.api.database.session import get_repo
 from src.api.entrypoints.solicitacao.schema import SolicitacaoInDB
 from src.api.exceptions.credentials_exception import NaoAutorizadoException
@@ -63,14 +64,23 @@ async def atualizar_status_solicitacao(
     professor: Professor = await ServicoTipoUsuarioGenerico(
         repository
     ).buscar_usuario_atual(token=token)
+    db_solicitacao: Solicitacao = await ServicoSolicitacao(
+        repository
+    ).buscar_solicitacao_por_id(solicitacao_id)
     logger.info(
         f"{solicitacao_id=} {professor.id=} | "
+        f"Tipo usuário atual é {professor.usuario.tipo_usuario.titulo}."
+    )
+    logger.info(
+        f"{professor.id=} {db_solicitacao.professor_id=} | "
         f"Tipo usuário atual é {professor.usuario.tipo_usuario.titulo}."
     )
     if professor.usuario.tipo_usuario.titulo not in [
         TipoUsuarioEnum.COORDENADOR,
         TipoUsuarioEnum.PROFESSOR,
     ]:
+        raise NaoAutorizadoException()
+    elif professor.id != db_solicitacao.professor_id:
         raise NaoAutorizadoException()
     return await ServicoSolicitacao(repository).atualizar_status_solicitacao(
         solicitacao_id=solicitacao_id, status=status
