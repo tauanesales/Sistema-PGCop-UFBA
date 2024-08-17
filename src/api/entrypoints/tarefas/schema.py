@@ -25,8 +25,7 @@ class TarefaBase(BaseModel):
 
 @partial_model
 class TarefaAtualizada(TarefaBase):
-   
-    data_conclusao: Optional[date] = None  # Campo opcional para data de conclusão
+    pass
 
 class TarefaInDB(TarefaBase):
     id: int
