@@ -55,7 +55,6 @@ class ServicoAluno(ServicoBase):
             data_defesa=novo_aluno.data_defesa,
             orientador_id=db_orientador.id,
             orientador=db_orientador,
-            usuario=db_usuario_aluno,
             usuario_id=db_usuario_aluno.id,
         )
         await self._repo.criar(db_aluno)
