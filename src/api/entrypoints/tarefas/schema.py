@@ -1,7 +1,7 @@
 from datetime import date
+from typing import Optional
 
 from pydantic import BaseModel, constr, field_validator
-from typing import Optional
 
 from src.api.utils.decorators import partial_model
 
@@ -23,15 +23,18 @@ class TarefaBase(BaseModel):
             raise ValueError("O campo não pode estar em branco")
         return value
 
+
 @partial_model
 class TarefaAtualizada(TarefaBase):
     pass
+
 
 class TarefaInDB(TarefaBase):
     id: int
 
     class ConfigDict:
         from_attributes = True
+
 
 class TarefaUpdate(BaseModel):
     concluida: Optional[bool] = None

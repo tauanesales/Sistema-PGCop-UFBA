@@ -1,12 +1,15 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from loguru import logger
 
+from src.api.database.models.aluno import Aluno
 from src.api.database.models.tarefa import Tarefa
 from src.api.database.repository import PGCopRepository
 from src.api.entrypoints.tarefas.errors import ExcecaoTarefaNaoEncontrada
 from src.api.entrypoints.tarefas.schema import TarefaAtualizada, TarefaBase, TarefaInDB
+from src.api.entrypoints.tarefas_base.schema import TarefaBaseInDB
 from src.api.services.servico_base import ServicoBase
+from src.api.services.tarefa_base import ServiceTarefaBase
 
 
 class ServiceTarefa(ServicoBase):
@@ -72,3 +75,23 @@ class ServiceTarefa(ServicoBase):
             descricao=tarefa.descricao,
             data_prazo=tarefa.data_prazo,
         )
+
+    async def criar_tarefas_para_novo_aluno(self, aluno: Aluno) -> None:
+        logger.info(f"{aluno.id=} | Criando tarefas para novo aluno.")
+        tarefas_base: list[TarefaBaseInDB] = await ServiceTarefaBase(
+            self._repo
+        ).buscar_tarefas_base_por_curso(aluno.curso.value)
+
+        for tarefa_base in tarefas_base:
+            tarefa = Tarefa(
+                nome=tarefa_base.nome,
+                aluno_id=aluno.id,
+                descricao=tarefa_base.descricao,
+                data_prazo=datetime.utcnow()
+                + timedelta(days=tarefa_base.prazo_em_meses * 30),
+                data_conclusao=None,
+            )
+            await self._repo.criar(tarefa)
+
+        logger.info(f"{aluno.id=} | Tarefas criadas para novo aluno.")
+        return None
