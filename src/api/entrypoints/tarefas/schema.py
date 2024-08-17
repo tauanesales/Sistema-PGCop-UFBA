@@ -12,7 +12,7 @@ class TarefaBase(BaseModel):
     data_prazo: date
     aluno_id: int
     concluida: bool
-    data_conclusao: date = None  # Campo opcional para data de conclusão
+    data_conclusao: Optional[date] = None
 
     @field_validator("nome", mode="before")
     def blank_string(cls, value):
@@ -26,7 +26,7 @@ class TarefaBase(BaseModel):
 @partial_model
 class TarefaAtualizada(TarefaBase):
    
-    data_conclusao: date = None  # Campo opcional para data de conclusão
+    data_conclusao: Optional[date] = None  # Campo opcional para data de conclusão
 
 class TarefaInDB(TarefaBase):
     id: int
