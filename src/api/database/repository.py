@@ -79,7 +79,7 @@ class PGCopRepository:
         result = await self._session.execute(query)
         return result.scalar()
 
-    async def buscar_professor_por_email(self, email: str) -> Optional[Usuario]:
+    async def buscar_professor_por_email(self, email: str) -> Optional[Professor]:
         query = (
             select(Professor)
             .join(Usuario, Usuario.id == Professor.usuario_id)

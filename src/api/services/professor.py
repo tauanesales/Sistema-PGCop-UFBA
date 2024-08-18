@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from fastapi import Depends
 from loguru import logger
@@ -26,13 +27,8 @@ class ServiceProfessor(ServicoBase):
 
     async def buscar_atual(self, token: str = Depends(oauth2_scheme)) -> ProfessorInDB:
         email = await ServicoAuth(self._repo).verificar_token(token)
-        professor: Professor = await self.buscar_por_email(email)
-        return ProfessorInDB(
-            id=professor.id,
-            nome=professor.usuario.nome,
-            email=professor.usuario.email,
-            tipo_usuario=professor.usuario.tipo_usuario.titulo,
-        )
+        return await self.buscar_dados_in_db_por_email(email)
+
 
     async def criar(self, novo_professor: ProfessorNovo) -> ProfessorInDB:
         db_usuario_professor: Usuario = await ServicoUsuario(self._repo).criar(
@@ -121,7 +117,7 @@ class ServiceProfessor(ServicoBase):
         return self.tipo_usuario_in_db(db_professor)
 
     async def buscar_por_email(self, email: str) -> Professor:
-        db_professor = await self._repo.buscar_professor_por_email(email)
+        db_professor: Optional[Professor] = await self._repo.buscar_professor_por_email(email)
         self._validador.validar_professor_existe(db_professor)
         return db_professor
 

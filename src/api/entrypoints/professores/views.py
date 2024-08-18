@@ -3,6 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordBearer
 from loguru import logger
+from urllib.parse import unquote
 
 from src.api.database.models.professor import Professor
 from src.api.database.session import get_repo
@@ -91,7 +92,7 @@ async def deletar_professor_atual(
 
 @router.get("/email/{email}", response_model=ProfessorInDB)
 async def obter_professor_por_email(email: str, repository=Depends(get_repo())):
-    return await ServiceProfessor(repository).buscar_dados_in_db_por_email(email=email)
+    return await ServiceProfessor(repository).buscar_dados_in_db_por_email(email=unquote(email))
 
 
 @router.get("/orientandos/{professor_id}", response_model=List[AlunoInDB])
