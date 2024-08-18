@@ -1,3 +1,4 @@
+from urllib.parse import unquote
 from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordBearer
 from loguru import logger
@@ -89,7 +90,7 @@ async def get_aluno_cpf(aluno_cpf: str, repository=Depends(get_repo()),token: st
 
 @router.get("/email/{aluno_email}", response_model=AlunoInDB)
 async def get_aluno_email(aluno_email: str, repository=Depends(get_repo())):
-    return await ServicoAluno(repository).buscar_dados_in_db_por_email(aluno_email)
+    return await ServicoAluno(repository).buscar_dados_in_db_por_email(email=unquote(aluno_email))
 
 
 @router.put("/{aluno_id}/remover-orientador/", response_model=AlunoInDB)
