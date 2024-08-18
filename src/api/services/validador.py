@@ -29,7 +29,6 @@ from src.api.exceptions.http_service_exception import (
     UsuarioNaoEncontradoException,
 )
 from src.api.schemas.usuario import UsuarioBase
-from src.api.utils import constantes
 from src.api.utils.enums import TipoUsuarioEnum
 
 
@@ -145,8 +144,6 @@ class ServicoValidador:
             raise OrientadorDeveSerInformadoException()
         if not await self._repo.buscar_por_id(aluno.orientador_id, Professor):
             raise OrientadorNaoEncontradoException()
-        if not await self._repo.buscar_por_id(constantes.SEM_ORIENTADOR, Professor):
-            raise CadastroSemOrientadorNaoEncontradoException()
         if await self._repo.buscar_aluno_por_matricula(aluno.matricula):
             raise MatriculaJaRegistradaException()
 

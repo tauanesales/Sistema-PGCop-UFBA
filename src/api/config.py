@@ -57,3 +57,5 @@ class Config:
     SENDGRID_CONFIG: SendGridConfig = SendGridConfig()
     AUTH: AuthConfig = AuthConfig()
     TESTING: bool = bool(os.getenv("TESTING", False))
+
+    SEM_ORIENTADOR_ID: int = int(os.getenv("SEM_ORIENTADOR_ID", 1))
