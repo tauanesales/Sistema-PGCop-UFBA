@@ -26,9 +26,6 @@ class AlunoBase(UsuarioBase):
     matricula: constr(min_length=6, max_length=12) = Field(
         ..., description="Matrícula do aluno."
     )
-    orientador_id: Optional[int] = Field(
-        None, description="ID do orientador do aluno, se houver."
-    )
     curso: CursoAlunoEnum = Field(
         ..., description="Curso do aluno, Mestrado (M) ou Doutorado (D)."
     )
@@ -84,7 +81,9 @@ class AlunoBase(UsuarioBase):
 
 
 class AlunoNovo(AlunoBase, UsuarioNovo):
-    pass
+    orientador_id: Optional[int] = Field(
+        None, description="ID do orientador do aluno, se houver."
+    )
 
 
 class AlunoInDB(AlunoBase, UsuarioInDB):

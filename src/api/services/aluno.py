@@ -5,6 +5,7 @@ from fastapi import Depends
 from loguru import logger
 from passlib.context import CryptContext
 
+from src.api.config import Config
 from src.api.database.models.aluno import Aluno
 from src.api.database.models.professor import Professor
 from src.api.database.models.tarefa import Tarefa
@@ -17,7 +18,6 @@ from src.api.services.servico_base import ServicoBase
 from src.api.services.solicitacao import ServicoSolicitacao
 from src.api.services.tarefa import ServiceTarefa
 from src.api.services.usuario import ServicoUsuario
-from src.api.utils import constantes
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -39,11 +39,6 @@ class ServicoAluno(ServicoBase):
 
         db_usuario_aluno: Usuario = await ServicoUsuario(self._repo).criar(novo_aluno)
         logger.info(f"{db_usuario_aluno.id=} | Usuário criado com sucesso.")
-        db_orientador: Professor = await self._repo.buscar_por_id(
-            constantes.SEM_ORIENTADOR, Professor
-        )
-
-        logger.info(f"{db_orientador.id=} | Atribuição sem orientador realizada.")
 
         db_aluno = Aluno(
             cpf=novo_aluno.cpf,
@@ -54,14 +49,13 @@ class ServicoAluno(ServicoBase):
             data_ingresso=novo_aluno.data_ingresso,
             data_qualificacao=novo_aluno.data_qualificacao,
             data_defesa=novo_aluno.data_defesa,
-            orientador_id=db_orientador.id,
-            orientador=db_orientador,
+            orientador_id=novo_aluno.orientador_id,
             usuario_id=db_usuario_aluno.id,
         )
         await self._repo.criar(db_aluno)
         await ServiceTarefa(self._repo).criar_tarefas_para_novo_aluno(db_aluno)
 
-        logger.info(f"{db_aluno.id=} {db_orientador.id=} | Aluno criado com sucesso.")
+        logger.info(f"{db_aluno.id=} {db_aluno.orientador_id=} | Aluno criado com sucesso.")
         await ServicoSolicitacao(self._repo).criar(db_aluno, novo_aluno.orientador_id)
         return self.tipo_usuario_in_db(db_aluno)
 
@@ -127,7 +121,8 @@ class ServicoAluno(ServicoBase):
 
     async def deletar(self, aluno_id: int) -> None:
         logger.info(f"Deletando aluno {aluno_id=}")
-        aluno: AlunoInDB = await self.buscar_aluno_por_id(aluno_id)
+        aluno: Aluno = await self.buscar_aluno_por_id(aluno_id)
+        logger.info(f"Tarefas do {aluno.id=}: {aluno.tarefas=}")
         tarefas: list[Tarefa] = aluno.tarefas or []
         logger.info(f"{aluno.id=} | Deleteando tarefas do aluno")
         for tarefa in tarefas:
@@ -164,7 +159,8 @@ class ServicoAluno(ServicoBase):
         return self.tipo_usuario_in_db(await self.buscar_por_email(email))
 
     async def remover_orientador(self, aluno_id: int) -> AlunoInDB:
-        db_aluno: Aluno = await self._repo.buscar_por_id(aluno_id, Aluno)
-        db_aluno.orientador_id = 1
+        db_aluno: Aluno = await self.buscar_aluno_por_id(aluno_id)
+        db_aluno.orientador_id = Config.SEM_ORIENTADOR_ID
+        await self._repo.salvar(db_aluno)
 
         return self.tipo_usuario_in_db(db_aluno)
