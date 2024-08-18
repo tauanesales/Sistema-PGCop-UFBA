@@ -1,8 +1,10 @@
 from datetime import datetime
 from typing import Optional
+from fastapi_cache.decorator import cache
 
 from loguru import logger
 
+from src.api.config import Config
 from src.api.database.models.tarefas_base import TarefaBase
 from src.api.database.repository import PGCopRepository
 from src.api.entrypoints.tarefas_base.errors import ExcecaoTarefaNaoEncontrada
@@ -61,6 +63,7 @@ class ServiceTarefaBase(ServicoBase):
         logger.info(f"{tarefa_base_id=} | Tarefa base encontrada.")
         return db_tarefa_base
 
+    @cache(expire=60 * Config.MINUTOS_DE_CACHE_REQUISICOES)
     async def buscar_tarefas_base_por_curso(self, curso: str) -> list[TarefaBaseInDB]:
         logger.info(f"{curso=} | Pesquisando por tarefas base por curso.")
         db_tarefas_base: list[TarefaBase] = await self._repo.filtrar(

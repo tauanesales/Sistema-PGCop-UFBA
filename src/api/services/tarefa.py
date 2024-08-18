@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
-
+from fastapi_cache.decorator import cache
 from loguru import logger
 
+from src.api.config import Config
 from src.api.database.models.aluno import Aluno
 from src.api.database.models.tarefa import Tarefa
 from src.api.database.repository import PGCopRepository
@@ -57,6 +58,7 @@ class ServiceTarefa(ServicoBase):
         logger.info(f"{db_tarefa.id=} | Tarefa encontrada.")
         return db_tarefa
 
+    @cache(expire=60 * Config.MINUTOS_DE_CACHE_REQUISICOES)
     async def buscar_tarefas_por_aluno(self, aluno_id: int) -> list[TarefaInDB]:
         db_tarefas: list[Tarefa] = await self._repo.buscar_tarefas_por_aluno_id(
             aluno_id

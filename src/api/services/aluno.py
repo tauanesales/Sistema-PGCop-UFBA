@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import List
 
 from fastapi import Depends
+from fastapi_cache.decorator import cache
 from loguru import logger
 from passlib.context import CryptContext
 
@@ -82,6 +83,7 @@ class ServicoAluno(ServicoBase):
             ),
         )
 
+    @cache(expire=60 * Config.MINUTOS_DE_CACHE_REQUISICOES)
     async def buscar_aluno_por_id(self, aluno_id: int) -> Aluno:
         db_aluno: Aluno = await self._repo.buscar_por_id(aluno_id, Aluno)
         self._validador.validar_aluno_existe(db_aluno)
@@ -131,6 +133,7 @@ class ServicoAluno(ServicoBase):
         aluno.usuario.deleted_at = datetime.utcnow()
         logger.info(f"{aluno.id=} | Aluno deletado com sucesso.")
 
+    @cache(expire=60 * Config.MINUTOS_DE_CACHE_REQUISICOES)
     async def buscar_alunos_por_orientador(self, orientador_id: int) -> List[AlunoInDB]:
         alunos: List[Aluno] = await self._repo.buscar_todos_orientandos_de_um_professor(
             orientador_id

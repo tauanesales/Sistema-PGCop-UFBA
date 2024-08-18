@@ -59,3 +59,5 @@ class Config:
     TESTING: bool = bool(os.getenv("TESTING", False))
 
     SEM_ORIENTADOR_ID: int = int(os.getenv("SEM_ORIENTADOR_ID", 1))
+
+    MINUTOS_DE_CACHE_REQUISICOES: int = int(os.getenv("MINUTOS_DE_CACHE_REQUISICOES", 1))
