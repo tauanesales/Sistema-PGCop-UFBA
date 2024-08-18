@@ -1,5 +1,7 @@
 from loguru import logger
+from fastapi_cache.decorator import cache
 
+from src.api.config import Config
 from src.api.database.models.aluno import Aluno
 from src.api.database.models.solicitacoes import Solicitacao
 from src.api.database.repository import PGCopRepository
@@ -21,6 +23,7 @@ class ServicoSolicitacao(ServicoBase):
         logger.info(f"{db_solicitacao.id=} | Solicitação para criada com sucesso.")
         return self.de_solicitacao_para_solicitacao_in_db(db_solicitacao)
 
+    @cache(expire=60 * Config.MINUTOS_DE_CACHE_REQUISICOES)
     async def listar(
         self, professor_id: int, status: StatusSolicitacaoEnum
     ) -> list[SolicitacaoInDB]:
