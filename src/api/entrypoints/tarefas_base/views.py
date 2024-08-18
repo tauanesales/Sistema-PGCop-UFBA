@@ -6,7 +6,6 @@ from loguru import logger
 from src.api.database.models.professor import Professor
 from src.api.database.session import get_repo
 from src.api.entrypoints.tarefas_base.schema import (
-    CursoEnum,
     TarefaBaseAtualizada,
     TarefaBaseBase,
     TarefaBaseInDB,
@@ -14,7 +13,7 @@ from src.api.entrypoints.tarefas_base.schema import (
 from src.api.exceptions.credentials_exception import NaoAutorizadoException
 from src.api.services.tarefa_base import ServiceTarefaBase
 from src.api.services.tipo_usuario import ServicoTipoUsuarioGenerico
-from src.api.utils.enums import TipoUsuarioEnum
+from src.api.utils.enums import CursoAlunoEnum, TipoUsuarioEnum
 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -90,7 +89,7 @@ async def buscar_tarefa_base(tarefa_id: int,token: str = Depends(oauth2_scheme),
 
 @router.get("/curso/{curso}", response_model=List[TarefaBaseInDB])
 async def buscar_tarefa_por_curso_base(
-    curso: CursoEnum,
+    curso: CursoAlunoEnum,
     token: str = Depends(oauth2_scheme),
     repository=Depends(get_repo()),
 ):

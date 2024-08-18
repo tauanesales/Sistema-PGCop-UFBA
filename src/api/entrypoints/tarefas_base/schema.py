@@ -3,18 +3,14 @@ from enum import Enum
 from pydantic import BaseModel, PositiveInt, constr, field_validator
 
 from src.api.utils.decorators import partial_model
-
-
-class CursoEnum(str, Enum):
-    M = "M"
-    D = "D"
+from src.api.utils.enums import CursoAlunoEnum
 
 
 class TarefaBaseBase(BaseModel):
     nome: constr(min_length=2, max_length=255)
-    descricao: constr()
+    descricao: constr(max_length=255)
     prazo_em_meses: PositiveInt
-    curso: CursoEnum
+    curso: CursoAlunoEnum
 
     @field_validator("nome", mode="before")
     def blank_string(cls, value):
