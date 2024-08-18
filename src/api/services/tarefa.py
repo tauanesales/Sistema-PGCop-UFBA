@@ -87,7 +87,7 @@ class ServiceTarefa(ServicoBase):
                 nome=tarefa_base.nome,
                 aluno_id=aluno.id,
                 descricao=tarefa_base.descricao,
-                data_prazo=datetime.utcnow()
+                data_prazo=aluno.data_ingresso
                 + timedelta(days=tarefa_base.prazo_em_meses * 30),
                 data_conclusao=None,
             )
