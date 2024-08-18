@@ -7,8 +7,8 @@ from src.api.utils.decorators import partial_model
 
 
 class TarefaBase(BaseModel):
-    nome: constr(min_length=2, max_length=100)
-    descricao: constr(max_length=100)
+    nome: constr(min_length=2, max_length=255)
+    descricao: constr(max_length=255)
     data_prazo: date
     aluno_id: int
     concluida: bool
