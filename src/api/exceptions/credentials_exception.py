@@ -18,8 +18,8 @@ class NaoAutorizadoException(HTTPException):
     """
     Exceção para nível de acesso inválido.
     """
-    def _init_(self, detail="Não autorizado."):
-        super()._init_(
+    def __init__(self, detail="Não autorizado."):
+        super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=detail,
             headers={"WWW-Authenticate": "Bearer"},
