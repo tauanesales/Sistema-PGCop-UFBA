@@ -8,7 +8,6 @@ from passlib.context import CryptContext
 
 from src.api.config import Config
 from src.api.database.models.aluno import Aluno
-from src.api.database.models.professor import Professor
 from src.api.database.models.tarefa import Tarefa
 from src.api.database.models.usuario import Usuario
 from src.api.database.repository import PGCopRepository
@@ -56,7 +55,9 @@ class ServicoAluno(ServicoBase):
         await self._repo.criar(db_aluno)
         await ServiceTarefa(self._repo).criar_tarefas_para_novo_aluno(db_aluno)
 
-        logger.info(f"{db_aluno.id=} {db_aluno.orientador_id=} | Aluno criado com sucesso.")
+        logger.info(
+            f"{db_aluno.id=} {db_aluno.orientador_id=} | Aluno criado com sucesso."
+        )
         await ServicoSolicitacao(self._repo).criar(db_aluno, novo_aluno.orientador_id)
         return self.tipo_usuario_in_db(db_aluno)
 
@@ -83,10 +84,12 @@ class ServicoAluno(ServicoBase):
             ),
         )
 
-    @cache(expire=60 * Config.MINUTOS_DE_CACHE_REQUISICOES)
     async def buscar_aluno_por_id(self, aluno_id: int) -> Aluno:
+        logger.info(f"Buscando aluno por id {aluno_id=}")
         db_aluno: Aluno = await self._repo.buscar_por_id(aluno_id, Aluno)
+        logger.info(f"{db_aluno.id=} | Aluno encontrado com sucesso.")
         self._validador.validar_aluno_existe(db_aluno)
+        logger.info(f"{db_aluno.id=} | Aluno validado com sucesso.")
         return db_aluno
 
     async def atualizar(
@@ -162,8 +165,19 @@ class ServicoAluno(ServicoBase):
         return self.tipo_usuario_in_db(await self.buscar_por_email(email))
 
     async def remover_orientador(self, aluno_id: int) -> AlunoInDB:
+        logger.info(f"Removendo orientador do {aluno_id=}")
         db_aluno: Aluno = await self.buscar_aluno_por_id(aluno_id)
+        logger.info(
+            f"{db_aluno.id=} | Orientador antes da remoção: {db_aluno.orientador_id=}"
+        )
         db_aluno.orientador_id = Config.SEM_ORIENTADOR_ID
+        logger.info(
+            f"{db_aluno.id=} | Orientador após a remoção: {db_aluno.orientador_id=}"
+        )
         await self._repo.salvar(db_aluno)
-
+        logger.info(
+            f"{db_aluno.id=} {db_aluno.orientador_id=} "
+            f"{db_aluno.orientador.usuario.nome=} "
+            "| Alteração sincronizada com o banco."
+        )
         return self.tipo_usuario_in_db(db_aluno)
